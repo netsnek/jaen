@@ -12,7 +12,8 @@
     "@babel/generator": "^7.22.15",
     "@babel/parser": "^7.22.11",
     "@babel/traverse": "^7.22.11",
-    "deepmerge": "^4.2.2"
+    "deepmerge": "^4.2.2",
+    "fast-xml-parser": "^4.3.6"
   },
   "devDependencies": {
     "jaen": "^1.0.0",

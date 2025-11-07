@@ -15,6 +15,8 @@ export const normalizePath = (raw: string): string => {
   return stripTrailingSlash(collapsed)
 }
 
+const DYNAMIC_SEGMENT_PATTERN = /[\[\]\{\}:*]|%5B|%5D|%7B|%7D|%3A|%2A/i
+
 /** Simple predicate for URLs that should never land in the sitemap. Extend as you like. */
 export const shouldExcludeFromSitemap = (pathname: string): boolean => {
   const p = normalizePath(pathname)
@@ -34,7 +36,7 @@ export const shouldExcludeFromSitemap = (pathname: string): boolean => {
     return true
   }
 
-  if (/[\[\]\{\}:*]/.test(p)) {
+  if (DYNAMIC_SEGMENT_PATTERN.test(p)) {
     return true
   }
 

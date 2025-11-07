@@ -2,6 +2,8 @@ import {createHash} from 'crypto'
 import {promises as fs} from 'fs'
 import path from 'path'
 
+import {XMLBuilder, XMLValidator} from 'fast-xml-parser'
+
 import type {Reporter} from 'gatsby'
 
 import {
@@ -183,58 +185,84 @@ export class SitemapManager {
       return a.path.localeCompare(b.path)
     })
 
-    const urlEntries = urls.map(entry => this.renderUrlEntry(entry)).join('\n')
+    const urlEntries = urls.map(entry => this.createUrlNode(entry))
 
-    return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urlEntries}\n</urlset>\n`
+    const builder = new XMLBuilder({
+      ignoreAttributes: false,
+      suppressEmptyNode: true,
+      format: true,
+      indentBy: '  '
+    })
+
+    const xmlBody = builder.build({
+      urlset: {
+        '@_xmlns': 'http://www.sitemaps.org/schemas/sitemap/0.9',
+        '@_xmlns:xhtml': 'http://www.w3.org/1999/xhtml',
+        url: urlEntries
+      }
+    })
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>\n${xmlBody}\n`
+    this.assertValidXml(xml)
+    return xml
   }
 
-  private renderUrlEntry(entry: SitemapEntry): string {
+  private createUrlNode(entry: SitemapEntry): Record<string, unknown> {
     const location = this.buildLocation(entry.path)
     const lastModified = entry.lastModified.toISOString()
     const changeFrequency = this.computeChangeFrequency(entry)
     const priority = this.computePriority(entry.path).toFixed(2)
 
-    const lines = [
-      '  <url>',
-      `    <loc>${this.escapeXml(location)}</loc>`,
-      `    <lastmod>${lastModified}</lastmod>`,
-      `    <changefreq>${changeFrequency}</changefreq>`,
-      `    <priority>${priority}</priority>`
-    ]
-
-    for (const link of this.buildAlternateLinks(entry)) {
-      lines.push(
-        `    <xhtml:link rel="alternate" hreflang="${this.escapeXml(
-          link.hreflang
-        )}" href="${this.escapeXml(link.href)}" />`
-      )
+    const node: Record<string, unknown> = {
+      loc: location,
+      lastmod: lastModified,
+      changefreq: changeFrequency,
+      priority
     }
 
-    lines.push('  </url>')
+    const alternateLinks = this.buildAlternateLinks(entry).map(link => ({
+      '@_rel': 'alternate',
+      '@_hreflang': link.hreflang,
+      '@_href': link.href
+    }))
 
-    return lines.join('\n')
+    if (alternateLinks.length > 0) {
+      node['xhtml:link'] = alternateLinks
+    }
+
+    return node
   }
 
   private buildLocation(pathname: string): string {
-    const base = this.siteUrl.replace(/\/+$/, '')
     const normalized = this.normalizePath(pathname)
+    const base = this.siteUrl.replace(/\/+$/, '')
 
     if (normalized === '/') {
       return `${base}/`
     }
 
-    const encodedPath = normalized
-      .split('/')
-      .map((segment, index) => {
-        if (index === 0) {
-          return ''
-        }
+    const segments = normalized.split('/').filter(Boolean)
 
-        return encodeURIComponent(segment)
-      })
-      .join('/')
+    try {
+      const baseUrl = new URL(base)
+      const baseSegments = baseUrl.pathname.split('/').filter(Boolean)
+      const encodedSegments = [...baseSegments, ...segments].map(segment =>
+        encodeURIComponent(segment)
+      )
+      const joinedPath = encodedSegments.length
+        ? `/${encodedSegments.join('/')}`
+        : '/'
 
-    return `${base}${encodedPath}`
+      return `${baseUrl.origin}${joinedPath}`
+    } catch {
+      // Fall back to manual encoding if URL construction fails for any reason.
+      const encodedSegments = segments.map(segment => encodeURIComponent(segment))
+      const joinedPath = encodedSegments.length
+        ? `/${encodedSegments.join('/')}`
+        : '/'
+
+      return `${base}${joinedPath}`
+    }
   }
 
   private computeChangeFrequency(entry: SitemapEntry): ChangeFrequency {
@@ -299,13 +327,21 @@ export class SitemapManager {
     return links
   }
 
-  private escapeXml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;')
+  private assertValidXml(xml: string): void {
+    const validationResult = XMLValidator.validate(xml, {
+      allowBooleanAttributes: true
+    })
+
+    if (validationResult !== true) {
+      const message =
+        typeof validationResult === 'object' && validationResult !== null
+          ? `Line ${validationResult.err.line}: ${validationResult.err.msg}`
+          : 'Unknown validation error'
+
+      throw new Error(
+        `[gatsby-source-jaen] Generated sitemap.xml is invalid: ${message}`
+      )
+    }
   }
 
   private async writeRobots(): Promise<void> {
