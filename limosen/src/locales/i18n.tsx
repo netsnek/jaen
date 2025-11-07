@@ -2,6 +2,7 @@
 import { getI18nHomepage } from './i18nHomepage'
 import { getI18nContact } from './i18nContact'
 import { getI18nBooking } from './i18nBooking'
+import { i18nJaen } from '../gatsby-plugin-jaen/locales/i18nJaen'
 
 export type I18nCode = 'en-US' | 'de-AT' | 'tr-TR' | 'ar-EG'
 
@@ -24,17 +25,20 @@ const strip = <T extends Record<string, any>>(obj: T, keys: string[]) => {
  * - Adds all other top-level fields generically (no hardcoded sub-keys)
  */
 export function getI18n(code: I18nCode): UnifiedI18n {
+  const jaen = i18nJaen(code)
   const homepage = getI18nHomepage(code)
   const contact = getI18nContact(code)
   const booking = getI18nBooking(code)
 
   const messages: Record<string, any> = {
     // flat string IDs first
+    ...(jaen?.strings ?? {}),
     ...(homepage?.strings ?? {}),
     ...(contact?.strings ?? {}),
     ...(booking?.strings ?? {}),
 
     // then all other top-level fields (no hardcoding), excluding `code` and `strings`
+    ...strip(jaen || {}, ['code', 'strings']),
     ...strip(homepage || {}, ['code', 'strings']),
     ...strip(contact || {}, ['code', 'strings']),
     ...strip(booking || {}, ['code', 'strings'])
