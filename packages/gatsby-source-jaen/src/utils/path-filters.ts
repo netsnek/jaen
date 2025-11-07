@@ -34,6 +34,10 @@ export const shouldExcludeFromSitemap = (pathname: string): boolean => {
     return true
   }
 
+  if (/[\[\]\{\}:*]/.test(p)) {
+    return true
+  }
+
   // Add any of your own rules here (examples):
   // if (p.startsWith('/draft')) return true
   // if (p.includes('?')) return true

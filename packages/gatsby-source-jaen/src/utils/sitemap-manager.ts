@@ -217,8 +217,24 @@ export class SitemapManager {
 
   private buildLocation(pathname: string): string {
     const base = this.siteUrl.replace(/\/+$/, '')
-    if (pathname === '/') return `${base}/`
-    return `${base}${pathname}`
+    const normalized = this.normalizePath(pathname)
+
+    if (normalized === '/') {
+      return `${base}/`
+    }
+
+    const encodedPath = normalized
+      .split('/')
+      .map((segment, index) => {
+        if (index === 0) {
+          return ''
+        }
+
+        return encodeURIComponent(segment)
+      })
+      .join('/')
+
+    return `${base}${encodedPath}`
   }
 
   private computeChangeFrequency(entry: SitemapEntry): ChangeFrequency {
