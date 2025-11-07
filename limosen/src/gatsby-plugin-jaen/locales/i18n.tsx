@@ -1,5 +1,5 @@
 // src/vars/i18n.tsx
-import {i18nJaen} from 'gatsby-plugin-jaen'
+import {i18nJaen} from './i18nJaen'
 import { getI18nHomepage } from './i18nHomepage'
 import { getI18nContact } from './i18nContact'
 import { getI18nBooking } from './i18nBooking'
@@ -11,6 +11,8 @@ export interface UnifiedI18n {
   // Flat messages consumed by <IntlProvider messages={...}>
   // Includes merged string keys + every other top-level field from homepage/contact/booking.
   messages: Record<string, any>
+  // Raw locale strings (unflattened) so downstream overrides can opt-in if desired.
+  strings: Record<string, any>
 }
 
 const strip = <T extends Record<string, any>>(obj: T, keys: string[]) => {
@@ -46,6 +48,7 @@ export function getI18n(code: I18nCode): UnifiedI18n {
 
   return {
     code,
-    messages
+    messages,
+    strings: (jaen?.strings ?? {})
   }
 }
