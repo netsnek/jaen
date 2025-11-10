@@ -1,0 +1,36 @@
+{
+  "types": [
+    {
+      "type": "feat",
+      "section": "🚀 Features"
+    },
+    {
+      "type": "fix",
+      "section": "🐛 Bug Fixes"
+    },
+    {
+      "type": "refactor",
+      "section": "🔄 Refactors"
+    },
+    {
+      "type": "test",
+      "section": "🧪 Tests"
+    },
+    {
+      "type": "docs",
+      "section": "📚 Documentations"
+    },
+    {
+      "type": "i18n",
+      "section": "🌍 Internationalization"
+    },
+    {
+      "type": "build",
+      "section": "🏗️ Dependencies and other build configuration"
+    },
+    {
+      "type": "ci",
+      "hidden": true
+    }
+  ]
+}
