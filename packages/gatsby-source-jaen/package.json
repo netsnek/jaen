@@ -27,7 +27,7 @@
     "@types/babel__generator": "^7.6.5",
     "@types/babel__traverse": "^7.20.1",
     "jaen": "^1.0.0",
-    "typescript": "^5"
+    "typescript": "^5.7.2"
   },
   "peerDependencies": {
     "jaen": "^1.0.0"
