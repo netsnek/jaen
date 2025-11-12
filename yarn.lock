@@ -10627,6 +10627,14 @@ gatsby-plugin-google-gtag@^5.12.0:
     "@babel/runtime" "^7.20.13"
     minimatch "^3.1.2"
 
+gatsby-plugin-i18n-l10n@^5.14.1:
+  version "5.14.1"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-i18n-l10n/-/gatsby-plugin-i18n-l10n-5.14.1.tgz#02de63886c730a4e04e8c01a39e989007c8997df"
+  integrity sha512-pO9L0yS5XwHwkzfUkgweMUHzLzmHjib66Z/IKgM6cwNc5ifl0kwAg28Do48H1B42n7Yup4u5EnrbXqfcaQMkGQ==
+  dependencies:
+    limax "^4.1.0"
+    path-browserify "^1.0.1"
+
 gatsby-plugin-image@^3.11.0, gatsby-plugin-image@^3.13.1:
   version "3.13.1"
   resolved "https://registry.yarnpkg.com/gatsby-plugin-image/-/gatsby-plugin-image-3.13.1.tgz#5c6e03b1c21bb0dbc076f589aea9911086b25bde"
@@ -11864,6 +11872,11 @@ help-me@^4.0.1:
   dependencies:
     glob "^8.0.0"
     readable-stream "^3.6.0"
+
+hepburn@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/hepburn/-/hepburn-1.2.2.tgz#c3a8fa9d705469ad05cf9922ee4ad135b45770b4"
+  integrity sha512-DeykBc4XmfAWsnN+Y1Svi9uaQnnz21Q/ARuGWvIBxP1iUFeMIWL41DfVkgTh7tU23LFIbmIBO2Bk17BTPu0kVA==
 
 highlight-words-core@^1.2.0:
   version "1.2.3"
@@ -13327,6 +13340,16 @@ lilconfig@^3.0.0:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/lilconfig/-/lilconfig-3.1.2.tgz#e4a7c3cb549e3a606c8dcc32e5ae1005e62c05cb"
   integrity sha512-eop+wDAvpItUys0FWkHIKeC9ybYrTGbU41U5K7+bttZZeohvnY7M9dZ5kB21GNWiFT2q1OoPTvncPCgSOVO5ow==
+
+limax@^4.1.0:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/limax/-/limax-4.2.1.tgz#05d9fc7e7b7122b2af4c0175eff20373f1d9745e"
+  integrity sha512-7YeQ8dV9XIjYIjBSFUSOfoxQFAtG2ckD0FGKYCuRaPJKc3IKXZwqsSLD5PnlPklp4y5ncPWhiL142ijAtHGNgw==
+  dependencies:
+    hepburn "^1.2.2"
+    lodash.deburr "^4.1.0"
+    pinyin-pro "^3.27.0"
+    speakingurl "^14.0.1"
 
 lines-and-columns@^1.1.6:
   version "1.2.4"
@@ -16108,6 +16131,11 @@ patch-package@^8.0.0:
     tmp "^0.2.4"
     yaml "^2.2.2"
 
+path-browserify@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/path-browserify/-/path-browserify-1.0.1.tgz#d98454a9c3753d5790860f16f68867b9e46be1fd"
+  integrity sha512-b7uo2UCUOYZcnF/3ID0lulOJi/bafxa1xPe7ZPsammBSpjSWQkjNxlt635YGS2MiR9GjvuXCtz2emr3jbsz98g==
+
 path-case@^3.0.4:
   version "3.0.4"
   resolved "https://registry.yarnpkg.com/path-case/-/path-case-3.0.4.tgz#9168645334eb942658375c56f80b4c0cb5f82c6f"
@@ -16306,6 +16334,11 @@ pino@^8.8.0:
     safe-stable-stringify "^2.3.1"
     sonic-boom "^3.7.0"
     thread-stream "^2.6.0"
+
+pinyin-pro@^3.27.0:
+  version "3.27.0"
+  resolved "https://registry.yarnpkg.com/pinyin-pro/-/pinyin-pro-3.27.0.tgz#b13e60a2383067e5b1231106f7939a2c7591be29"
+  integrity sha512-Osdgjwe7Rm17N2paDMM47yW+jUIUH3+0RGo8QP39ZTLpTaJVDK0T58hOLaMQJbcMmAebVuK2ePunTEVEx1clNQ==
 
 pirates@^4.0.1, pirates@^4.0.6:
   version "4.0.6"
@@ -19014,6 +19047,11 @@ spdx-license-ids@^3.0.0:
   version "3.0.18"
   resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.18.tgz#22aa922dcf2f2885a6494a261f2d8b75345d0326"
   integrity sha512-xxRs31BqRYHwiMzudOrpSiHtZ8i/GeionCBDSilhYRj+9gIcI8wCZTlXZKu9vZIVqViP3dcp9qE5G6AlIaD+TQ==
+
+speakingurl@^14.0.1:
+  version "14.0.1"
+  resolved "https://registry.yarnpkg.com/speakingurl/-/speakingurl-14.0.1.tgz#f37ec8ddc4ab98e9600c1c9ec324a8c48d772a53"
+  integrity sha512-1POYv7uv2gXoyGFpBCmpDVSNV74IfsWlDW216UPjbWufNf+bSU6GdbDsxdcxtfwb4xlI3yxzOTKClUosxARYrQ==
 
 speech-rule-engine@^4.0.6:
   version "4.0.7"
