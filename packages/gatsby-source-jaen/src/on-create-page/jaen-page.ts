@@ -10,23 +10,66 @@ export const onCreatePage = async ({
   getNode,
   createContentDigest
 }: CreatePageArgs) => {
+  // Skip localized routes like /de/cms, /en/login, /tr/mailpress, /ar/settings, /de/logout, /en/app
+  const protectedSegments = [
+    'cms',
+    'login',
+    'mailpress',
+    'settings',
+    'logout',
+    'app'
+  ]
+  const isLocalizedProtectedPath = new RegExp(
+    `^\\/[a-z]{2}(?:-[A-Z]{2})?\\/(?:${protectedSegments.join('|')})(?:\\/|$)`
+  ).test(page.path)
+  if (isLocalizedProtectedPath) {
+    actions.deletePage(page)
+    return
+  }
+
+  const expectedJaenPageId = `JaenPage ${page.path}`
+  // Gatsby attaches this property at runtime, but it's not declared on the Page TS type.
+  // Use a narrowed shape to make TypeScript happy without changing runtime behavior.
+  type MaybeStateful = {
+    isCreatedByStatefulCreatePages?: boolean
+  }
+  const isStateful = Boolean(
+    (page as unknown as MaybeStateful).isCreatedByStatefulCreatePages
+  )
+
   let jaenPageId = page.context?.jaenPageId as string | undefined
   let pageConfig = page.context?.pageConfig as PageConfig | undefined
 
-  if (!jaenPageId) {
-    jaenPageId = `JaenPage ${page.path}`
-    pageConfig = readPageConfig(page.component)
+  const shouldEnsureJaenPageId =
+    jaenPageId === undefined ||
+    (isStateful && jaenPageId !== expectedJaenPageId)
+
+  const shouldEnsurePageConfig = pageConfig === undefined
+
+  if (shouldEnsureJaenPageId || shouldEnsurePageConfig) {
+    pageConfig = pageConfig ?? readPageConfig(page.component)
+
+    const nextJaenPageId = isStateful
+      ? expectedJaenPageId
+      : (jaenPageId ?? expectedJaenPageId)
 
     actions.deletePage(page)
 
-    actions.createPage({
-      ...page,
-      context: {
-        ...page.context,
-        jaenPageId,
-        pageConfig
-      }
-    })
+    // Only (re)create page when it's not a localized protected path.
+    if (!isLocalizedProtectedPath) {
+      actions.createPage({
+        ...page,
+        context: {
+          ...page.context,
+          jaenPageId: nextJaenPageId,
+          pageConfig
+        }
+      })
+    } else {
+      return
+    }
+
+    jaenPageId = nextJaenPageId
   }
 
   // Find the JaenPage node with the same id
@@ -43,7 +86,7 @@ export const onCreatePage = async ({
     : new Date()
 
   const newJaenPageNode = {
-    id: jaenPageId,
+    id: jaenPageId!,
     slug: lastPathElement,
 
     jaenPageMetadata: {
