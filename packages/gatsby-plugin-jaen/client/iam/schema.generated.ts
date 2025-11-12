@@ -66,8 +66,33 @@ export interface EmailInput {
 }
 
 export interface OptsInput {
+  driverId?: InputMaybe<Scalars['String']['input']>
+  fromDateISO?: InputMaybe<Scalars['String']['input']>
   state?: InputMaybe<TransferStateInput>
+  toDateISO?: InputMaybe<Scalars['String']['input']>
   userId?: InputMaybe<Scalars['String']['input']>
+}
+
+export interface OptsInput_1 {
+  fromDateISO?: InputMaybe<Scalars['String']['input']>
+  state?: InputMaybe<TransferStateInput>
+  toDateISO?: InputMaybe<Scalars['String']['input']>
+}
+
+export interface OptsInput_2 {
+  fromDateISO?: InputMaybe<Scalars['String']['input']>
+  includeVouchers?: InputMaybe<Scalars['Boolean']['input']>
+  state?: InputMaybe<PENDING_CONFIRMED_COMPLETE_CANCELED_TERMINATED_COMPLETEORCONFIRMEDInput>
+  toDateISO?: InputMaybe<Scalars['String']['input']>
+}
+
+export enum PENDING_CONFIRMED_COMPLETE_CANCELED_TERMINATED_COMPLETEORCONFIRMEDInput {
+  canceled = 'canceled',
+  complete = 'complete',
+  completeOrConfirmed = 'completeOrConfirmed',
+  confirmed = 'confirmed',
+  pending = 'pending',
+  terminated = 'terminated'
 }
 
 export interface PasswordInput {
@@ -100,6 +125,7 @@ export interface TransferInputInput {
 export enum TransferState {
   canceled = 'canceled',
   complete = 'complete',
+  confirmed = 'confirmed',
   pending = 'pending',
   terminated = 'terminated'
 }
@@ -107,6 +133,7 @@ export enum TransferState {
 export enum TransferStateInput {
   canceled = 'canceled',
   complete = 'complete',
+  confirmed = 'confirmed',
   pending = 'pending',
   terminated = 'terminated'
 }
@@ -135,6 +162,7 @@ export const scalarsEnumsHash: ScalarsEnumsHash = {
   JSON: true,
   JSONObject: true,
   Number: true,
+  PENDING_CONFIRMED_COMPLETE_CANCELED_TERMINATED_COMPLETEORCONFIRMEDInput: true,
   String: true,
   TransferState: true,
   TransferStateInput: true,
@@ -174,6 +202,13 @@ export const generatedSchema = {
   },
   Email: {__typename: {__type: 'String!'}, email: {__type: 'String'}},
   EmailInput: {email: {__type: 'String!'}},
+  GetDriverRevenue: {
+    __typename: {__type: 'String!'},
+    count: {__type: 'Number!'},
+    currency: {__type: 'String!'},
+    driverUserId: {__type: 'String!'},
+    total: {__type: 'Number!'}
+  },
   HumanUser: {
     __typename: {__type: 'String!'},
     email: {__type: 'Email'},
@@ -181,8 +216,25 @@ export const generatedSchema = {
     profile: {__type: 'Profile'}
   },
   OptsInput: {
+    driverId: {__type: 'String'},
+    fromDateISO: {__type: 'String'},
     state: {__type: 'TransferStateInput'},
+    toDateISO: {__type: 'String'},
     userId: {__type: 'String'}
+  },
+  OptsInput_1: {
+    fromDateISO: {__type: 'String'},
+    state: {__type: 'TransferStateInput'},
+    toDateISO: {__type: 'String'}
+  },
+  OptsInput_2: {
+    fromDateISO: {__type: 'String'},
+    includeVouchers: {__type: 'Boolean'},
+    state: {
+      __type:
+        'PENDING_CONFIRMED_COMPLETE_CANCELED_TERMINATED_COMPLETEORCONFIRMEDInput'
+    },
+    toDateISO: {__type: 'String'}
   },
   PasswordInput: {
     changeRequired: {__type: 'Boolean'},
@@ -216,7 +268,8 @@ export const generatedSchema = {
     __typename: {__type: 'String!'},
     amountEUR: {__type: 'Number'},
     customerName: {__type: 'String'},
-    driver: {__type: 'String'},
+    driverId: {__type: 'String'},
+    driverName: {__type: 'String'},
     dropoff: {__type: 'String!'},
     payment: {__type: 'String'},
     pickup: {__type: 'String!'},
@@ -262,7 +315,7 @@ export const generatedSchema = {
     __typename: {__type: 'String!'},
     assignDriver: {
       __type: 'Void',
-      __args: {driver: 'String!', transferId: 'String!'}
+      __args: {driverUserId: 'String!', transferId: 'String!'}
     },
     cancelTransfer: {__type: 'Void', __args: {transferId: 'String!'}},
     createAuthorization: {
@@ -293,6 +346,7 @@ export const generatedSchema = {
       __args: {organizationId: 'String', userId: 'String!'}
     },
     markCompleted: {__type: 'Void', __args: {transferId: 'String!'}},
+    markConfirmed: {__type: 'Void', __args: {transferId: 'String!'}},
     reactivateUser: {
       __type: 'Any!',
       __args: {organizationId: 'String', userId: 'String!'}
@@ -367,6 +421,14 @@ export const generatedSchema = {
       __args: {opts: 'OptsInput'}
     },
     getAllUser: {__type: '[ZitadelUser!]!', __args: {limit: 'Number'}},
+    getDriverRevenue: {
+      __type: 'GetDriverRevenue!',
+      __args: {driverUserId: 'String!', opts: 'OptsInput_2'}
+    },
+    getDriverTransfers: {
+      __type: '[TransferRow!]!',
+      __args: {driverUserId: 'String!', opts: 'OptsInput_1'}
+    },
     getIsUnique: {__type: 'Boolean', __args: {loginName: 'String!'}},
     getTransfer: {__type: 'TransferRow', __args: {transferId: 'String!'}},
     getUserCount: {__type: 'Number!'},
@@ -403,6 +465,14 @@ export interface Email {
   email?: Maybe<ScalarsEnums['String']>
 }
 
+export interface GetDriverRevenue {
+  __typename?: 'GetDriverRevenue'
+  count: ScalarsEnums['Number']
+  currency: ScalarsEnums['String']
+  driverUserId: ScalarsEnums['String']
+  total: ScalarsEnums['Number']
+}
+
 /**
  * Contains human-specific attributes (profile, email, phone).
  */
@@ -425,7 +495,8 @@ export interface TransferRow {
   __typename?: 'TransferRow'
   amountEUR?: Maybe<ScalarsEnums['Number']>
   customerName?: Maybe<ScalarsEnums['String']>
-  driver?: Maybe<ScalarsEnums['String']>
+  driverId?: Maybe<ScalarsEnums['String']>
+  driverName?: Maybe<ScalarsEnums['String']>
   dropoff: ScalarsEnums['String']
   payment?: Maybe<ScalarsEnums['String']>
   pickup: ScalarsEnums['String']
@@ -459,7 +530,7 @@ export interface ZitadelUser {
 export interface Mutation {
   __typename?: 'Mutation'
   assignDriver: (args: {
-    driver: ScalarsEnums['String']
+    driverUserId: ScalarsEnums['String']
     transferId: ScalarsEnums['String']
   }) => Maybe<ScalarsEnums['Void']>
   cancelTransfer: (args: {
@@ -487,6 +558,9 @@ export interface Mutation {
     userId: ScalarsEnums['String']
   }) => ScalarsEnums['Any']
   markCompleted: (args: {
+    transferId: ScalarsEnums['String']
+  }) => Maybe<ScalarsEnums['Void']>
+  markConfirmed: (args: {
     transferId: ScalarsEnums['String']
   }) => Maybe<ScalarsEnums['Void']>
   reactivateUser: (args: {
@@ -555,6 +629,14 @@ export interface Query {
   getAllUser: (args?: {
     limit?: Maybe<ScalarsEnums['Number']>
   }) => Array<ZitadelUser>
+  getDriverRevenue: (args: {
+    driverUserId: ScalarsEnums['String']
+    opts?: Maybe<OptsInput_2>
+  }) => GetDriverRevenue
+  getDriverTransfers: (args: {
+    driverUserId: ScalarsEnums['String']
+    opts?: Maybe<OptsInput_1>
+  }) => Array<TransferRow>
   getIsUnique: (args: {
     loginName: ScalarsEnums['String']
   }) => Maybe<ScalarsEnums['Boolean']>
@@ -583,6 +665,7 @@ export type ScalarsEnums = {
     ? Scalars[Key]['output']
     : never
 } & {
+  PENDING_CONFIRMED_COMPLETE_CANCELED_TERMINATED_COMPLETEORCONFIRMEDInput: PENDING_CONFIRMED_COMPLETE_CANCELED_TERMINATED_COMPLETEORCONFIRMEDInput
   TransferState: TransferState
   TransferStateInput: TransferStateInput
 }
