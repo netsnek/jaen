@@ -103,37 +103,51 @@ const UserDetailsPage: React.FC<PageProps> = ({params}) => {
 
     try {
       const result = await gqtyIAMClient.resolve(({query}) => {
-        const allUsers = query.getAllUser()
+        const fetchedUser = query.user({userId})
+
+        const loginNames = (fetchedUser.loginNames ?? []).filter(
+          (loginName): loginName is string => typeof loginName === 'string'
+        )
+
+        const phoneValue = fetchedUser.human?.phone
+        const parsedPhone =
+          typeof phoneValue === 'string'
+            ? phoneValue
+            : phoneValue && typeof phoneValue === 'object'
+              ? (() => {
+                  const candidate = (phoneValue as {phone?: unknown}).phone
+
+                  return typeof candidate === 'string' ? candidate : null
+                })()
+              : null
 
         return {
-          users: allUsers.map(user => ({
-            id: user.id,
-            userName: user.userName ?? '',
-            preferredLoginName: user.preferredLoginName,
-            loginNames: (user.loginNames ?? []).filter(
-              (loginName): loginName is string => typeof loginName === 'string'
-            ),
-            state: user.state,
-            email: user.human?.email?.email,
-            phone: user.human?.phone,
+          user: {
+            id: fetchedUser.id ?? '',
+            userName: fetchedUser.userName ?? '',
+            preferredLoginName: fetchedUser.preferredLoginName ?? null,
+            loginNames,
+            state: fetchedUser.state ?? null,
+            email: fetchedUser.human?.email?.email ?? null,
+            phone: parsedPhone,
             profile: {
-              displayName: user.human?.profile?.displayName,
-              firstName: user.human?.profile?.firstName,
-              lastName: user.human?.profile?.lastName,
-              preferredLanguage: user.human?.profile?.preferredLanguage
+              displayName: fetchedUser.human?.profile?.displayName ?? null,
+              firstName: fetchedUser.human?.profile?.firstName ?? null,
+              lastName: fetchedUser.human?.profile?.lastName ?? null,
+              preferredLanguage:
+                fetchedUser.human?.profile?.preferredLanguage ?? null
             },
             details: {
-              changeDate: user.details?.changeDate ?? null,
-              creationDate: user.details?.creationDate ?? null,
-              resourceOwner: user.details?.resourceOwner ?? null,
-              sequence: user.details?.sequence ?? null
+              changeDate: fetchedUser.details?.changeDate ?? null,
+              creationDate: fetchedUser.details?.creationDate ?? null,
+              resourceOwner: fetchedUser.details?.resourceOwner ?? null,
+              sequence: fetchedUser.details?.sequence ?? null
             }
-          }))
+          }
         }
       })
 
-      const currentUser =
-        result.users.find(current => current.id === userId) ?? null
+      const currentUser = result.user
 
       if (!currentUser) {
         setError('The requested account could not be found.')
@@ -175,7 +189,6 @@ const UserDetailsPage: React.FC<PageProps> = ({params}) => {
     setIsSaving(true)
 
     try {
-      // Placeholder for future mutation: update locally for now
       const updatedUser: IamUserDetail = {
         ...user,
         email: values.email ?? '',

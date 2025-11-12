@@ -20,22 +20,19 @@ const queryFetcher: QueryFetcher = async function (
   fetchOptions
 ) {
   // Modify "http://localhost:3000/graphql" if needed
-  const response = await fetch(
-    'https://iam-limosen.netsnek.workers.dev/graphql',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-        operationName
-      }),
-      mode: 'cors',
-      ...fetchOptions
-    }
-  )
+  const response = await fetch('http://localhost:3000/graphql', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      query,
+      variables,
+      operationName
+    }),
+    mode: 'cors',
+    ...fetchOptions
+  })
 
   return await defaultResponseHandler(response)
 }

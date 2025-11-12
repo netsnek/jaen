@@ -8,6 +8,7 @@ import {Link} from 'gatsby'
 import {cn} from '../../lib/utils'
 import {JaenLogo} from '../shared/JaenLogo/JaenLogo'
 import {MenuButton, MenuButtonProps} from '../shared/MenuButton/MenuButton'
+import {BottomNavigation} from './components/BottomNavigation/BottomNavigation'
 import {
   Breadcrumbs,
   BreadcrumbsProps
@@ -43,51 +44,55 @@ export interface JaenFrameProps {
 
 export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
   return (
-    <header
-      className={cn(
-        'flex h-16 px-4 border-b border-border backdrop-blur-sm gap-2 z-40 bg-white justify-center',
-        {
-          'sticky top-0': !props.navigation.isStickyDisabled
-        }
-      )}>
-      <div className="flex w-full max-w-7xl justify-center">
-        <div className="flex flex-1 gap-4 my-auto">
-          <DrawerLeft
-            navigationGroups={props.navigation.app.navigationGroups}
-            version={props.navigation.app.version}
-            logo={props.navigation.app.logo}
-          />
+    <>
+      <header
+        className={cn(
+          'hidden h-16 px-4 border-b border-border backdrop-blur-sm gap-2 z-40 bg-white justify-center md:flex',
+          {
+            'sticky top-0': !props.navigation.isStickyDisabled
+          }
+        )}>
+        <div className="flex w-full max-w-7xl justify-center">
+          <div className="flex flex-1 gap-4 my-auto">
+            <DrawerLeft
+              navigationGroups={props.navigation.app.navigationGroups}
+              version={props.navigation.app.version}
+              logo={props.navigation.app.logo}
+            />
 
-          <Breadcrumbs links={props.navigation.breadcrumbs.links} />
+            <Breadcrumbs links={props.navigation.breadcrumbs.links} />
+          </div>
+
+          <div className="flex justify-center items-center flex-1">
+            <Link className="no-underline h-full max-w-xs" to="/">
+              {props.logo || <JaenLogo />}
+            </Link>
+          </div>
+
+          <div className="flex flex-1 my-auto gap-4 justify-end">
+            <Toolbar />
+
+            <MenuButton
+              display={{
+                base: 'none',
+                md: 'flex'
+              }}
+              leftIcon={<Icon as={FaPlus} color="brand.500" />}
+              variant="outline"
+              items={props.navigation.addMenu.items}
+            />
+
+            <DrawerRight
+              user={props.navigation.user.user}
+              navigationGroups={props.navigation.user.navigationGroups}
+              isBadgeVisible={props.navigation.user.isBadgeVisible}
+            />
+          </div>
         </div>
+      </header>
 
-        <div className="flex justify-center items-center flex-1">
-          <Link className="no-underline h-full max-w-xs" to="/">
-            {props.logo || <JaenLogo />}
-          </Link>
-        </div>
-
-        <div className="flex flex-1 my-auto gap-4 justify-end">
-          <Toolbar />
-
-          <MenuButton
-            display={{
-              base: 'none',
-              md: 'flex'
-            }}
-            leftIcon={<Icon as={FaPlus} color="brand.500" />}
-            variant="outline"
-            items={props.navigation.addMenu.items}
-          />
-
-          <DrawerRight
-            user={props.navigation.user.user}
-            navigationGroups={props.navigation.user.navigationGroups}
-            isBadgeVisible={props.navigation.user.isBadgeVisible}
-          />
-        </div>
-      </div>
-    </header>
+      <BottomNavigation />
+    </>
   )
 })
 

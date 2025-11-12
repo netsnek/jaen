@@ -38,7 +38,7 @@ import {navigate} from 'gatsby'
 import {forwardRef, useEffect, useState} from 'react'
 import {Controller, useFieldArray, useForm} from 'react-hook-form'
 
-import {useUser, useUsers} from '../../../hooks'
+import {useUser, useUsers} from '../../../../src/hooks/user'
 import {InfoIcon} from '@chakra-ui/icons'
 
 type FormValues = {

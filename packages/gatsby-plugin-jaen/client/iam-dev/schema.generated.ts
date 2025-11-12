@@ -44,46 +44,14 @@ export interface Scalars {
   Void: {input: any; output: any}
 }
 
-export interface AuthorizationCreateInputInput {
-  projectGrantId?: InputMaybe<Scalars['String']['input']>
-  projectId?: InputMaybe<Scalars['String']['input']>
-  roleKeys: Array<Scalars['String']['input']>
-  userId: Scalars['String']['input']
-}
-
-export interface AuthorizationUpdateInputInput {
-  authorizationId: Scalars['String']['input']
-  roleKeys: Array<Scalars['String']['input']>
-}
-
 export interface DetailsInput {
   firstName?: InputMaybe<Scalars['String']['input']>
   lastName?: InputMaybe<Scalars['String']['input']>
 }
 
-export interface EmailInput {
-  email: Scalars['String']['input']
-}
-
 export interface OptsInput {
   state?: InputMaybe<TransferStateInput>
   userId?: InputMaybe<Scalars['String']['input']>
-}
-
-export interface PasswordInput {
-  changeRequired?: InputMaybe<Scalars['Boolean']['input']>
-  password: Scalars['String']['input']
-}
-
-export interface PhoneInput {
-  phone: Scalars['String']['input']
-}
-
-export interface ProfileInput {
-  displayName?: InputMaybe<Scalars['String']['input']>
-  familyName?: InputMaybe<Scalars['String']['input']>
-  givenName?: InputMaybe<Scalars['String']['input']>
-  preferredLanguage?: InputMaybe<Scalars['String']['input']>
 }
 
 export interface TransferInputInput {
@@ -111,14 +79,6 @@ export enum TransferStateInput {
   terminated = 'terminated'
 }
 
-export interface UserUpdateInputInput {
-  email?: InputMaybe<EmailInput>
-  password?: InputMaybe<PasswordInput>
-  phone?: InputMaybe<PhoneInput>
-  profile?: InputMaybe<ProfileInput>
-  username?: InputMaybe<Scalars['String']['input']>
-}
-
 export interface ValuesInput {
   details?: InputMaybe<DetailsInput>
   emailAddress: Scalars['String']['input']
@@ -141,16 +101,6 @@ export const scalarsEnumsHash: ScalarsEnumsHash = {
   Void: true
 }
 export const generatedSchema = {
-  AuthorizationCreateInputInput: {
-    projectGrantId: {__type: 'String'},
-    projectId: {__type: 'String'},
-    roleKeys: {__type: '[String!]!'},
-    userId: {__type: 'String!'}
-  },
-  AuthorizationUpdateInputInput: {
-    authorizationId: {__type: 'String!'},
-    roleKeys: {__type: '[String!]!'}
-  },
   CreateTransfer: {
     __typename: {__type: 'String!'},
     transferId: {__type: 'String!'}
@@ -173,7 +123,6 @@ export const generatedSchema = {
     sequence: {__type: 'String!'}
   },
   Email: {__typename: {__type: 'String!'}, email: {__type: 'String'}},
-  EmailInput: {email: {__type: 'String!'}},
   HumanUser: {
     __typename: {__type: 'String!'},
     email: {__type: 'Email'},
@@ -184,22 +133,11 @@ export const generatedSchema = {
     state: {__type: 'TransferStateInput'},
     userId: {__type: 'String'}
   },
-  PasswordInput: {
-    changeRequired: {__type: 'Boolean'},
-    password: {__type: 'String!'}
-  },
-  PhoneInput: {phone: {__type: 'String!'}},
   Profile: {
     __typename: {__type: 'String!'},
     displayName: {__type: 'String'},
     firstName: {__type: 'String'},
     lastName: {__type: 'String'},
-    preferredLanguage: {__type: 'String'}
-  },
-  ProfileInput: {
-    displayName: {__type: 'String'},
-    familyName: {__type: 'String'},
-    givenName: {__type: 'String'},
     preferredLanguage: {__type: 'String'}
   },
   TransferInputInput: {
@@ -234,13 +172,6 @@ export const generatedSchema = {
     details: {__type: 'Details_1!'},
     userId: {__type: 'String!'}
   },
-  UserUpdateInputInput: {
-    email: {__type: 'EmailInput'},
-    password: {__type: 'PasswordInput'},
-    phone: {__type: 'PhoneInput'},
-    profile: {__type: 'ProfileInput'},
-    username: {__type: 'String'}
-  },
   ValuesInput: {
     details: {__type: 'DetailsInput'},
     emailAddress: {__type: 'String!'},
@@ -265,87 +196,16 @@ export const generatedSchema = {
       __args: {driver: 'String!', transferId: 'String!'}
     },
     cancelTransfer: {__type: 'Void', __args: {transferId: 'String!'}},
-    createAuthorization: {
-      __type: 'Any!',
-      __args: {
-        input: 'AuthorizationCreateInputInput!',
-        organizationId: 'String'
-      }
-    },
     createTransfer: {
       __type: 'CreateTransfer!',
       __args: {values: 'TransferInputInput!'}
     },
-    deactivateUser: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', userId: 'String!'}
-    },
-    deleteAuthorization: {
-      __type: 'Any!',
-      __args: {authorizationId: 'String!', organizationId: 'String'}
-    },
-    deleteUser: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', userId: 'String!'}
-    },
-    lockUser: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', userId: 'String!'}
-    },
     markCompleted: {__type: 'Void', __args: {transferId: 'String!'}},
-    reactivateUser: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', userId: 'String!'}
-    },
-    requestPasswordReset: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', userId: 'String!'}
-    },
-    resendEmailVerification: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', userId: 'String!'}
-    },
-    sendEmailVerification: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', userId: 'String!'}
-    },
-    setPassword: {
-      __type: 'Any!',
-      __args: {
-        changeRequired: 'Boolean',
-        newPassword: 'String!',
-        organizationId: 'String',
-        userId: 'String!'
-      }
-    },
-    setPhone: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', phone: 'String!', userId: 'String!'}
-    },
     syncMonthlyTransfers: {
       __type: 'Void',
       __args: {userId: 'String!', yyyymm: 'String!'}
     },
     terminateTransfer: {__type: 'Void', __args: {transferId: 'String!'}},
-    unlockUser: {
-      __type: 'Any!',
-      __args: {organizationId: 'String', userId: 'String!'}
-    },
-    updateAuthorization: {
-      __type: 'Any!',
-      __args: {
-        input: 'AuthorizationUpdateInputInput!',
-        organizationId: 'String'
-      }
-    },
-    updateUser: {
-      __type: 'Any!',
-      __args: {
-        changes: 'UserUpdateInputInput!',
-        organizationId: 'String',
-        userId: 'String!'
-      }
-    },
     userCreate: {
       __type: 'UserCreateResponse!',
       __args: {
@@ -354,10 +214,6 @@ export const generatedSchema = {
         skipEmailVerification: 'Boolean',
         values: 'ValuesInput!'
       }
-    },
-    verifyEmail: {
-      __type: 'Any!',
-      __args: {code: 'String!', organizationId: 'String', userId: 'String!'}
     }
   },
   query: {
@@ -465,57 +321,10 @@ export interface Mutation {
   cancelTransfer: (args: {
     transferId: ScalarsEnums['String']
   }) => Maybe<ScalarsEnums['Void']>
-  createAuthorization: (args: {
-    input: AuthorizationCreateInputInput
-    organizationId?: Maybe<ScalarsEnums['String']>
-  }) => ScalarsEnums['Any']
   createTransfer: (args: {values: TransferInputInput}) => CreateTransfer
-  deactivateUser: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
-  deleteAuthorization: (args: {
-    authorizationId: ScalarsEnums['String']
-    organizationId?: Maybe<ScalarsEnums['String']>
-  }) => ScalarsEnums['Any']
-  deleteUser: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
-  lockUser: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
   markCompleted: (args: {
     transferId: ScalarsEnums['String']
   }) => Maybe<ScalarsEnums['Void']>
-  reactivateUser: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
-  requestPasswordReset: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
-  resendEmailVerification: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
-  sendEmailVerification: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
-  setPassword: (args: {
-    changeRequired?: Maybe<ScalarsEnums['Boolean']>
-    newPassword: ScalarsEnums['String']
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
-  setPhone: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    phone: ScalarsEnums['String']
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
   syncMonthlyTransfers: (args: {
     userId: ScalarsEnums['String']
     yyyymm: ScalarsEnums['String']
@@ -523,30 +332,12 @@ export interface Mutation {
   terminateTransfer: (args: {
     transferId: ScalarsEnums['String']
   }) => Maybe<ScalarsEnums['Void']>
-  unlockUser: (args: {
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
-  updateAuthorization: (args: {
-    input: AuthorizationUpdateInputInput
-    organizationId?: Maybe<ScalarsEnums['String']>
-  }) => ScalarsEnums['Any']
-  updateUser: (args: {
-    changes: UserUpdateInputInput
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
   userCreate: (args: {
     createProfile?: Maybe<ScalarsEnums['Boolean']>
     organizationId?: Maybe<ScalarsEnums['String']>
     skipEmailVerification?: Maybe<ScalarsEnums['Boolean']>
     values: ValuesInput
   }) => UserCreateResponse
-  verifyEmail: (args: {
-    code: ScalarsEnums['String']
-    organizationId?: Maybe<ScalarsEnums['String']>
-    userId: ScalarsEnums['String']
-  }) => ScalarsEnums['Any']
 }
 
 export interface Query {

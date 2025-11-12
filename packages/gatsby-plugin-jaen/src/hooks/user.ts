@@ -4,8 +4,8 @@ import {useCallback, useEffect, useState} from 'react'
 
 import {GQtyError} from 'gqty'
 
-import {resolve} from '../client/iam'
-import type {ZitadelUser} from '../client/iam'
+import {resolve} from '../../client/iam'
+import type {ZitadelUser} from '../../client/iam'
 
 export interface ResourceUser {
   id: string

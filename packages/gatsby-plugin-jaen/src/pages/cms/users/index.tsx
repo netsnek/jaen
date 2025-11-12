@@ -43,8 +43,8 @@ import React from 'react'
 
 import {useForm} from 'react-hook-form'
 
-import {useUsers} from '../../../hooks'
-import type {UserCreateInput} from '../../../hooks'
+import {useUsers} from '../../../../src/hooks/user'
+import type {UserCreateInput} from '../../../../src/hooks/user'
 
 const Page: React.FC = () => {
   //const { isAuthenticated, user } = useAuthenticationContext()
