@@ -198,6 +198,37 @@ export function getI18nJaen(code: I18nCode) {
         CmsSettingsTitle: 'Jaen CMS | Einstellungen',
         CmsSettingsMenuLabel: 'Einstellungen',
         CmsSettingsBreadcrumbsSettings: 'Einstellungen',
+        CmsSettingsNotificationsUpdated: 'Einstellungen aktualisiert',
+        CmsSettingsFormHeading: 'Einstellungen',
+        CmsSettingsFormSiteInfoGroupTitle: 'Website-Informationen',
+        CmsSettingsFormSiteInfoTitleLabel: 'Titel',
+        CmsSettingsFormSiteInfoTitlePlaceholder: 'Titel',
+        CmsSettingsFormSiteInfoTitleTooLong: 'Titel ist zu lang',
+        CmsSettingsFormSiteInfoUrlLabel: 'URL',
+        CmsSettingsFormSiteInfoUrlPlaceholder: 'https://snek.at',
+        CmsSettingsFormSiteInfoUrlInvalid:
+          'URL muss mit http:// oder https:// beginnen',
+        CmsSettingsFormSiteInfoDescriptionLabel: 'Beschreibung',
+        CmsSettingsFormSiteInfoDescriptionPlaceholder:
+          'Die Beschreibung, die in Suchmaschinen und sozialen Medien erscheint.',
+        CmsSettingsFormSiteInfoDescriptionHelper:
+          'Kurze Beschreibung für deine Website.',
+        CmsSettingsFormSiteInfoImageLabel: 'Bild',
+        CmsSettingsFormSiteInfoImageDescription:
+          'Lade ein Bild hoch, das die Website repräsentiert.',
+        CmsSettingsFormOrganisationGroupTitle: 'Organisation',
+        CmsSettingsFormOrganisationNameLabel: 'Name',
+        CmsSettingsFormOrganisationNamePlaceholder: 'Snek',
+        CmsSettingsFormOrganisationNameTooLong: 'Name ist zu lang',
+        CmsSettingsFormOrganisationUrlLabel: 'URL',
+        CmsSettingsFormOrganisationUrlPlaceholder: 'https://snek.at',
+        CmsSettingsFormOrganisationUrlInvalid:
+          'URL muss mit http:// oder https:// beginnen',
+        CmsSettingsFormOrganisationLogoLabel: 'Bild',
+        CmsSettingsFormOrganisationLogoDescription:
+          'Lade ein Bild hoch, das die Organisation repräsentiert.',
+        CmsSettingsFormCancel: 'Abbrechen',
+        CmsSettingsFormSave: 'Speichern',
 
         CmsDebugTitle: 'Jaen CMS | Debug',
         CmsDebugBreadcrumbsDebug: 'Debug',
@@ -403,6 +434,37 @@ export function getI18nJaen(code: I18nCode) {
         CmsSettingsTitle: 'Jaen CMS | Ayarlar',
         CmsSettingsMenuLabel: 'Ayarlar',
         CmsSettingsBreadcrumbsSettings: 'Ayarlar',
+        CmsSettingsNotificationsUpdated: 'Ayarlar güncellendi',
+        CmsSettingsFormHeading: 'Ayarlar',
+        CmsSettingsFormSiteInfoGroupTitle: 'Site Bilgileri',
+        CmsSettingsFormSiteInfoTitleLabel: 'Başlık',
+        CmsSettingsFormSiteInfoTitlePlaceholder: 'Başlık',
+        CmsSettingsFormSiteInfoTitleTooLong: 'Başlık çok uzun',
+        CmsSettingsFormSiteInfoUrlLabel: 'URL',
+        CmsSettingsFormSiteInfoUrlPlaceholder: 'https://snek.at',
+        CmsSettingsFormSiteInfoUrlInvalid:
+          'URL http:// veya https:// ile başlamalıdır',
+        CmsSettingsFormSiteInfoDescriptionLabel: 'Açıklama',
+        CmsSettingsFormSiteInfoDescriptionPlaceholder:
+          'Arama motorlarında ve sosyal medyada görünen açıklama.',
+        CmsSettingsFormSiteInfoDescriptionHelper:
+          'Siteniz için kısa bir açıklama.',
+        CmsSettingsFormSiteInfoImageLabel: 'Görsel',
+        CmsSettingsFormSiteInfoImageDescription:
+          'Siteyi temsil edecek bir görsel yükleyin.',
+        CmsSettingsFormOrganisationGroupTitle: 'Organizasyon',
+        CmsSettingsFormOrganisationNameLabel: 'Ad',
+        CmsSettingsFormOrganisationNamePlaceholder: 'Snek',
+        CmsSettingsFormOrganisationNameTooLong: 'Ad çok uzun',
+        CmsSettingsFormOrganisationUrlLabel: 'URL',
+        CmsSettingsFormOrganisationUrlPlaceholder: 'https://snek.at',
+        CmsSettingsFormOrganisationUrlInvalid:
+          'URL http:// veya https:// ile başlamalıdır',
+        CmsSettingsFormOrganisationLogoLabel: 'Görsel',
+        CmsSettingsFormOrganisationLogoDescription:
+          'Organizasyonu temsil edecek bir görsel yükleyin.',
+        CmsSettingsFormCancel: 'İptal',
+        CmsSettingsFormSave: 'Kaydet',
 
         CmsDebugTitle: 'Jaen CMS | Hata Ayıklama',
         CmsDebugBreadcrumbsDebug: 'Hata Ayıklama',
@@ -599,6 +661,34 @@ export function getI18nJaen(code: I18nCode) {
         CmsSettingsTitle: 'Jaen CMS | الإعدادات',
         CmsSettingsMenuLabel: 'الإعدادات',
         CmsSettingsBreadcrumbsSettings: 'الإعدادات',
+        CmsSettingsNotificationsUpdated: 'تم تحديث الإعدادات',
+        CmsSettingsFormHeading: 'الإعدادات',
+        CmsSettingsFormSiteInfoGroupTitle: 'معلومات الموقع',
+        CmsSettingsFormSiteInfoTitleLabel: 'العنوان',
+        CmsSettingsFormSiteInfoTitlePlaceholder: 'العنوان',
+        CmsSettingsFormSiteInfoTitleTooLong: 'العنوان طويل جدًا',
+        CmsSettingsFormSiteInfoUrlLabel: 'الرابط',
+        CmsSettingsFormSiteInfoUrlPlaceholder: 'https://snek.at',
+        CmsSettingsFormSiteInfoUrlInvalid:
+          'يجب أن يبدأ الرابط بـ http:// أو https://',
+        CmsSettingsFormSiteInfoDescriptionLabel: 'الوصف',
+        CmsSettingsFormSiteInfoDescriptionPlaceholder:
+          'الوصف الذي يظهر في محركات البحث ووسائل التواصل الاجتماعي.',
+        CmsSettingsFormSiteInfoDescriptionHelper: 'وصف موجز لموقعك.',
+        CmsSettingsFormSiteInfoImageLabel: 'صورة',
+        CmsSettingsFormSiteInfoImageDescription: 'حمّل صورة لتمثل الموقع.',
+        CmsSettingsFormOrganisationGroupTitle: 'المنظمة',
+        CmsSettingsFormOrganisationNameLabel: 'الاسم',
+        CmsSettingsFormOrganisationNamePlaceholder: 'Snek',
+        CmsSettingsFormOrganisationNameTooLong: 'الاسم طويل جدًا',
+        CmsSettingsFormOrganisationUrlLabel: 'الرابط',
+        CmsSettingsFormOrganisationUrlPlaceholder: 'https://snek.at',
+        CmsSettingsFormOrganisationUrlInvalid:
+          'يجب أن يبدأ الرابط بـ http:// أو https://',
+        CmsSettingsFormOrganisationLogoLabel: 'صورة',
+        CmsSettingsFormOrganisationLogoDescription: 'حمّل صورة لتمثل المنظمة.',
+        CmsSettingsFormCancel: 'إلغاء',
+        CmsSettingsFormSave: 'حفظ',
 
         CmsDebugTitle: 'Jaen CMS | تتبع الأخطاء',
         CmsDebugBreadcrumbsDebug: 'تتبع الأخطاء',
@@ -801,6 +891,37 @@ export function getI18nJaen(code: I18nCode) {
       CmsSettingsTitle: 'Jaen CMS | Settings',
       CmsSettingsMenuLabel: 'Settings',
       CmsSettingsBreadcrumbsSettings: 'Settings',
+      CmsSettingsNotificationsUpdated: 'Settings updated',
+      CmsSettingsFormHeading: 'Settings',
+      CmsSettingsFormSiteInfoGroupTitle: 'Site Info',
+      CmsSettingsFormSiteInfoTitleLabel: 'Title',
+      CmsSettingsFormSiteInfoTitlePlaceholder: 'Title',
+      CmsSettingsFormSiteInfoTitleTooLong: 'Title is too long',
+      CmsSettingsFormSiteInfoUrlLabel: 'URL',
+      CmsSettingsFormSiteInfoUrlPlaceholder: 'https://snek.at',
+      CmsSettingsFormSiteInfoUrlInvalid:
+        'URL must start with http:// or https://',
+      CmsSettingsFormSiteInfoDescriptionLabel: 'Description',
+      CmsSettingsFormSiteInfoDescriptionPlaceholder:
+        'The description that appears in search engines and social media.',
+      CmsSettingsFormSiteInfoDescriptionHelper:
+        'Brief description for your site.',
+      CmsSettingsFormSiteInfoImageLabel: 'Image',
+      CmsSettingsFormSiteInfoImageDescription:
+        'Upload a photo to represent the site.',
+      CmsSettingsFormOrganisationGroupTitle: 'Organisation',
+      CmsSettingsFormOrganisationNameLabel: 'Name',
+      CmsSettingsFormOrganisationNamePlaceholder: 'Snek',
+      CmsSettingsFormOrganisationNameTooLong: 'Name is too long',
+      CmsSettingsFormOrganisationUrlLabel: 'URL',
+      CmsSettingsFormOrganisationUrlPlaceholder: 'https://snek.at',
+      CmsSettingsFormOrganisationUrlInvalid:
+        'URL must start with http:// or https://',
+      CmsSettingsFormOrganisationLogoLabel: 'Image',
+      CmsSettingsFormOrganisationLogoDescription:
+        'Upload a photo to represent the organization.',
+      CmsSettingsFormCancel: 'Cancel',
+      CmsSettingsFormSave: 'Save',
 
       CmsDebugTitle: 'Jaen CMS | Debug',
       CmsDebugBreadcrumbsDebug: 'Debug',

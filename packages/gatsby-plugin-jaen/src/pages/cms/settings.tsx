@@ -1,12 +1,15 @@
 import {PageProps} from 'gatsby'
 import {PageConfig, useNotificationsContext} from 'jaen'
+import {useIntl} from 'react-intl'
 
 import {FormDataType, Settings} from '../../components/cms/Settings/Settings'
 import {CMSManagement, useCMSManagement} from '../../connectors/cms-management'
+import {intlText} from '../../lib/intl'
 
 const SettingsPage: React.FC<PageProps> = () => {
   const manager = useCMSManagement()
   const {toast} = useNotificationsContext()
+  const intl = useIntl()
 
   return (
     <Settings
@@ -15,7 +18,9 @@ const SettingsPage: React.FC<PageProps> = () => {
         manager.updateSiteMetadata(siteMetadata || {})
 
         toast({
-          title: 'Settings updated',
+          title: intl.formatMessage({
+            id: 'CmsSettingsNotificationsUpdated'
+          }),
           status: 'success'
         })
       }}
