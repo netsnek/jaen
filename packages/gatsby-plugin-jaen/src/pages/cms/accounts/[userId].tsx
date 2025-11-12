@@ -35,7 +35,7 @@ import {format} from 'date-fns'
 import {GQtyError} from 'gqty'
 import {useForm} from 'react-hook-form'
 
-import {resolve as resolveIam} from '../../../clients/iam'
+import * as gqtyIAMClient from '../../../../client/iam'
 
 interface IamUserDetail {
   id: string
@@ -102,8 +102,8 @@ const UserDetailsPage: React.FC<PageProps> = ({params}) => {
     setError(null)
 
     try {
-      const result = await resolveIam(({query}) => {
-        const allUsers = query.getAllUser ?? []
+      const result = await gqtyIAMClient.resolve(({query}) => {
+        const allUsers = query.getAllUser()
 
         return {
           users: allUsers.map(user => ({

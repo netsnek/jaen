@@ -28,7 +28,8 @@ import {
 } from '@chakra-ui/react'
 import {GQtyError} from 'gqty'
 
-import {resolve as resolveIam} from '../../../clients/iam'
+// GQty client
+import * as gqtyIAMClient from '../../../../client/iam'
 
 interface IamUserSummary {
   id: string
@@ -52,8 +53,8 @@ const AccountsPage: React.FC = () => {
     setError(null)
 
     try {
-      const result = await resolveIam(({query}) => {
-        const allUsers = query.getAllUser ?? []
+      const result = await gqtyIAMClient.resolve(({query}) => {
+        const allUsers = query.getAllUser()
 
         return {
           users: allUsers.map(user => ({
