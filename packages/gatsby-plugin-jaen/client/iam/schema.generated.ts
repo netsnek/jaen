@@ -132,7 +132,10 @@ export const generatedSchema = {
     getAllUser: {__type: '[ZitadelUser!]!', __args: {limit: 'Number'}},
     getIsUnique: {__type: 'Boolean', __args: {loginName: 'String!'}},
     getUserCount: {__type: 'Number!'},
-    user: {__type: 'String!'}
+    user: {
+      __type: 'ZitadelUser!',
+      __args: {organizationId: 'String', userId: 'String!'}
+    }
   },
   subscription: {}
 } as const
@@ -211,7 +214,10 @@ export interface Query {
     loginName: Scalars['String']['input']
   }) => Maybe<Scalars['Boolean']['output']>
   getUserCount?: Scalars['Number']['output']
-  user?: Scalars['String']['output']
+  user: (args: {
+    organizationId?: Maybe<Scalars['String']['input']>
+    userId: Scalars['String']['input']
+  }) => ZitadelUser
 }
 
 export interface Subscription {
