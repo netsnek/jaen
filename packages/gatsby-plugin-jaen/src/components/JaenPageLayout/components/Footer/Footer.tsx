@@ -13,7 +13,11 @@ export interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = props => {
   return (
-    <Box mt="24" borderTop="1px solid" borderColor="border.emphasized">
+    <Box
+      mt={{base: 0, md: '24'}}
+      my={{base: '24', md: 0}}
+      borderTop="1px solid"
+      borderColor="border.emphasized">
       <Container py="8" maxW="8xl">
         <Stack
           spacing="8"
@@ -21,7 +25,11 @@ export const Footer: React.FC<FooterProps> = props => {
             base: 'column-reverse',
             md: 'row'
           }}>
-          <Box maxW="64" h="full">
+          <Box
+            maxW="64"
+            h="full"
+            mx={{base: 'auto', md: 0}}
+            textAlign={{base: 'center', md: 'left'}}>
             <Logo />
           </Box>
 

@@ -2,6 +2,9 @@
  * GQty: You can safely modify this file based on your needs.
  */
 
+import {User} from 'oidc-client-ts'
+
+import {createReactClient} from '@gqty/react'
 import {
   Cache,
   createClient,
@@ -14,15 +17,36 @@ import {
   type GeneratedSchema
 } from './schema.generated'
 
+const apiURL =
+  'https://limosen.netsnek.workers.dev/graphql'
+
 const queryFetcher: QueryFetcher = async function (
   {query, variables, operationName},
   fetchOptions
 ) {
-  // Modify "https://iam-limosen.netsnek.workers.dev/graphql" if needed
-  const response = await fetch('https://limosen.netsnek.workers.dev/graphql', {
+  const headers: any = {}
+
+  const oidcStorage = sessionStorage.getItem(
+    `oidc.user:${__JAEN_ZITADEL__.authority}:${__JAEN_ZITADEL__.clientId}`
+  )
+
+  console.log('OIDC STORAGE', oidcStorage)
+
+  if (oidcStorage) {
+    const user = User.fromStorageString(oidcStorage)
+
+    console.log('USER', user)
+
+    headers['Authorization'] = `Bearer ${user?.access_token}`
+  }
+
+  console.log('HEADERS', headers)
+
+  const response = await fetch(apiURL, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      ...headers
     },
     body: JSON.stringify({
       query,
@@ -39,12 +63,12 @@ const queryFetcher: QueryFetcher = async function (
 const cache = new Cache(
   undefined,
   /**
-   * Cache is valid for 30 minutes, but starts revalidating after 5 seconds,
+   * Default option is immediate cache expiry but keep it for 5 minutes,
    * allowing soft refetches in background.
    */
   {
-    maxAge: 5000,
-    staleWhileRevalidate: 30 * 60 * 1000,
+    maxAge: 0,
+    staleWhileRevalidate: 5 * 60 * 1000,
     normalization: true
   }
 )
@@ -64,5 +88,25 @@ export const {resolve, subscribe, schema} = client
 // Legacy functions
 export const {query, mutation, mutate, subscription, resolved, refetch, track} =
   client
+
+export const {
+  graphql,
+  useQuery,
+  usePaginatedQuery,
+  useTransactionQuery,
+  useLazyQuery,
+  useRefetch,
+  useMutation,
+  useMetaState,
+  prepareReactRender,
+  useHydrateCache,
+  prepareQuery
+} = createReactClient<GeneratedSchema>(client, {
+  defaults: {
+    // Enable Suspense, you can override this option for each hook.
+    suspense: true,
+    initialLoadingState: true
+  }
+})
 
 export * from './schema.generated'

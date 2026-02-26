@@ -17,7 +17,8 @@ export const onCreatePage = async ({
     'mailpress',
     'settings',
     'logout',
-    'app'
+    'app',
+    'resources'
   ]
   const isLocalizedProtectedPath = new RegExp(
     `^\\/[a-z]{2}(?:-[A-Z]{2})?\\/(?:${protectedSegments.join('|')})(?:\\/|$)`

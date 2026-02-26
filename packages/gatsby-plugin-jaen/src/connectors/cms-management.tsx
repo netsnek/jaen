@@ -8,27 +8,38 @@ export interface CMSManagementProps {
 }
 
 export const CMSManagement: React.FC<CMSManagementProps> = props => {
-  const staticData = useStaticQuery<{
-    allJaenPage: {
-      nodes: JaenPage[]
-    }
-    allJaenTemplate: {
-      nodes: JaenTemplate[]
-    }
-  }>(graphql`
-    query CMSManagementData {
-      allJaenPage {
-        nodes {
-          ...JaenPageData
+  let staticData: {
+    allJaenPage: {nodes: JaenPage[]}
+    allJaenTemplate: {nodes: JaenTemplate[]}
+  }
+
+  try {
+    staticData = useStaticQuery<{
+      allJaenPage: {
+        nodes: JaenPage[]
+      }
+      allJaenTemplate: {
+        nodes: JaenTemplate[]
+      }
+    }>(graphql`
+      query CMSManagementData {
+        allJaenPage {
+          nodes {
+            ...JaenPageData
+          }
+        }
+        allJaenTemplate {
+          nodes {
+            ...JaenTemplateData
+          }
         }
       }
-      allJaenTemplate {
-        nodes {
-          ...JaenTemplateData
-        }
-      }
-    }
-  `)
+    `)
+  } catch {
+    // Gracefully handle the offline-plugin-app-shell-fallback page
+    // where StaticQuery data is not available during SSR
+    return <>{props.children}</>
+  }
 
   return (
     <CMSManagementProvider

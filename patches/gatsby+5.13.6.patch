@@ -1,0 +1,14 @@
+diff --git a/node_modules/gatsby/dist/query/query-compiler.js b/node_modules/gatsby/dist/query/query-compiler.js
+index f36d8bf..2084718 100644
+--- a/node_modules/gatsby/dist/query/query-compiler.js
++++ b/node_modules/gatsby/dist/query/query-compiler.js
+@@ -115,7 +115,8 @@ const parseQueries = async ({
+   const modulesThatUseGatsby = await (0, _gatsbyDependents.getGatsbyDependents)();
+   let files = [path.join(base, `src`), path.join(base, `.cache`, `fragments`), ...additional.map(additional => path.join(additional, `src`)), ...modulesThatUseGatsby.map(module => module.path)].reduce((merged, folderPath) => {
+     merged.push(...glob.sync(path.join(folderPath, pathRegex), {
+-      nodir: true
++      nodir: true,
++      ignore: [`**/node_modules/**`]
+     }));
+     return merged;
+   }, []);

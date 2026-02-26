@@ -11,7 +11,7 @@
     "babel-plugin-remove-page-config.js"
   ],
   "scripts": {
-    "build": "tsc gatsby/* --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule && yarn build:css",
+    "build": "tsc gatsby/gatsby-config.ts gatsby/gatsby-node.ts --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule && yarn build:css",
     "build:css": "tailwindcss -i ./src/styles/globals.css -o dist/jaen.css",
     "build:css:watch": "tailwindcss -i ./src/styles/globals.css -o dist/jaen.css --watch"
   },

@@ -49,10 +49,8 @@ export const JaenSectionBlockProvider: React.FC<SectionType> = memo(
           <Component />
         ) : (
           <Text>
-            <>
-              No block component found for section {id} at path {path}. Please
-              contact the site administrator.
-            </>
+            No block component found for section {String(id)} at path {String(path)}. Please
+            contact the site administrator.
           </Text>
         )}
       </SectionBlockContext.Provider>

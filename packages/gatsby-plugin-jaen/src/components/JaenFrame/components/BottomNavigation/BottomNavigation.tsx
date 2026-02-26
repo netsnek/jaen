@@ -19,7 +19,7 @@ const itemsBase = [
     id: 'settings',
     label: 'Settings',
     icon: FaCog,
-    to: '/app/settings'
+    to: '/settings'
   },
   {
     id: 'locations',
@@ -44,14 +44,17 @@ const itemsBase = [
 export const BottomNavigation: React.FC = () => {
   const {pathname} = useLocation()
   const auth = useAuth()
+
   const isAdmin = checkUserRoles(auth.user, ['jaen:admin'])
+  const isDriver = checkUserRoles(auth.user, ['limosen:driver'])
+  const isCustomer = checkUserRoles(auth.user, ['limosen:customer'])
 
   const accountItem = isAdmin
     ? {
         id: 'accounts',
         label: 'Accounts',
         icon: FaUsers,
-        to: '/app/accounts'
+        to: '/app/users'
       }
     : {
         id: 'account',
@@ -60,10 +63,33 @@ export const BottomNavigation: React.FC = () => {
         to: '/app/account'
       }
 
-  const items = [...itemsBase, accountItem]
+  // Start from base items + account and adjust the "booking" item per role
+  const items = [...itemsBase, accountItem].map(item => {
+    if (item.id === 'booking') {
+      // limosen:driver or jaen:admin → show Transfers on /app/transfers/
+      if (isAdmin || isDriver) {
+        return {
+          ...item,
+          id: 'transfers',
+          label: 'Transfers',
+          to: '/app/transfers/'
+        }
+      }
+
+      // limosen:customer → keep label Booking but go to /app/booking/
+      if (isCustomer) {
+        return {
+          ...item,
+          to: '/app/booking/'
+        }
+      }
+    }
+
+    return item
+  })
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 border-t border-border bg-white md:hidden z-40">
+    <nav className="fixed inset-x-0 bottom-0 border-t border-border bg-white md:hidden z-40 pb-4">
       <ul className="flex items-center justify-around py-2">
         {items.map(item => {
           const isActive =

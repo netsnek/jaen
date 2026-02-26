@@ -1,4 +1,4 @@
-import {AuthUser, useNotificationsContext, AuthPasswordPolicy} from 'jaen'
+import {AuthUser, useNotificationsContext, AuthPasswordPolicy, useAuth} from 'jaen'
 import {
   Avatar,
   Button,
@@ -88,6 +88,7 @@ export const Settings: React.FC<SettingsProps> = props => {
   const initialTab = query.get('activeTab') || 'GENERAL' // replace 'GENERAL' with your default tab value
 
   const notify = useNotificationsContext()
+  const auth = useAuth()
 
   const [user, setUser] = useState(props.user)
 
@@ -251,6 +252,12 @@ export const Settings: React.FC<SettingsProps> = props => {
     setIsContactInformationRefreshing(true)
     await props.onContactInformationRefresh()
     setIsContactInformationRefreshing(false)
+  }
+
+  const handleLogout = () => {
+    auth.signoutRedirect({
+      post_logout_redirect_uri: `${window.location.origin}/login`
+    })
   }
 
   return (
@@ -634,6 +641,17 @@ export const Settings: React.FC<SettingsProps> = props => {
                     )}
                   </FormControl>
                 </Stack>
+              </CardBody>
+            </Card>
+
+            <Card>
+              <CardHeader fontWeight="bold" fontSize="lg">
+                Account
+              </CardHeader>
+              <CardBody>
+                <Button colorScheme="red" variant="outline" onClick={handleLogout}>
+                  Logout
+                </Button>
               </CardBody>
             </Card>
           </Stack>

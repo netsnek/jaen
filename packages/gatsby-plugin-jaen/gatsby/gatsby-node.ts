@@ -174,7 +174,7 @@ export const onPreInit: GatsbyNode['onPreInit'] = async (
       // Write sentry.org and sentry.project to process.env
       process.env.SENTRY_ORG = pluginOptions.sentry.org
       process.env.SENTRY_PROJECT = pluginOptions.sentry.project
-      process.env.SENTRY_URL = new URL(pluginOptions.sentry.dsn).origin
+      //process.env.SENTRY_URL = new URL(pluginOptions.sentry.dsn).origin
     } else {
       sentryPlugin.pluginOptions.enabled = false
     }

@@ -8,3 +8,10 @@ node_modules
 **/dist
 
 **/tsconfig.tsbuildinfo
+
+# Embedded repos / standalone apps
+examples/my-gatsby-app
+examples/freiearztwahl.at
+examples/oldcode
+examples/psylon
+packages/gatsby-jaen-app/toev-pwa

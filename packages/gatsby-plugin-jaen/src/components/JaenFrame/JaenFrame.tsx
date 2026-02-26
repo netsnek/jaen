@@ -42,7 +42,43 @@ export interface JaenFrameProps {
   }
 }
 
+const getInitialIsPwa = () => {
+  if (typeof window === 'undefined') {
+    return false
+  }
+
+  const mediaQuery = window.matchMedia?.('(display-mode: standalone)')
+
+  return Boolean(mediaQuery?.matches || (window.navigator as any)?.standalone)
+}
+
 export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
+  const [isPwa, setIsPwa] = React.useState(getInitialIsPwa)
+
+  React.useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    const mediaQuery = window.matchMedia?.('(display-mode: standalone)')
+
+    if (!mediaQuery) {
+      return
+    }
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      setIsPwa(event.matches || (window.navigator as any)?.standalone)
+    }
+
+    if ('addEventListener' in mediaQuery) {
+      mediaQuery.addEventListener('change', handleChange)
+      return () => mediaQuery.removeEventListener('change', handleChange)
+    }
+
+    mediaQuery.addListener(handleChange)
+    return () => mediaQuery.removeListener(handleChange)
+  }, [])
+
   return (
     <>
       <header
@@ -91,7 +127,7 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
         </div>
       </header>
 
-      <BottomNavigation />
+      {isPwa ? <BottomNavigation /> : null}
     </>
   )
 })

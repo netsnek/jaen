@@ -16,7 +16,7 @@
     "index.js"
   ],
   "scripts": {
-    "build": "tsc gatsby/* --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule"
+    "build": "tsc gatsby/gatsby-node.ts --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule"
   },
   "dependencies": {
     "react-hook-form": "^7.46.1",
