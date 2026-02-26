@@ -83,6 +83,13 @@ const USER_QUERY = `
       creationDate
       changeDate
       loginNames
+    }
+  }
+`
+
+const USER_PROFILES_QUERY = `
+  query($args: UserArgsInput!) {
+    user(args: $args) {
       ... on HumanUser {
         profiles {
           edges {
@@ -99,6 +106,13 @@ const USER_QUERY = `
           }
         }
       }
+    }
+  }
+`
+
+const USER_ROLES_QUERY = `
+  query($args: UserArgsInput!) {
+    user(args: $args) {
       roles {
         edges {
           node {
@@ -291,29 +305,15 @@ const mapUserRow = (user: any): ResourceUser => {
 }
 
 const mapUserRowFull = (user: any): ResourceUser => {
-  const isHuman = user?.__typename === 'HumanUser'
-  const profileEdges = isHuman ? (user?.profiles?.edges || []) : []
-  const firstProfile = profileEdges[0]?.node
-
-  const roleEdges = user?.roles?.edges || []
-  const roles = roleEdges
-    .map((e: any) => e?.node)
-    .filter(Boolean)
-    .map((r: any) => ({ id: r.id ?? r.key ?? '', description: r.displayName ?? r.key ?? '' }))
-
   return {
     id: user?.id ?? '',
-    primaryEmailAddress: firstProfile?.email ?? user?.preferredLoginName ?? '',
+    primaryEmailAddress: user?.preferredLoginName ?? '',
     username: user?.userName ?? '',
     createdAt: user?.creationDate ?? user?.changeDate ?? null,
-    details: {
-      avatarURL: firstProfile?.avatarUrl ?? undefined,
-      firstName: firstProfile?.firstName ?? undefined,
-      lastName: firstProfile?.lastName ?? undefined,
-    },
+    details: {},
     isActive: user?.state === 'USER_STATE_ACTIVE' || user?.state?.toLowerCase?.() === 'active',
     isAdmin: false,
-    roles,
+    roles: [],
     driverColor: undefined,
   }
 }
@@ -520,12 +520,43 @@ export function useUser(userId: string) {
       const data = await gqlFetch(USER_QUERY, { args: { id: userId } })
       const result = data?.user
       let mapped = result ? mapUserRowFull(result) : undefined
+
       if (mapped) {
-        try {
-          const colorData = await gqlFetch(DRIVER_COLOR_QUERY, { userId: mapped.id })
-          const color = colorData?.getDriverColor
-          mapped = { ...mapped, driverColor: color && color !== '#C0C0C0' ? color : undefined }
-        } catch { /* ignore */ }
+        const queryArgs = { args: { id: userId } }
+
+        const [profilesResult, rolesResult, colorResult] = await Promise.all([
+          gqlFetch(USER_PROFILES_QUERY, queryArgs).catch(() => null),
+          gqlFetch(USER_ROLES_QUERY, queryArgs).catch(() => null),
+          gqlFetch(DRIVER_COLOR_QUERY, { userId: mapped.id }).catch(() => null),
+        ])
+
+        const profileEdges = profilesResult?.user?.profiles?.edges || []
+        const firstProfile = profileEdges[0]?.node
+        if (firstProfile) {
+          mapped = {
+            ...mapped,
+            primaryEmailAddress: firstProfile.email ?? mapped.primaryEmailAddress,
+            details: {
+              avatarURL: firstProfile.avatarUrl ?? mapped.details?.avatarURL,
+              firstName: firstProfile.firstName ?? mapped.details?.firstName,
+              lastName: firstProfile.lastName ?? mapped.details?.lastName,
+            },
+          }
+        }
+
+        const roleEdges = rolesResult?.user?.roles?.edges || []
+        const roles = roleEdges
+          .map((e: any) => e?.node)
+          .filter(Boolean)
+          .map((r: any) => ({ id: r.id ?? r.key ?? '', description: r.displayName ?? r.key ?? '' }))
+        if (roles.length) {
+          mapped = { ...mapped, roles }
+        }
+
+        const color = colorResult?.getDriverColor
+        if (color && color !== '#C0C0C0') {
+          mapped = { ...mapped, driverColor: color }
+        }
       }
       setUser(mapped)
     } catch (err) {
