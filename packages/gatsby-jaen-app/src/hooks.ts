@@ -24,6 +24,20 @@ function getAuthHeaders(): Record<string, string> {
   return headers
 }
 
+async function gqlFetch<T = any>(query: string, variables?: Record<string, any>): Promise<T> {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ query, variables }),
+    mode: 'cors',
+  })
+  const json = await response.json()
+  if (json.errors?.length) {
+    throw new Error(json.errors[0]?.message || 'GraphQL error')
+  }
+  return json.data
+}
+
 const TRANSFERS_QUERY = `
   query($args: TransfersArgsInput) {
     transfers(args: $args) {
@@ -55,6 +69,77 @@ const TRANSFERS_QUERY = `
         }
       }
     }
+  }
+`
+
+const USER_QUERY = `
+  query($args: UserArgsInput!) {
+    user(args: $args) {
+      __typename
+      id
+      userName
+      state
+      preferredLoginName
+      creationDate
+      changeDate
+      loginNames
+      ... on HumanUser {
+        profiles {
+          edges {
+            node {
+              id
+              email
+              firstName
+              lastName
+              avatarUrl
+              displayName
+              phone
+              preferredLanguage
+            }
+          }
+        }
+      }
+      roles {
+        edges {
+          node {
+            id
+            key
+            displayName
+          }
+        }
+      }
+    }
+  }
+`
+
+const USERS_QUERY = `
+  query($args: UsersArgsInput) {
+    users(args: $args) {
+      totalCount
+      pageInfo {
+        endCursor
+        startCursor
+        hasNextPage
+        hasPreviousPage
+      }
+      edges {
+        node {
+          __typename
+          id
+          userName
+          state
+          preferredLoginName
+          creationDate
+          changeDate
+        }
+      }
+    }
+  }
+`
+
+const DRIVER_COLOR_QUERY = `
+  query($userId: String!) {
+    getDriverColor(userId: $userId)
   }
 `
 
@@ -192,7 +277,7 @@ const mapUserRow = (user: any): ResourceUser => {
     id: user?.id ?? '',
     primaryEmailAddress: loginName,
     username: user?.userName ?? '',
-    createdAt: null,
+    createdAt: user?.creationDate ?? user?.changeDate ?? null,
     details: {
       avatarURL: undefined,
       firstName: undefined,
@@ -206,10 +291,15 @@ const mapUserRow = (user: any): ResourceUser => {
 }
 
 const mapUserRowFull = (user: any): ResourceUser => {
-  const humanUser = user?.$on ? user.$on.HumanUser ?? user : user
-  const profiles = typeof humanUser?.profiles === 'function' ? humanUser.profiles() : null
-  const profileEdges = profiles?.edges || []
+  const isHuman = user?.__typename === 'HumanUser'
+  const profileEdges = isHuman ? (user?.profiles?.edges || []) : []
   const firstProfile = profileEdges[0]?.node
+
+  const roleEdges = user?.roles?.edges || []
+  const roles = roleEdges
+    .map((e: any) => e?.node)
+    .filter(Boolean)
+    .map((r: any) => ({ id: r.id ?? r.key ?? '', description: r.displayName ?? r.key ?? '' }))
 
   return {
     id: user?.id ?? '',
@@ -223,7 +313,7 @@ const mapUserRowFull = (user: any): ResourceUser => {
     },
     isActive: user?.state === 'USER_STATE_ACTIVE' || user?.state?.toLowerCase?.() === 'active',
     isAdmin: false,
-    roles: [],
+    roles,
     driverColor: undefined,
   }
 }
@@ -261,17 +351,8 @@ export function useTransfers(pageSize = DEFAULT_TRANSFER_PAGE_SIZE, dateFilter?:
       if (fromISO) args.fromISO = fromISO
       if (toISO) args.toISO = toISO
 
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ query: TRANSFERS_QUERY, variables: { args } }),
-        mode: 'cors',
-      })
-      const json = await response.json()
-      if (json.errors?.length) {
-        throw new Error(json.errors[0]?.message || 'GraphQL error')
-      }
-      const result = json?.data?.transfers
+      const data = await gqlFetch(TRANSFERS_QUERY, { args })
+      const result = data?.transfers
 
       const edges: any[] = Array.isArray(result?.edges) ? result.edges : []
       const items = edges.map((e: any) => e?.node).filter(Boolean).map(mapTransferRow)
@@ -357,23 +438,8 @@ export function useUsers(pageSize = DEFAULT_USER_PAGE_SIZE) {
       const args: any = { first: pageSize }
       if (after) args.after = after
 
-      const result = await resolve(
-        ({ query }) => {
-          const conn = (query as any).users({ args })
-          void conn?.pageInfo?.endCursor
-          void conn?.pageInfo?.startCursor
-          void conn?.pageInfo?.hasNextPage
-          void conn?.pageInfo?.hasPreviousPage
-          void conn?.totalCount
-          const firstNode = conn?.edges?.[0]?.node
-          if (firstNode) {
-            void firstNode.__typename
-            void mapUserRow(firstNode)
-          }
-          return conn
-        },
-        { cachePolicy: 'no-store' }
-      )
+      const data = await gqlFetch(USERS_QUERY, { args })
+      const result = data?.users
 
       const edges: any[] = Array.isArray(result?.edges) ? result.edges : []
       const items = edges.map((e: any) => e?.node).filter(Boolean).map(mapUserRow)
@@ -382,10 +448,8 @@ export function useUsers(pageSize = DEFAULT_USER_PAGE_SIZE) {
       const enriched = await Promise.all(
         items.map(async (u) => {
           try {
-            const color = await resolve(
-              ({ query }) => (query as any).getDriverColor({ userId: u.id }),
-              { cachePolicy: 'no-store' }
-            )
+            const colorData = await gqlFetch(DRIVER_COLOR_QUERY, { userId: u.id })
+            const color = colorData?.getDriverColor
             return { ...u, driverColor: color && color !== '#C0C0C0' ? color : undefined }
           } catch {
             return u
@@ -453,24 +517,13 @@ export function useUser(userId: string) {
     setIsLoading(true)
     setError(null)
     try {
-      const result = await resolve(
-        ({ query }) => {
-          const iamUser = (query as any).user({ args: { id: userId } })
-          if (iamUser) {
-            void iamUser.__typename
-            void mapUserRowFull(iamUser)
-          }
-          return iamUser
-        },
-        { cachePolicy: 'no-store' }
-      )
+      const data = await gqlFetch(USER_QUERY, { args: { id: userId } })
+      const result = data?.user
       let mapped = result ? mapUserRowFull(result) : undefined
       if (mapped) {
         try {
-          const color = await resolve(
-            ({ query }) => (query as any).getDriverColor({ userId: mapped!.id }),
-            { cachePolicy: 'no-store' }
-          )
+          const colorData = await gqlFetch(DRIVER_COLOR_QUERY, { userId: mapped.id })
+          const color = colorData?.getDriverColor
           mapped = { ...mapped, driverColor: color && color !== '#C0C0C0' ? color : undefined }
         } catch { /* ignore */ }
       }
@@ -812,10 +865,8 @@ export async function bookTransferMutation(args: BookTransferArgs): Promise<Reso
 
 export async function fetchDriverColor(userId: string): Promise<string | undefined> {
   try {
-    const result = await resolve(
-      ({ query }) => (query as any).getDriverColor({ userId }),
-      { cachePolicy: 'no-store' }
-    )
+    const data = await gqlFetch(DRIVER_COLOR_QUERY, { userId })
+    const result = data?.getDriverColor
     return typeof result === 'string' && result !== '#C0C0C0' ? result : undefined
   } catch {
     return undefined
