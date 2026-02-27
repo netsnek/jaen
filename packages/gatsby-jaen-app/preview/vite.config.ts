@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react()],
   define: {
     __JAEN_ZITADEL__: JSON.stringify({ authority: 'preview', clientId: 'preview' }),
+    'process.env.GATSBY_MAPBOX_TOKEN': JSON.stringify(process.env.MAPBOX_TOKEN || ''),
   },
   resolve: {
     alias: {
