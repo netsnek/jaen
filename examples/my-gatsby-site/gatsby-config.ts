@@ -22,7 +22,7 @@ const config: GatsbyConfig = {
         remote: {
           repository: 'atsnek/jaen-starter'
         },
-        zitadel: {
+        zitadelGql: {
           organizationId: '252746033782587395',
           clientId: '252746210698395651@services',
           authority: 'https://accounts.cronit.io',

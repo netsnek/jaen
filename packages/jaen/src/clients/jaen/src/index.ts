@@ -12,7 +12,7 @@ export const sqJaen = makeSnekQuery(
     middlewares: [
       ({context}) => {
         const oidcStorage = sessionStorage.getItem(
-          `oidc.user:${__JAEN_ZITADEL__.authority}:${__JAEN_ZITADEL__.clientId}`
+          `oidc.user:${__JAEN_ZITADEL_GQL__.authority}:${__JAEN_ZITADEL_GQL__.clientId}`
         )
 
         if (oidcStorage) {

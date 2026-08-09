@@ -1,4 +1,5 @@
 export * from './connectors'
+export * as zitadelGql from './clients/zitadel-gql'
 export {
   AuthenticationProvider,
   useAuth,

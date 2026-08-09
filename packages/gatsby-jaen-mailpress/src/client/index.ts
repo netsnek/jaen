@@ -27,7 +27,7 @@ const queryFetcher: QueryFetcher = async function (
   const headers: any = {}
 
   const oidcStorage = sessionStorage.getItem(
-    `oidc.user:${__JAEN_ZITADEL__.authority}:${__JAEN_ZITADEL__.clientId}`
+    `oidc.user:${__JAEN_ZITADEL_GQL__.authority}:${__JAEN_ZITADEL_GQL__.clientId}`
   )
 
   console.log('OIDC STORAGE', oidcStorage)

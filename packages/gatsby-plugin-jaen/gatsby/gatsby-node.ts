@@ -7,12 +7,14 @@ export interface JaenPluginOptions extends PluginOptions {
     cwd?: string
   }
   pylonUrl?: string
-  zitadel: {
+  zitadelGql: {
     organizationId: string
     clientId: string
     authority: string
     redirectUri: string
     projectIds?: string[]
+    /** GraphQL endpoint of the zitadel-gql server. Defaults to `${authority}/graphql`. */
+    graphqlUrl?: string
   }
   googleAnalytics?: {
     trackingIds?: string[]
@@ -50,12 +52,13 @@ export const pluginOptionsSchema: GatsbyNode['pluginOptionsSchema'] = ({
       cwd: Joi.string()
     }).required(),
     pylonUrl: Joi.string(),
-    zitadel: Joi.object({
+    zitadelGql: Joi.object({
       organizationId: Joi.string().required(),
       clientId: Joi.string().required(),
       authority: Joi.string().required(),
       redirectUri: Joi.string().required(),
-      projectIds: Joi.array().items(Joi.string())
+      projectIds: Joi.array().items(Joi.string()),
+      graphqlUrl: Joi.string().uri()
     }).required(),
 
     googleAnalytics: Joi.object({
@@ -151,7 +154,7 @@ export const onCreateWebpackConfig: GatsbyNode['onCreateWebpackConfig'] =
 
           __JAEN_REMOTE__: JSON.stringify(pluginOptions.remote),
           __JAEN_PYLON_URL__: JSON.stringify(pluginOptions.pylonUrl),
-          __JAEN_ZITADEL__: JSON.stringify(pluginOptions.zitadel)
+          __JAEN_ZITADEL_GQL__: JSON.stringify(pluginOptions.zitadelGql)
         })
       ]
     })

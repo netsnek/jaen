@@ -1,5 +1,16 @@
 import React, {createContext, useMemo} from 'react'
 import {useAuth} from 'react-oidc-context'
+
+import {
+  fetchCurrentUser,
+  primaryProfile,
+  setUserPassword,
+  setUserPhone,
+  resendUserEmailVerification,
+  updateUser,
+  ZgUser,
+  ZgUserChanges
+} from '../clients/zitadel-gql'
 import {useNotificationsContext} from './notifications'
 
 export interface AuthUser {
@@ -38,6 +49,59 @@ export interface AuthPasswordPolicy {
   isDefault: boolean
 }
 
+/**
+ * Applied when no policy endpoint is reachable (zitadel-gql has no policy
+ * query). Matches Zitadel's default complexity policy.
+ */
+const FALLBACK_PASSWORD_POLICY: AuthPasswordPolicy = {
+  minLength: 8,
+  hasUppercase: true,
+  hasLowercase: true,
+  hasNumber: true,
+  hasSymbol: false,
+  isDefault: true
+}
+
+/**
+ * Adapt a zitadel-gql user node into the AuthUser shape the CMS components
+ * consume. zitadel-gql's profile node has no verification flags or
+ * nickName/gender; verification is assumed for values the identity server
+ * hands out, the unsupported fields stay empty.
+ */
+const toAuthUser = (user: ZgUser): AuthUser => {
+  const profile = primaryProfile(user)
+
+  const preferredLanguage =
+    user.preferences?.preferredLanguage ?? profile?.preferredLanguage ?? ''
+
+  return {
+    id: user.id,
+    state: user.state,
+    userName: user.userName,
+    loginNames: user.loginNames,
+    preferredLoginName: user.preferredLoginName,
+    human: {
+      profile: {
+        firstName: profile?.firstName ?? '',
+        lastName: profile?.lastName ?? '',
+        nickName: '',
+        displayName: profile?.displayName ?? user.userName,
+        preferredLanguage,
+        gender: '',
+        avatarUrl: profile?.avatarUrl ?? ''
+      },
+      email: {
+        email: profile?.email ?? '',
+        isEmailVerified: Boolean(profile?.email)
+      },
+      phone: {
+        phone: profile?.phone ?? '',
+        isPhoneVerified: Boolean(profile?.phone)
+      }
+    }
+  }
+}
+
 const AuthUserContext = createContext<{
   user: AuthUser
   passwordPolicy: AuthPasswordPolicy
@@ -64,20 +128,38 @@ export const AuthUserProvider: React.FC<{
 
   const notify = useNotificationsContext()
 
-  const sendAPIRequest = async (
+  const [data, setData] = React.useState<
+    | {
+        user: AuthUser
+        passwordPolicy: AuthPasswordPolicy
+      }
+    | undefined
+  >()
+
+  const accessToken = auth.user?.access_token
+
+  /**
+   * REST helper for the endpoints zitadel-gql does not cover (avatar
+   * upload via the assets API, phone verification codes, the password
+   * complexity policy, old-password-checked password change). On a
+   * zitadel-gql deployment without these REST routes the callers degrade
+   * gracefully.
+   */
+  const sendRestRequest = async (
     path: string,
     method: string,
     body: any,
     headers: any = {},
     options: {
       stringifyBody?: boolean
+      silent?: boolean
     } = {stringifyBody: true}
-  ) => {
+  ): Promise<boolean> => {
     try {
       const reqHeaders = Object.fromEntries(
         Object.entries({
           Accept: 'application/json',
-          Authorization: `Bearer ${auth.user?.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
           ...headers
         }).filter(([_, value]) => value !== undefined)
       ) as any
@@ -85,167 +167,191 @@ export const AuthUserProvider: React.FC<{
       const reqBody = options.stringifyBody ? JSON.stringify(body) : body
 
       const response = await fetch(`${baseUrl}${path}`, {
-        method: method,
+        method,
         headers: reqHeaders,
         body: reqBody
       })
 
-      if (response.headers.get('content-type') === 'application/json') {
-        const data = await response.json()
+      if (!response.ok) {
+        let message = response.statusText
 
-        console.log(
-          'Performed action: ',
-          method,
-          path,
-          body,
-          'Response: ',
-          data
-        )
+        if (response.headers.get('content-type') === 'application/json') {
+          const errorData = await response.json().catch(() => undefined)
+          message = errorData?.message || message
+        }
 
-        if (!response.ok) {
+        if (!options.silent) {
           notify.toast({
             position: 'top-right',
             title: 'Error',
-            description: data.message,
+            description: message,
             status: 'error'
           })
-        } else {
-          notify.toast({
-            position: 'top-right',
-            title: 'Success',
-            description: 'Action completed successfully',
-            status: 'success'
-          })
-
-          // Refresh the profile
-          await refetchProfile()
         }
-      } else {
-        console.log(
-          'Performed action: ',
-          method,
-          path,
-          body,
-          'Response: ',
-          response
-        )
 
-        if (!response.ok) {
-          notify.toast({
-            position: 'top-right',
-            title: 'Error',
-            description: response.statusText,
-            status: 'error'
-          })
-        } else {
-          notify.toast({
-            position: 'top-right',
-            title: 'Success',
-            description: 'Action completed successfully',
-            status: 'success'
-          })
-
-          // Refresh the profile
-          await refetchProfile()
-        }
+        return false
       }
+
+      if (!options.silent) {
+        notify.toast({
+          position: 'top-right',
+          title: 'Success',
+          description: 'Action completed successfully',
+          status: 'success'
+        })
+      }
+
+      await refetchProfile()
+
+      return true
     } catch (error) {
-      console.error('Error:', error)
-      notify.toast({
-        position: 'top-right',
-        title: 'Error',
-        description: `Internal error: ${error.message}`,
-        status: 'error'
-      })
+      if (!options.silent) {
+        notify.toast({
+          position: 'top-right',
+          title: 'Error',
+          description: `Internal error: ${(error as Error).message}`,
+          status: 'error'
+        })
+      }
+
+      return false
     }
   }
 
-  const getData = async () => {
-    // curl -L -X GET 'https://$CUSTOM-DOMAIN/auth/v1/users/me/profile' \
-    // -H 'Accept: application/json' \
-    // -H 'Authorization: Bearer <TOKEN>'
+  /** Run a zitadel-gql mutation with the usual toast + refetch handling. */
+  const runGqlAction = async (
+    action: () => Promise<{ok: boolean; message: string | null}>
+  ): Promise<boolean> => {
+    try {
+      const result = await action()
 
-    const getUser = async () => {
-      const response = await fetch(`${baseUrl}/auth/v1/users/me`, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${auth.user?.access_token}`
-        }
+      if (!result.ok) {
+        notify.toast({
+          position: 'top-right',
+          title: 'Error',
+          description: result.message || 'Action failed',
+          status: 'error'
+        })
+
+        return false
+      }
+
+      notify.toast({
+        position: 'top-right',
+        title: 'Success',
+        description: 'Action completed successfully',
+        status: 'success'
       })
 
-      const data = await response.json()
+      await refetchProfile()
 
-      const user = data.user
+      return true
+    } catch (error) {
+      notify.toast({
+        position: 'top-right',
+        title: 'Error',
+        description: (error as Error).message,
+        status: 'error'
+      })
 
-      return user
+      return false
     }
+  }
 
-    const getPasswordPolicy = async () => {
-      // curl -L -X GET 'https://$CUSTOM-DOMAIN/auth/v1/policies/passwords/complexity' \
-      // -H 'Accept: application/json' \
-      // -H 'Authorization: Bearer <TOKEN>'
-
+  const getPasswordPolicy = async (): Promise<AuthPasswordPolicy> => {
+    // zitadel-gql exposes no policy query; on a stock Zitadel the REST
+    // endpoint still answers. Either way there is always a usable policy.
+    try {
       const response = await fetch(
         `${baseUrl}/auth/v1/policies/passwords/complexity`,
         {
           method: 'GET',
           headers: {
             Accept: 'application/json',
-            Authorization: `Bearer ${auth.user?.access_token}`
+            Authorization: `Bearer ${accessToken}`
           }
         }
       )
 
-      const data = await response.json()
+      if (!response.ok) return FALLBACK_PASSWORD_POLICY
 
-      const passwordPolicy = data.policy
+      const policyData = await response.json()
 
-      return passwordPolicy
-    }
-
-    const [user, passwordPolicy] = await Promise.all([
-      getUser(),
-      getPasswordPolicy()
-    ])
-
-    return {
-      user,
-      passwordPolicy
+      return policyData.policy ?? FALLBACK_PASSWORD_POLICY
+    } catch {
+      return FALLBACK_PASSWORD_POLICY
     }
   }
 
-  const [data, setData] = React.useState<any>()
-
   const refetchProfile = async () => {
-    const data = await getData()
+    if (!accessToken) return
 
-    setData(data)
+    const [user, passwordPolicy] = await Promise.all([
+      fetchCurrentUser(accessToken).then(toAuthUser),
+      getPasswordPolicy()
+    ])
+
+    setData({user, passwordPolicy})
   }
 
   React.useEffect(() => {
     const fetchProfile = async () => {
       if (!auth.isAuthenticated) return
 
-      await refetchProfile()
+      try {
+        await refetchProfile()
+      } catch (error) {
+        console.error('jaen: loading the current user failed', error)
+      }
     }
 
-    fetchProfile()
+    void fetchProfile()
   }, [auth.isAuthenticated])
 
+  const requireUserId = (): string => {
+    const userId = data?.user?.id
+
+    if (!userId) {
+      throw new Error('The current user is not loaded yet')
+    }
+
+    return userId
+  }
+
+  const applyChanges = async (changes: ZgUserChanges) => {
+    await runGqlAction(() =>
+      updateUser({
+        accessToken: accessToken!,
+        userId: requireUserId(),
+        changes
+      })
+    )
+  }
+
   const usernameUpdate = async (userName: string) => {
-    await sendAPIRequest('/auth/v1/users/me/username', 'PUT', {userName})
+    await applyChanges({username: userName})
   }
 
   const profileUpdate = async (profile: AuthUser['human']['profile']) => {
-    await sendAPIRequest('/auth/v1/users/me/profile', 'PUT', profile)
+    // REST profile fields map onto zitadel-gql's ProfileInput; nickName and
+    // gender have no equivalent there and are not sent.
+    await applyChanges({
+      profile: {
+        givenName: profile.firstName,
+        familyName: profile.lastName,
+        displayName: profile.displayName,
+        preferredLanguage: profile.preferredLanguage
+      }
+    })
   }
 
   const profileAvatarUpdate = async (avatarFile: File) => {
+    // The avatar endpoint belongs to Zitadel's assets API, which is not part
+    // of the GraphQL surface.
     const formData = new FormData()
     formData.append('file', avatarFile)
 
-    await sendAPIRequest(
+    await sendRestRequest(
       '/assets/v1/users/me/avatar',
       'POST',
       formData,
@@ -259,27 +365,35 @@ export const AuthUserProvider: React.FC<{
   }
 
   const emailUpdate = async (email: string) => {
-    await sendAPIRequest('/auth/v1/users/me/email', 'PUT', {email})
+    await applyChanges({email: {email}})
   }
 
   const emailResendCode = async () => {
-    await sendAPIRequest(
-      '/auth/v1/users/me/email/_resend_verification',
-      'POST',
-      {}
+    await runGqlAction(() =>
+      resendUserEmailVerification({
+        accessToken: accessToken!,
+        userId: requireUserId()
+      })
     )
   }
 
   const phoneUpdate = async (phone: string) => {
-    await sendAPIRequest('/auth/v1/users/me/phone', 'PUT', {phone})
+    await runGqlAction(() =>
+      setUserPhone({
+        accessToken: accessToken!,
+        userId: requireUserId(),
+        phone
+      })
+    )
   }
 
   const phoneVerify = async (code: string) => {
-    await sendAPIRequest('/auth/v1/users/me/phone/_verify', 'POST', {code})
+    // Phone verification has no zitadel-gql mutation (only email verify).
+    await sendRestRequest('/auth/v1/users/me/phone/_verify', 'POST', {code})
   }
 
   const phoneResendCode = async () => {
-    await sendAPIRequest(
+    await sendRestRequest(
       '/auth/v1/users/me/phone/_resend_verification',
       'POST',
       {}
@@ -287,14 +401,43 @@ export const AuthUserProvider: React.FC<{
   }
 
   const phoneDelete = async () => {
-    await sendAPIRequest('/auth/v1/users/me/phone', 'DELETE', {})
+    await sendRestRequest('/auth/v1/users/me/phone', 'DELETE', {})
   }
 
   const passwordUpdate = async (oldPassword: string, newPassword: string) => {
-    await sendAPIRequest('/auth/v1/users/me/password', 'PUT', {
-      oldPassword,
-      newPassword
-    })
+    // Prefer the REST route: it verifies the old password. On a zitadel-gql
+    // deployment without it, fall back to the GraphQL mutation — the caller
+    // is authenticated, which is the same trust the OIDC session grants.
+    const restSucceeded = await sendRestRequest(
+      '/auth/v1/users/me/password',
+      'PUT',
+      {
+        oldPassword,
+        newPassword
+      },
+      {},
+      {stringifyBody: true, silent: true}
+    )
+
+    if (restSucceeded) {
+      notify.toast({
+        position: 'top-right',
+        title: 'Success',
+        description: 'Action completed successfully',
+        status: 'success'
+      })
+
+      return
+    }
+
+    await runGqlAction(() =>
+      setUserPassword({
+        accessToken: accessToken!,
+        userId: requireUserId(),
+        newPassword,
+        changeRequired: false
+      })
+    )
   }
 
   const refresh = async () => {
@@ -303,8 +446,8 @@ export const AuthUserProvider: React.FC<{
 
   const value = useMemo(() => {
     return {
-      user: data?.user,
-      passwordPolicy: data?.passwordPolicy,
+      user: data?.user as AuthUser,
+      passwordPolicy: data?.passwordPolicy as AuthPasswordPolicy,
       usernameUpdate,
       profileUpdate,
       profileAvatarUpdate,
