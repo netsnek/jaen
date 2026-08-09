@@ -102,9 +102,19 @@ export const onCreatePage = async (
           return !isPathBlacklisted(other.path, otherLocale)
         })
 
-        actions.createPage({
+        // A client-only route's matchPath must be scoped per locale, or all
+        // clones would claim the origin's pattern (one shadows the others
+        // and the prefixed routes go dead).
+        const matchPath = page.matchPath
+          ? locale.isDefault
+            ? page.matchPath
+            : `/${locale.prefix}${page.matchPath === '/' ? '' : page.matchPath}`
+          : undefined
+
+        const localizedPage = {
           ...page,
           path: entry.path,
+          ...(matchPath ? {matchPath} : {}),
           context: {
             ...page.context,
             locale: entry.locale,
@@ -114,11 +124,21 @@ export const onCreatePage = async (
             jaenPageId: `JaenPage ${entry.path}`,
             pageConfig
           }
-        })
+        }
+
+        actions.createPage(localizedPage)
+
+        // Gatsby suppresses onCreatePage for pages a plugin creates itself
+        // (infinite-loop guard), so run the hook manually for every clone —
+        // it re-enters with locale context set, falls through the i18n
+        // branches and creates the clone's JaenPage node.
+        await onCreatePage(
+          {actions, page: localizedPage, getNode, createContentDigest} as any,
+          i18n
+        )
       }
 
-      // The clones re-enter this hook with locale context set and create
-      // their JaenPage nodes there; the origin page is gone.
+      // The origin page is gone; its clones were handled above.
       return
     }
 
@@ -130,15 +150,19 @@ export const onCreatePage = async (
       Array.isArray(localeContext.referTranslations) ||
       typeof localeContext.locale === 'string'
     const prefix = parsePathPrefix(page.path)
+    // A path segment only counts as a locale signal when it maps to a
+    // configured locale — /it/... is Italian only if 'it' is configured,
+    // never an excuse to hijack arbitrary two-letter segments.
+    const prefixLocale = localeForPrefix(prefix, i18n)
 
-    if (optIn || prefix) {
+    if (optIn || prefixLocale) {
       const locales = resolveLocales(i18n)
       const explicit =
         typeof localeContext.locale === 'string'
           ? locales.find(l => l.locale === localeContext.locale)
           : undefined
       const locale =
-        explicit ?? localeForPrefix(prefix, i18n) ?? defaultLocale(i18n)
+        explicit ?? prefixLocale ?? (optIn ? defaultLocale(i18n) : undefined)
 
       if (locale) {
         const basePath =
@@ -167,7 +191,8 @@ export const onCreatePage = async (
         } = (page.context ?? {}) as Record<string, unknown>
 
         actions.deletePage(page)
-        actions.createPage({
+
+        const recreatedPage = {
           ...page,
           path: nextPath,
           context: {
@@ -177,9 +202,17 @@ export const onCreatePage = async (
             localePagesId: createLocalePagesId(basePath, locale.prefix),
             ...(translations.length > 0 ? {translations} : {})
           }
-        })
+        }
 
-        // The re-created page re-enters this hook with locale context set.
+        actions.createPage(recreatedPage)
+
+        // Same manual re-entry as above: the recreated page has locale
+        // context set, so it falls through to id assurance + node creation.
+        await onCreatePage(
+          {actions, page: recreatedPage, getNode, createContentDigest} as any,
+          i18n
+        )
+
         return
       }
     }
@@ -244,9 +277,12 @@ export const onCreatePage = async (
     slug: lastPathElement,
 
     jaenPageMetadata: {
+      // pageConfig.label may be a serialized intlText marker (an object) —
+      // only a plain string may land in the String!-typed node title.
       title:
-        pageConfig?.label ||
-        lastPathElement.charAt(0).toUpperCase() + lastPathElement.slice(1)
+        typeof pageConfig?.label === 'string'
+          ? pageConfig.label
+          : lastPathElement.charAt(0).toUpperCase() + lastPathElement.slice(1)
     },
     jaenFields: null,
     sections: [],

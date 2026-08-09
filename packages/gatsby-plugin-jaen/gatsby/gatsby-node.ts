@@ -85,6 +85,18 @@ export const pluginOptionsSchema: GatsbyNode['pluginOptionsSchema'] = ({
         .min(1)
         .required(),
       trailingSlash: Joi.string().valid('always', 'never', 'ignore')
+    }).custom((i18n: any, helpers: any) => {
+      // A defaultLocale that matches no locale entry would strip the
+      // unprefixed pages and silently drop x-default — fail the build.
+      if (
+        !i18n.locales.some((entry: any) => entry.locale === i18n.defaultLocale)
+      ) {
+        return helpers.message({
+          custom: `i18n.defaultLocale "${i18n.defaultLocale}" is not in i18n.locales`
+        })
+      }
+
+      return i18n
     })
   })
 }
