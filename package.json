@@ -9,14 +9,14 @@
     "lint:fix": "yarn eslint packages/jaen/src/ --fix",
     "prettier:fix": "yarn prettier packages/jaen/src/ --write",
     "format": "yarn prettier:fix && yarn lint:fix",
-    "build": "yarn workspace jaen run build && yarn workspace gatsby-source-jaen run build && yarn workspace gatsby-plugin-jaen run build && yarn workspace gatsby-jaen-mailpress run build && yarn workspace gatsby-jaen-lens run build &&  yarn workspace jaen-fields-mdx run build",
+    "build": "yarn workspace jaen run build && yarn workspace gatsby-source-jaen run build && yarn workspace gatsby-plugin-jaen run build && yarn workspace gatsby-jaen-emailwerk run build && yarn workspace gatsby-jaen-lens run build &&  yarn workspace jaen-fields-mdx run build",
     "prepare": "husky"
   },
   "workspaces": [
     "packages/jaen",
     "packages/gatsby-plugin-jaen",
     "packages/gatsby-jaen-resource",
-    "packages/gatsby-jaen-mailpress",
+    "packages/gatsby-jaen-emailwerk",
     "packages/gatsby-jaen-lens",
     "packages/gatsby-source-jaen",
     "packages/jaen-fields-mdx",

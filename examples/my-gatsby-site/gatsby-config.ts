@@ -46,7 +46,7 @@ const config: GatsbyConfig = {
         }
       }
     },
-    `gatsby-jaen-mailpress`
+    `gatsby-jaen-emailwerk`
     // 'gatsby-plugin-webpack-bundle-analyser-v2'
   ]
 }

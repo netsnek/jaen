@@ -1,5 +1,5 @@
 /**
- * GQty: You can safely modify this file based on your needs.
+ * GQty client for the emailwerk GraphQL API.
  */
 
 import {User} from 'oidc-client-ts'
@@ -17,30 +17,40 @@ import {
   type GeneratedSchema
 } from './schema.generated'
 
-const apiURL =
-  __JAEN_MAILPRESS_PYLON_URL__ || 'https://mailpress.cronit.io/graphql'
+/**
+ * Endpoint resolution: the `__JAEN_EMAILWERK_URL__` webpack define (fed by the
+ * plugin's `url` option or the `GATSBY_EMAILWERK_URL` env var, see
+ * `gatsby/gatsby-node.ts`), falling back to the default public emailwerk
+ * instance.
+ */
+const apiURL = __JAEN_EMAILWERK_URL__ || 'https://emailwerk.com/graphql'
 
 const queryFetcher: QueryFetcher = async function (
   {query, variables, operationName},
   fetchOptions
 ) {
-  const headers: any = {}
+  const headers: Record<string, string> = {}
 
+  // Authentication is two-layered:
+  //
+  // 1. `credentials: 'include'` — production emailwerk sits behind Cloudflare
+  //    Access; the CF_Authorization cookie set by the Access login carries the
+  //    auth there (emailwerk itself only trusts the Cf-Access-Jwt-Assertion
+  //    header CF Access derives from it).
+  // 2. The Zitadel Bearer access token of the current Jaen session — for
+  //    deployments that accept it directly (dev/basic modes, or a future
+  //    Bearer introspection path). Harmless to send alongside the cookie.
   const oidcStorage = sessionStorage.getItem(
     `oidc.user:${__JAEN_ZITADEL_GQL__.authority}:${__JAEN_ZITADEL_GQL__.clientId}`
   )
 
-  console.log('OIDC STORAGE', oidcStorage)
-
   if (oidcStorage) {
     const user = User.fromStorageString(oidcStorage)
 
-    console.log('USER', user)
-
-    headers['Authorization'] = `Bearer ${user?.access_token}`
+    if (user?.access_token) {
+      headers['Authorization'] = `Bearer ${user.access_token}`
+    }
   }
-
-  console.log('HEADERS', headers)
 
   const response = await fetch(apiURL, {
     method: 'POST',
@@ -54,6 +64,7 @@ const queryFetcher: QueryFetcher = async function (
       operationName
     }),
     mode: 'cors',
+    credentials: 'include',
     ...fetchOptions
   })
 
