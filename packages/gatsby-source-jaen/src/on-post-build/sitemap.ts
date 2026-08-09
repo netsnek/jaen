@@ -65,7 +65,11 @@ export const onPostBuild = async (
   // Array.from, not a bare for..of over the Map iterator: the package
   // compiles to ES5 without downlevelIteration, where the iterator loop
   // silently never runs (an always-empty sitemap).
-  for (const page of Array.from(store.getState().pages.values())) {
+  const storePages: Array<{path: string; context?: unknown}> = Array.from(
+    store.getState().pages.values()
+  )
+
+  for (const page of storePages) {
     if (shouldExcludeFromSitemap(page.path)) continue
 
     const context = (page.context ?? {}) as PageContextShape
