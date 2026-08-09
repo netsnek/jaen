@@ -26,11 +26,19 @@ export const Head: React.FC<
     dynamicJaenPageMetadata || {}
   )
 
+  // Both fallbacks may carry a serialized intlText marker (an object) —
+  // only plain strings may render into the document title.
+  const metadataTitle =
+    typeof jaenPageMetadata?.title === 'string'
+      ? jaenPageMetadata.title
+      : undefined
+  const configLabel =
+    typeof props.pageContext.pageConfig?.label === 'string'
+      ? props.pageContext.pageConfig.label
+      : undefined
+
   const title =
-    jaenPageMetadata?.title ||
-    props.pageContext.pageConfig?.label ||
-    siteMetadata?.title ||
-    defaultTitle
+    metadataTitle || configLabel || siteMetadata?.title || defaultTitle
 
   const description = jaenPageMetadata?.description || siteMetadata?.description
   const image = jaenPageMetadata?.image || siteMetadata?.image
