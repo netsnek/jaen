@@ -50,10 +50,17 @@ export const usePageConfig = () => {
         // Handle arrays by mapping each element
         return await Promise.all(field.map(parseField))
       } else if (typeof field === 'object') {
-        // Handle objects by recursively parsing their properties
+        // Build a fresh object instead of writing into the shared one:
+        // pageContext objects are cached by Gatsby, and mutating them would
+        // permanently replace the serialized intlText markers with the
+        // first-resolved locale's strings.
+        const parsed: Record<string, any> = {}
+
         for (const key in field) {
-          field[key] = await parseField(field[key])
+          parsed[key] = await parseField(field[key])
         }
+
+        return parsed
       }
       return field
     }

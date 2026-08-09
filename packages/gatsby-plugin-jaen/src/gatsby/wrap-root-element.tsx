@@ -90,9 +90,11 @@ const JaenIntlProvider: FC<{children: ReactNode}> = ({children}) => {
     )
   }, [preferredLanguage, claimLocale, browserLocale])
 
+  // No key={locale}: react-intl propagates locale/messages changes through
+  // context, so strings update in place instead of remounting (and thereby
+  // resetting) the entire app subtree on sign-in.
   return (
     <IntlProvider
-      key={locale}
       messages={messagesByLocale[locale]}
       locale={locale}
       defaultLocale={DEFAULT_LOCALE}>
