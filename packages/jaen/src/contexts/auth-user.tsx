@@ -154,7 +154,7 @@ export const AuthUserProvider: React.FC<{
       stringifyBody?: boolean
       silent?: boolean
     } = {stringifyBody: true}
-  ): Promise<boolean> => {
+  ): Promise<{ok: boolean; status?: number}> => {
     try {
       const reqHeaders = Object.fromEntries(
         Object.entries({
@@ -189,7 +189,7 @@ export const AuthUserProvider: React.FC<{
           })
         }
 
-        return false
+        return {ok: false, status: response.status}
       }
 
       if (!options.silent) {
@@ -203,7 +203,7 @@ export const AuthUserProvider: React.FC<{
 
       await refetchProfile()
 
-      return true
+      return {ok: true, status: response.status}
     } catch (error) {
       if (!options.silent) {
         notify.toast({
@@ -214,7 +214,8 @@ export const AuthUserProvider: React.FC<{
         })
       }
 
-      return false
+      // No status: the route never answered (network error / no such host).
+      return {ok: false}
     }
   }
 
@@ -405,10 +406,11 @@ export const AuthUserProvider: React.FC<{
   }
 
   const passwordUpdate = async (oldPassword: string, newPassword: string) => {
-    // Prefer the REST route: it verifies the old password. On a zitadel-gql
-    // deployment without it, fall back to the GraphQL mutation — the caller
-    // is authenticated, which is the same trust the OIDC session grants.
-    const restSucceeded = await sendRestRequest(
+    // Prefer the REST route: it verifies the old password. Fall back to the
+    // GraphQL mutation ONLY when the route does not exist (zitadel-gql
+    // removed the REST gateway) — never when it rejected the request, or a
+    // wrong old password would silently turn into a force-set.
+    const rest = await sendRestRequest(
       '/auth/v1/users/me/password',
       'PUT',
       {
@@ -419,12 +421,29 @@ export const AuthUserProvider: React.FC<{
       {stringifyBody: true, silent: true}
     )
 
-    if (restSucceeded) {
+    if (rest.ok) {
       notify.toast({
         position: 'top-right',
         title: 'Success',
         description: 'Action completed successfully',
         status: 'success'
+      })
+
+      return
+    }
+
+    const routeMissing =
+      rest.status === undefined || [404, 405, 501].includes(rest.status)
+
+    if (!routeMissing) {
+      notify.toast({
+        position: 'top-right',
+        title: 'Error',
+        description:
+          rest.status === 400 || rest.status === 403
+            ? 'The current password is not correct.'
+            : 'The password could not be changed.',
+        status: 'error'
       })
 
       return

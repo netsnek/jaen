@@ -35,9 +35,10 @@ export const useAuth = () => {
         oidcAuth.user?.profile['urn:zitadel:iam:org:project:roles']
       )
 
-      // Token-claim roles are available synchronously; show them while the
-      // authoritative zitadel-gql query resolves.
-      setRoles(Array.from(new Set(claimRoles)))
+      // Token-claim roles are available synchronously; merge them into the
+      // current set (a token refresh must not blank previously fetched
+      // roles) while the authoritative zitadel-gql query resolves.
+      setRoles(prev => Array.from(new Set([...prev, ...claimRoles])))
       setIsRolesLoading(true)
 
       try {
