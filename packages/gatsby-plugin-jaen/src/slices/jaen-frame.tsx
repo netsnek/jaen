@@ -9,6 +9,7 @@ import {
 } from 'jaen'
 import {graphql, SliceComponentProps} from 'gatsby'
 import {useEffect, useState} from 'react'
+import {useIntl} from 'react-intl'
 import {globalHistory} from '@reach/router'
 
 import {FaEdit} from '@react-icons/all-files/fa/FaEdit'
@@ -45,6 +46,7 @@ type SliceProps = SliceComponentProps<
 >
 
 const Slice: React.FC<SliceProps> = props => {
+  const intl = useIntl()
   const manager = useCMSManagement()
 
   const auth = useAuth()
@@ -108,54 +110,98 @@ const Slice: React.FC<SliceProps> = props => {
       // Add jaenCMS user menu
       extendMenu('user', {
         group: 'jaenCMS',
-        label: 'Jaen CMS',
+        label: intl.formatMessage({
+          id: 'CmsDashboardMenuGroupLabel',
+          defaultMessage: 'Jaen CMS'
+        }),
         items: {
           edit: {
-            label: manager.isEditing ? 'Stop editing' : 'Start editing',
+            label: manager.isEditing
+              ? intl.formatMessage({
+                  id: 'CmsFrameStopEditing',
+                  defaultMessage: 'Stop editing'
+                })
+              : intl.formatMessage({
+                  id: 'CmsFrameStartEditing',
+                  defaultMessage: 'Start editing'
+                }),
             icon: FaEdit,
             onClick: () => {
               manager.setIsEditing(!manager.isEditing)
 
               toast({
-                title: 'Edit mode',
+                title: intl.formatMessage({
+                  id: 'CmsFrameNotificationsEditModeTitle',
+                  defaultMessage: 'Edit mode'
+                }),
                 description: !manager.isEditing
-                  ? 'You can now edit the page'
-                  : 'You can no longer edit the page',
+                  ? intl.formatMessage({
+                      id: 'CmsFrameNotificationsEditModeOn',
+                      defaultMessage: 'You can now edit the page'
+                    })
+                  : intl.formatMessage({
+                      id: 'CmsFrameNotificationsEditModeOff',
+                      defaultMessage: 'You can no longer edit the page'
+                    }),
                 status: !manager.isEditing ? 'success' : 'info'
               })
             },
             order: 1
           },
           save: {
-            label: 'Save draft',
+            label: intl.formatMessage({
+              id: 'CmsFrameSaveDraft',
+              defaultMessage: 'Save draft'
+            }),
             icon: FaFileDownload,
             onClick: () => {
               manager.draft.save()
 
               toast({
-                title: 'Saved',
-                description: 'Your changes have been saved',
+                title: intl.formatMessage({
+                  id: 'CmsFrameNotificationsSaved',
+                  defaultMessage: 'Saved'
+                }),
+                description: intl.formatMessage({
+                  id: 'CmsFrameNotificationsSavedDescription',
+                  defaultMessage: 'Your changes have been saved'
+                }),
                 status: 'success'
               })
             },
             order: 2
           },
           import: {
-            label: 'Import draft',
+            label: intl.formatMessage({
+              id: 'CmsFrameImportDraft',
+              defaultMessage: 'Import draft'
+            }),
             icon: FaFileUpload,
             onClick: async () => {
               try {
                 await manager.draft.import()
 
                 toast({
-                  title: 'Imported',
-                  description: 'Your changes have been imported',
+                  title: intl.formatMessage({
+                    id: 'CmsFrameNotificationsImported',
+                    defaultMessage: 'Imported'
+                  }),
+                  description: intl.formatMessage({
+                    id: 'CmsFrameNotificationsImportedDescription',
+                    defaultMessage: 'Your changes have been imported'
+                  }),
                   status: 'success'
                 })
               } catch (e) {
                 toast({
-                  title: 'Failed to import',
-                  description: 'Your changes could not be imported',
+                  title: intl.formatMessage({
+                    id: 'CmsFrameNotificationsImportFailed',
+                    defaultMessage: 'Failed to import'
+                  }),
+                  description: intl.formatMessage({
+                    id: 'CmsFrameNotificationsImportFailedDescription',
+                    defaultMessage: 'Your changes could not be imported'
+                  }),
                   status: 'error'
                 })
               }
@@ -163,22 +209,36 @@ const Slice: React.FC<SliceProps> = props => {
             order: 3
           },
           discard: {
-            label: 'Discard changes',
+            label: intl.formatMessage({
+              id: 'CmsFrameDiscardChanges',
+              defaultMessage: 'Discard changes'
+            }),
             icon: FaTrash,
             onClick: () => {
               manager.draft.discard()
 
               toast({
-                title: 'Discarded',
-                description: 'Your changes have been discarded',
+                title: intl.formatMessage({
+                  id: 'CmsFrameNotificationsDiscarded',
+                  defaultMessage: 'Discarded'
+                }),
+                description: intl.formatMessage({
+                  id: 'CmsFrameNotificationsDiscardedDescription',
+                  defaultMessage: 'Your changes have been discarded'
+                }),
                 status: 'info'
               })
             }
           },
           publish: {
-            label: `Publish ${
-              manager.isPublishing ? 'in progress' : 'changes'
-            }`,
+            label: intl.formatMessage(
+              {
+                id: 'CmsFramePublish',
+                defaultMessage:
+                  '{isPublishing, select, true {Publish in progress} other {Publish changes}}'
+              },
+              {isPublishing: String(manager.isPublishing)}
+            ),
             isLoading: manager.isPublishing,
             icon: FaGlobe,
             onClick: async () => {
@@ -192,14 +252,20 @@ const Slice: React.FC<SliceProps> = props => {
       // Add jaenCMS add menu
       extendAddMenu({
         addPage: {
-          label: 'New page',
+          label: intl.formatMessage({
+            id: 'CmsPagesTableNewPage',
+            defaultMessage: 'New page'
+          }),
           icon: FaSitemap,
           path: props.jaenPageId
             ? `/cms/pages/new/#${btoa(props.jaenPageId)}`
             : '/cms/pages/new/'
         },
         addMedia: {
-          label: 'New media',
+          label: intl.formatMessage({
+            id: 'CmsFrameNewMedia',
+            defaultMessage: 'New media'
+          }),
           icon: FaImage,
           onClick: () => {
             mediaModal.toggleModal()
@@ -282,7 +348,10 @@ const Slice: React.FC<SliceProps> = props => {
                   auth.user?.profile?.picture
               }
             : {
-                username: 'Guest'
+                username: intl.formatMessage({
+                  id: 'CmsFrameGuest',
+                  defaultMessage: 'Guest'
+                })
               },
           navigationGroups: menu.user,
           isBadgeVisible
