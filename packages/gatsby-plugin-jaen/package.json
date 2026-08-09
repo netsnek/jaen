@@ -59,6 +59,7 @@
     "react-dropzone": "^14.2.3",
     "react-filerobot-image-editor": "^4.5.1",
     "react-hook-form": "^7.51.5",
+    "react-intl": "6.8.9",
     "react-konva": "^18.2.10",
     "react-photo-view": "^1.2.3",
     "react-zoom-pan-pinch": "^3.1.0",
@@ -68,8 +69,7 @@
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
     "use-debounce": "^9.0.4",
-    "zod": "^3.23.8",
-    "react-intl": "6.8.9"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.13",
