@@ -23,7 +23,12 @@ import {createSchemaCustomization as createSchemaCustomizationSitePageContext} f
 import {onCreateWebpackConfig as onCreateWebpackConfigJaenTemplate} from './on-create-webpack-config/jaen-template'
 import {onCreateWebpackConfig as onCreateWebpackConfigJaenData} from './on-create-webpack-config/jaen-data'
 
-import {i18nFromPluginOptions} from './utils/plugin-options'
+import {onPostBuild as onPostBuildSitemap} from './on-post-build/sitemap'
+
+import {
+  i18nFromPluginOptions,
+  siteUrlFromPluginOptions
+} from './utils/plugin-options'
 
 export const pluginOptionsSchema: GatsbyNode['pluginOptionsSchema'] = ({
   Joi
@@ -101,3 +106,13 @@ export const onCreateWebpackConfig: GatsbyNode['onCreateWebpackConfig'] =
     await onCreateWebpackConfigJaenTemplate(args)
     await onCreateWebpackConfigJaenData(args)
   }
+
+export const onPostBuild: GatsbyNode['onPostBuild'] = async (
+  args,
+  pluginOptions
+) => {
+  await onPostBuildSitemap(args, {
+    siteUrl: siteUrlFromPluginOptions(pluginOptions),
+    i18n: i18nFromPluginOptions(pluginOptions)
+  })
+}
