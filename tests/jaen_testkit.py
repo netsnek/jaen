@@ -101,6 +101,7 @@ __all__ = [
     "http_get",
     "http_post_json",
     "graphql",
+    "emailwerk_auth_headers",
     "read_text",
     "xml_file",
     "sitemap_entries",
@@ -143,7 +144,10 @@ CONFIG = {
         str(_Path.home() / "git" / "walther-deployment" / "iam" / ".pylon" / "schema.graphql"),
     ),
     # endpoints for optional live checks. Empty means SKIP those checks.
-    "emailwerk_url": _env("JAEN_EMAILWERK_URL", "http://127.0.0.1:3000/graphql"),
+    "emailwerk_url": _env("JAEN_EMAILWERK_URL", "https://emailwerk.com/graphql"),
+    # "user:pass" for the deployed emailwerk's interim HTTP Basic gate.
+    # Falls back to the local ansible-vault (emailwerk.basic_user/basic_pass).
+    "emailwerk_basic": _env("JAEN_EMAILWERK_BASIC", ""),
     "zitadel_gql_url": _env("JAEN_ZITADEL_GQL_URL", ""),
     # expectations of the fixture site
     "site_locales": _env("JAEN_SITE_LOCALES", "de,en,sl,it,ja").split(","),
@@ -155,6 +159,12 @@ CONFIG = {
     "cmd_timeout": _env_int("JAEN_CMD_TIMEOUT", 120),
     "build_timeout": _env_int("JAEN_BUILD_TIMEOUT", 1800),
     "http_timeout": _env_int("JAEN_HTTP_TIMEOUT", 15),
+    # A real browser User-Agent: Cloudflare blocks the default urllib agent.
+    "user_agent": _env(
+        "JAEN_USER_AGENT",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/126.0.0.0 Safari/537.36",
+    ),
     "evidence_width": _env_int("JAEN_EVIDENCE_WIDTH", 96),
 }
 
@@ -854,7 +864,9 @@ def http_get(url, headers=None, timeout=None, label=""):
     if not url:
         return HttpResult(url=url, skipped=True, skip_reason="no url configured")
     timeout = timeout or CONFIG["http_timeout"]
-    request = _urlrequest.Request(url, headers=headers or {})
+    merged_get = {"User-Agent": CONFIG["user_agent"]}
+    merged_get.update(headers or {})
+    request = _urlrequest.Request(url, headers=merged_get)
     try:
         with _urlrequest.urlopen(request, timeout=timeout) as response:
             return HttpResult(
@@ -879,7 +891,7 @@ def http_post_json(url, payload, headers=None, timeout=None):
         return HttpResult(url=url, skipped=True, skip_reason="no url configured")
     timeout = timeout or CONFIG["http_timeout"]
     data = _json.dumps(payload).encode("utf-8")
-    merged = {"Content-Type": "application/json"}
+    merged = {"Content-Type": "application/json", "User-Agent": CONFIG["user_agent"]}
     merged.update(headers or {})
     request = _urlrequest.Request(url, data=data, headers=merged, method="POST")
     try:
@@ -898,6 +910,43 @@ def http_post_json(url, payload, headers=None, timeout=None):
         )
     except Exception as exc:  # noqa: BLE001
         return HttpResult(url=url, error=str(exc))
+
+
+def emailwerk_auth_headers():
+    """Authorization header for the deployed emailwerk, if credentials exist.
+
+    Reads ``JAEN_EMAILWERK_BASIC`` (``user:pass``); when unset, tries the
+    local ansible-vault at ``~/.claude/vault/secrets.yml`` (keys
+    ``emailwerk.basic_user``/``basic_pass``). Returns ``{}`` when neither
+    source yields credentials — live checks then SKIP.
+    """
+    import base64 as _b64
+
+    pair = CONFIG["emailwerk_basic"]
+
+    if not pair:
+        vault = _Path.home() / ".claude" / "vault" / "secrets.yml"
+        pass_file = vault.parent / ".vault_pass"
+        if vault.is_file() and pass_file.is_file():
+            result = sh(
+                ["ansible-vault", "view", str(vault),
+                 "--vault-password-file", str(pass_file)],
+                label="vault view", timeout=30)
+            if result.ok:
+                try:
+                    import yaml as _yaml
+
+                    data = _yaml.safe_load(result.stdout).get("emailwerk", {})
+                    if data.get("basic_user") and data.get("basic_pass"):
+                        pair = "%s:%s" % (data["basic_user"], data["basic_pass"])
+                except Exception:
+                    pair = ""
+
+    if not pair:
+        return {}
+
+    token = _b64.b64encode(pair.encode("utf-8")).decode("ascii")
+    return {"Authorization": "Basic %s" % token}
 
 
 def graphql(url, query, variables=None, headers=None, timeout=None):
