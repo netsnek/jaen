@@ -3,8 +3,12 @@ import {CreatePagesArgs} from 'gatsby'
 import {onCreatePage} from '../on-create-page/jaen-page'
 import {readPageConfig} from '../utils/page-config-reader'
 import {generatePageOriginPath} from '../utils/path'
+import type {JaenI18nOptions} from '../utils/i18n'
 
-export const createPages = async (args: CreatePagesArgs) => {
+export const createPages = async (
+  args: CreatePagesArgs,
+  i18n?: JaenI18nOptions
+) => {
   const {actions, graphql, reporter} = args
 
   reporter.info('Creating pages...')
@@ -88,10 +92,13 @@ export const createPages = async (args: CreatePagesArgs) => {
 
       actions.createPage(page)
 
-      await onCreatePage({
-        page,
-        ...args
-      })
+      await onCreatePage(
+        {
+          page,
+          ...args
+        },
+        i18n
+      )
     }
   }
 }

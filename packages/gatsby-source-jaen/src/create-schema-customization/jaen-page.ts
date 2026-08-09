@@ -99,6 +99,12 @@ export const createSchemaCustomization = async ({
           const pagesArr: any[] = Array.from(pages)
 
           if (pagesArr.length > 0) {
+            // Several SitePages can share one jaenPageId (localized variants
+            // of a programmatic page). Prefer the shortest path — the
+            // unprefixed default-locale variant — so buildPath stays
+            // deterministic.
+            pagesArr.sort((a, b) => a.path.length - b.path.length)
+
             return pagesArr[0].path
           }
         }

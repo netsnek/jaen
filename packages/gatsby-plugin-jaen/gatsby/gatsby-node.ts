@@ -22,6 +22,23 @@ export interface JaenPluginOptions extends PluginOptions {
     project: string
     dsn: string
   }
+  /** Absolute site origin; forwarded to gatsby-source-jaen for the sitemap. */
+  siteUrl?: string
+  /**
+   * Localized page generation, forwarded to gatsby-source-jaen. The default
+   * locale keeps unprefixed paths; every other locale is served under its
+   * prefix. System routes (cms, login, ...) are never localized.
+   */
+  i18n?: {
+    defaultLocale: string
+    locales: Array<{
+      locale: string
+      prefix?: string
+      slugs?: Record<string, string>
+      pageBlacklist?: string[]
+    }>
+    trailingSlash?: 'always' | 'never' | 'ignore'
+  }
 }
 
 export const pluginOptionsSchema: GatsbyNode['pluginOptionsSchema'] = ({
@@ -49,6 +66,22 @@ export const pluginOptionsSchema: GatsbyNode['pluginOptionsSchema'] = ({
       project: Joi.string().required(),
       dsn: Joi.string().required(),
       feedbackIntegration: Joi.object()
+    }),
+    siteUrl: Joi.string().uri(),
+    i18n: Joi.object({
+      defaultLocale: Joi.string().required(),
+      locales: Joi.array()
+        .items(
+          Joi.object({
+            locale: Joi.string().required(),
+            prefix: Joi.string(),
+            slugs: Joi.object().pattern(Joi.string(), Joi.string()),
+            pageBlacklist: Joi.array().items(Joi.string())
+          })
+        )
+        .min(1)
+        .required(),
+      trailingSlash: Joi.string().valid('always', 'never', 'ignore')
     })
   })
 }

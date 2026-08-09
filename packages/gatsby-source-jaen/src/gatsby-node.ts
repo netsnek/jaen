@@ -18,9 +18,35 @@ import {createSchemaCustomization as createSchemaCustomizationJaenTemplate} from
 import {createSchemaCustomization as createSchemaCustomizationJaenData} from './create-schema-customization/jaen-data'
 import {createSchemaCustomization as createSchemaCustomizationJaenSite} from './create-schema-customization/jaen-site'
 import {createSchemaCustomization as createSchemaCustomizationJaenWidget} from './create-schema-customization/jaen-widget'
+import {createSchemaCustomization as createSchemaCustomizationSitePageContext} from './create-schema-customization/site-page-context'
 
 import {onCreateWebpackConfig as onCreateWebpackConfigJaenTemplate} from './on-create-webpack-config/jaen-template'
 import {onCreateWebpackConfig as onCreateWebpackConfigJaenData} from './on-create-webpack-config/jaen-data'
+
+import {i18nFromPluginOptions} from './utils/plugin-options'
+
+export const pluginOptionsSchema: GatsbyNode['pluginOptionsSchema'] = ({
+  Joi
+}) => {
+  return Joi.object({
+    siteUrl: Joi.string().uri(),
+    i18n: Joi.object({
+      defaultLocale: Joi.string().required(),
+      locales: Joi.array()
+        .items(
+          Joi.object({
+            locale: Joi.string().required(),
+            prefix: Joi.string(),
+            slugs: Joi.object().pattern(Joi.string(), Joi.string()),
+            pageBlacklist: Joi.array().items(Joi.string())
+          })
+        )
+        .min(1)
+        .required(),
+      trailingSlash: Joi.string().valid('always', 'never', 'ignore')
+    })
+  })
+}
 
 export const sourceNodes: GatsbyNode['sourceNodes'] = async args => {
   await sourceNodesJaenData(args)
@@ -31,12 +57,18 @@ export const sourceNodes: GatsbyNode['sourceNodes'] = async args => {
   await sourceNodesJaenWidget(args)
 }
 
-export const createPages: GatsbyNode['createPages'] = async args => {
-  await createPagesJaenPages(args)
+export const createPages: GatsbyNode['createPages'] = async (
+  args,
+  pluginOptions
+) => {
+  await createPagesJaenPages(args, i18nFromPluginOptions(pluginOptions))
 }
 
-export const onCreatePage: GatsbyNode['onCreatePage'] = async args => {
-  await onCreatePageJaenPage(args)
+export const onCreatePage: GatsbyNode['onCreatePage'] = async (
+  args,
+  pluginOptions
+) => {
+  await onCreatePageJaenPage(args, i18nFromPluginOptions(pluginOptions))
 }
 
 export const onCreateNode: GatsbyNode['onCreateNode'] = async args => {
@@ -59,7 +91,8 @@ export const createSchemaCustomization: GatsbyNode['createSchemaCustomization'] 
       createSchemaCustomizationJaenTemplate(args),
       createSchemaCustomizationJaenData(args),
       createSchemaCustomizationJaenSite(args),
-      createSchemaCustomizationJaenWidget(args)
+      createSchemaCustomizationJaenWidget(args),
+      createSchemaCustomizationSitePageContext(args)
     ])
   }
 
