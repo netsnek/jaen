@@ -2,6 +2,7 @@ import {PageConfig} from 'jaen'
 import {graphql, PageProps} from 'gatsby'
 
 import MediaContainer from '../../containers/media'
+import {intlText} from '../../lib/intl'
 
 const MediaPage: React.FC<PageProps> = () => {
   return <MediaContainer />
@@ -10,21 +11,21 @@ const MediaPage: React.FC<PageProps> = () => {
 export default MediaPage
 
 export const pageConfig: PageConfig = {
-  label: 'Jaen CMS | Media',
+  label: intlText('CmsMediaTitle', 'Jaen CMS | Media'),
   icon: 'FaImage',
   menu: {
-    label: 'Media',
+    label: intlText('CmsMediaMenuLabel', 'Media'),
     type: 'app',
     group: 'cms',
     order: 300
   },
   breadcrumbs: [
     {
-      label: 'CMS',
+      label: intlText('CmsLabelsRoot', 'CMS'),
       path: '/cms/'
     },
     {
-      label: 'Media',
+      label: intlText('CmsMediaBreadcrumbsMedia', 'Media'),
       path: '/cms/media/'
     }
   ],

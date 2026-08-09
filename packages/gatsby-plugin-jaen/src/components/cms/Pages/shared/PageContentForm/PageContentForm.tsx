@@ -21,6 +21,7 @@ import {
 } from '@chakra-ui/react'
 import {useEffect, useState} from 'react'
 import {Controller, SubmitHandler, useForm} from 'react-hook-form'
+import {useIntl} from 'react-intl'
 import {FaEdit} from '@react-icons/all-files/fa/FaEdit'
 import {FaEye} from '@react-icons/all-files/fa/FaEye'
 import {FaImage} from '@react-icons/all-files/fa/FaImage'
@@ -34,101 +35,243 @@ import {Link} from '../../../../shared/Link'
 import {ChooseButton, ChooseButtonProps} from '../ChooseButton/ChooseButton'
 import {FaClone} from '@react-icons/all-files/fa/FaClone'
 
-const texts = {
-  heading: {
-    create: 'Create a New Page',
-    edit: 'Edit the Page'
-  },
-  lead: {
-    create:
-      'A page represents an arrangement of fields or blocks that are presented on a specific URL.',
-    edit: 'Edit the page. Enhance SEO and social media presence.'
-  },
-  template: {
-    create: 'Select a Template for the New Page',
-    edit: 'The template used for the page'
-  },
-  templateHelperText: {
-    create:
-      'This template will be applied to the new page, based on the parent page.',
-    edit: 'If you wish to modify the template, create a new page and transfer the content.'
-  },
-  title: {
-    create: 'Enter a Title for the New Page',
-    edit: 'The title of the page'
-  },
-  titleHelperText: {
-    create:
-      'The title of the new page. The URL slug will be automatically generated from the title.',
-    edit: 'The title of the page.'
-  },
-  description: {
-    create: 'Provide a Description for the New Page',
-    edit: 'The description of the page'
-  },
-  descriptionHelperText: {
-    create:
-      'The description will be utilized by search engines and social media. Aim for 160-165 characters.',
-    edit: 'The description will be utilized by search engines and social media. Aim for 160-165 characters.'
-  },
-  parentPage: {
-    create: 'Select a Parent Page',
-    edit: 'The parent page of the page'
-  },
-  parentHelperText: {
-    create: 'This serves as the parent page of the new page.',
-    edit: 'You have the option to relocate the page to a more suitable parent page.'
-  },
-  image: {
-    create: 'Image',
-    edit: 'Image'
-  },
-  imageHelperText: {
-    create:
-      'Include an image on the page. If left unset, the image of the parent page or site will be utilized.',
-    edit: 'The image of the page. If left unset, the image of the parent page or site will be utilized.'
-  },
-  post: {
-    create: 'Mark as a Post',
-    edit: 'Post'
-  },
-  postHelperText: {
-    create:
-      'Designate this page as a post to incorporate a date and author field.',
-    edit: 'Designate this page as a post to incorporate a date and author field.'
-  },
-  postDate: {
-    create: 'Enter a Date for the New Page',
-    edit: 'The publication date of the page'
-  },
-  postDateHelperText: {
-    create: 'The date will be employed for post sorting.',
-    edit: 'The date will be employed for post sorting.'
-  },
-  postAuthor: {
-    create: 'Enter an Author for the New Page',
-    edit: 'The author of the page'
-  },
-  postAuthorHelperText: {
-    create: 'This will be displayed as the author of the post.',
-    edit: 'This will be displayed as the author of the post.'
-  },
-  postCategory: {
-    create: 'Enter a Category for the New Page',
-    edit: 'The category of the page'
-  },
-  postCategoryHelperText: {
-    create: 'The category will be used for post classification.',
-    edit: 'The category will be used for post classification.'
-  },
-  excludeFromIndex: {
-    create: 'Exclude from Index',
-    edit: 'Exclude from Index'
-  },
-  excludeFromIndexHelperText: {
-    create:
-      'Exclude this page from all index fields (e.g., locations where pages are listed).',
-    edit: 'Exclude this page from all index fields (e.g., locations where pages are listed).'
+const useTexts = () => {
+  const intl = useIntl()
+
+  return {
+    heading: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormHeadingCreate',
+        defaultMessage: 'Create a New Page'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormHeadingEdit',
+        defaultMessage: 'Edit the Page'
+      })
+    },
+    lead: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormLeadCreate',
+        defaultMessage:
+          'A page represents an arrangement of fields or blocks that are presented on a specific URL.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormLeadEdit',
+        defaultMessage: 'Edit the page. Enhance SEO and social media presence.'
+      })
+    },
+    template: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormTemplateCreate',
+        defaultMessage: 'Select a Template for the New Page'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormTemplateEdit',
+        defaultMessage: 'The template used for the page'
+      })
+    },
+    templateHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormTemplateHelperTextCreate',
+        defaultMessage:
+          'This template will be applied to the new page, based on the parent page.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormTemplateHelperTextEdit',
+        defaultMessage:
+          'If you wish to modify the template, create a new page and transfer the content.'
+      })
+    },
+    title: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormTitleCreate',
+        defaultMessage: 'Enter a Title for the New Page'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormTitleEdit',
+        defaultMessage: 'The title of the page'
+      })
+    },
+    titleHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormTitleHelperTextCreate',
+        defaultMessage:
+          'The title of the new page. The URL slug will be automatically generated from the title.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormTitleHelperTextEdit',
+        defaultMessage: 'The title of the page.'
+      })
+    },
+    description: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormDescriptionCreate',
+        defaultMessage: 'Provide a Description for the New Page'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormDescriptionEdit',
+        defaultMessage: 'The description of the page'
+      })
+    },
+    descriptionHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormDescriptionHelperTextCreate',
+        defaultMessage:
+          'The description will be utilized by search engines and social media. Aim for 160-165 characters.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormDescriptionHelperTextEdit',
+        defaultMessage:
+          'The description will be utilized by search engines and social media. Aim for 160-165 characters.'
+      })
+    },
+    parentPage: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormParentPageCreate',
+        defaultMessage: 'Select a Parent Page'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormParentPageEdit',
+        defaultMessage: 'The parent page of the page'
+      })
+    },
+    parentHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormParentHelperTextCreate',
+        defaultMessage: 'This serves as the parent page of the new page.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormParentHelperTextEdit',
+        defaultMessage:
+          'You have the option to relocate the page to a more suitable parent page.'
+      })
+    },
+    image: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormImageCreate',
+        defaultMessage: 'Image'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormImageEdit',
+        defaultMessage: 'Image'
+      })
+    },
+    imageHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormImageHelperTextCreate',
+        defaultMessage:
+          'Include an image on the page. If left unset, the image of the parent page or site will be utilized.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormImageHelperTextEdit',
+        defaultMessage:
+          'The image of the page. If left unset, the image of the parent page or site will be utilized.'
+      })
+    },
+    post: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormPostCreate',
+        defaultMessage: 'Mark as a Post'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormPostEdit',
+        defaultMessage: 'Post'
+      })
+    },
+    postHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormPostHelperTextCreate',
+        defaultMessage:
+          'Designate this page as a post to incorporate a date and author field.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormPostHelperTextEdit',
+        defaultMessage:
+          'Designate this page as a post to incorporate a date and author field.'
+      })
+    },
+    postDate: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormPostDateCreate',
+        defaultMessage: 'Enter a Date for the New Page'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormPostDateEdit',
+        defaultMessage: 'The publication date of the page'
+      })
+    },
+    postDateHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormPostDateHelperTextCreate',
+        defaultMessage: 'The date will be employed for post sorting.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormPostDateHelperTextEdit',
+        defaultMessage: 'The date will be employed for post sorting.'
+      })
+    },
+    postAuthor: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormPostAuthorCreate',
+        defaultMessage: 'Enter an Author for the New Page'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormPostAuthorEdit',
+        defaultMessage: 'The author of the page'
+      })
+    },
+    postAuthorHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormPostAuthorHelperTextCreate',
+        defaultMessage: 'This will be displayed as the author of the post.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormPostAuthorHelperTextEdit',
+        defaultMessage: 'This will be displayed as the author of the post.'
+      })
+    },
+    postCategory: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormPostCategoryCreate',
+        defaultMessage: 'Enter a Category for the New Page'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormPostCategoryEdit',
+        defaultMessage: 'The category of the page'
+      })
+    },
+    postCategoryHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormPostCategoryHelperTextCreate',
+        defaultMessage: 'The category will be used for post classification.'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormPostCategoryHelperTextEdit',
+        defaultMessage: 'The category will be used for post classification.'
+      })
+    },
+    excludeFromIndex: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormExcludeFromIndexCreate',
+        defaultMessage: 'Exclude from Index'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormExcludeFromIndexEdit',
+        defaultMessage: 'Exclude from Index'
+      })
+    },
+    excludeFromIndexHelperText: {
+      create: intl.formatMessage({
+        id: 'CmsPagesFormExcludeFromIndexHelperTextCreate',
+        defaultMessage:
+          'Exclude this page from all index fields (e.g., locations where pages are listed).'
+      }),
+      edit: intl.formatMessage({
+        id: 'CmsPagesFormExcludeFromIndexHelperTextEdit',
+        defaultMessage:
+          'Exclude this page from all index fields (e.g., locations where pages are listed).'
+      })
+    }
   }
 }
 
@@ -168,6 +311,9 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
   mode = 'create',
   ...props
 }) => {
+  const intl = useIntl()
+  const texts = useTexts()
+
   const {
     handleSubmit,
     watch,
@@ -216,7 +362,10 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
       if (e instanceof DuplicateSlugError) {
         setError('slug', {
           type: 'manual',
-          message: 'Slug is already in use'
+          message: intl.formatMessage({
+            id: 'CmsPagesFormErrorsSlugInUse',
+            defaultMessage: 'Slug is already in use'
+          })
         })
       }
     }
@@ -296,7 +445,11 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
           <HStack justifyContent="space-between">
             <HStack>
               <Heading as="h2" size="sm">
-                {props.values?.title || 'Page'}
+                {props.values?.title ||
+                  intl.formatMessage({
+                    id: 'CmsPagesLabelsFallbackTitle',
+                    defaultMessage: 'Page'
+                  })}
               </Heading>
 
               <Text fontSize="sm" color="fg.muted">
@@ -306,7 +459,10 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
 
             <ButtonGroup variant="outline">
               <Link as={Button} leftIcon={<FaEye />} to={props.path}>
-                Preview
+                {intl.formatMessage({
+                  id: 'CmsPagesFormButtonsPreview',
+                  defaultMessage: 'Preview'
+                })}
               </Link>
 
               <Button
@@ -315,7 +471,10 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                 onClick={() => {
                   setIsEditFormLocked(false)
                 }}>
-                Edit page
+                {intl.formatMessage({
+                  id: 'CmsPagesFormButtonsEdit',
+                  defaultMessage: 'Edit page'
+                })}
               </Button>
             </ButtonGroup>
           </HStack>
@@ -452,7 +611,11 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
 
             <FormHelperText>{texts.parentHelperText[mode]}</FormHelperText>
             <FormErrorMessage>
-              {errors.parentPage && 'Parent is required'}
+              {errors.parentPage &&
+                intl.formatMessage({
+                  id: 'CmsPagesFormErrorsParentRequired',
+                  defaultMessage: 'Parent is required'
+                })}
             </FormErrorMessage>
           </FormControl>
         )}
@@ -465,7 +628,10 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                 {...register('title', {
                   required: true
                 })}
-                placeholder="Title"
+                placeholder={intl.formatMessage({
+                  id: 'CmsPagesFormPlaceholdersTitle',
+                  defaultMessage: 'Title'
+                })}
               />
               <FormHelperText>{texts.titleHelperText[mode]}</FormHelperText>
             </FormControl>
@@ -478,12 +644,18 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
               <Grid templateColumns="70% 30%" gap="2">
                 <Input
                   {...register('title', {required: true})}
-                  placeholder="Title"
+                  placeholder={intl.formatMessage({
+                    id: 'CmsPagesFormPlaceholdersTitle',
+                    defaultMessage: 'Title'
+                  })}
                 />
                 <Stack>
                   <Input
                     {...register('slug', {required: true})}
-                    placeholder="slug"
+                    placeholder={intl.formatMessage({
+                      id: 'CmsPagesFormPlaceholdersSlug',
+                      defaultMessage: 'slug'
+                    })}
                     onBlur={e => {
                       const slug = slugify(e.target.value, {lower: true})
                       setValue('slug', slug, {
@@ -507,7 +679,10 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
             <FormLabel as="legend">{texts.description[mode]}</FormLabel>
             <Textarea
               {...register('description', {required: true})}
-              placeholder="Description"
+              placeholder={intl.formatMessage({
+                id: 'CmsPagesFormPlaceholdersDescription',
+                defaultMessage: 'Description'
+              })}
             />
             <FormHelperText as={HStack} justifyContent="space-between">
               <Text>{texts.descriptionHelperText[mode]}</Text>
@@ -544,7 +719,11 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
             <FormHelperText>{texts.templateHelperText[mode]}</FormHelperText>
 
             <FormErrorMessage>
-              {errors.template && 'Template is required'}
+              {errors.template &&
+                intl.formatMessage({
+                  id: 'CmsPagesFormErrorsTemplateRequired',
+                  defaultMessage: 'Template is required'
+                })}
             </FormErrorMessage>
           </FormControl>
         )}
@@ -593,7 +772,11 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                           shouldDirty: true
                         })
                       }}
-                      description="Upload a photo to represent the organization."
+                      description={intl.formatMessage({
+                        id: 'CmsPagesFormHelperMediaDescription',
+                        defaultMessage:
+                          'Upload a photo to represent the organization.'
+                      })}
                     />
                   )
                 }}
@@ -642,7 +825,10 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                   {...register('blogPost.date', {
                     validate: value => {
                       if (!value && isBlogPostInUse) {
-                        return 'Date is required for blog posts'
+                        return intl.formatMessage({
+                          id: 'CmsPagesFormErrorsDateRequired',
+                          defaultMessage: 'Date is required for blog posts'
+                        })
                       }
 
                       return true
@@ -665,13 +851,19 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                   {...register('blogPost.author', {
                     validate: value => {
                       if (!value && isBlogPostInUse) {
-                        return 'Author is required for blog posts'
+                        return intl.formatMessage({
+                          id: 'CmsPagesFormErrorsAuthorRequired',
+                          defaultMessage: 'Author is required for blog posts'
+                        })
                       }
 
                       return true
                     }
                   })}
-                  placeholder="Author"
+                  placeholder={intl.formatMessage({
+                    id: 'CmsPagesFormPlaceholdersAuthor',
+                    defaultMessage: 'Author'
+                  })}
                 />
                 <FormHelperText>
                   {texts.postAuthorHelperText[mode]}
@@ -685,7 +877,10 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                 <FormLabel as="legend">{texts.postCategory[mode]}</FormLabel>
                 <Input
                   {...register('blogPost.category')}
-                  placeholder="Category"
+                  placeholder={intl.formatMessage({
+                    id: 'CmsPagesFormPlaceholdersCategory',
+                    defaultMessage: 'Category'
+                  })}
                 />
                 <FormHelperText>
                   {texts.postCategoryHelperText[mode]}
@@ -718,11 +913,22 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
           <ButtonGroup>
             {mode === 'edit' && (
               <Button variant="outline" onClick={handleReset}>
-                Cancel
+                {intl.formatMessage({
+                  id: 'CmsPagesFormButtonsCancel',
+                  defaultMessage: 'Cancel'
+                })}
               </Button>
             )}
             <Button type="submit" isLoading={isSubmitting}>
-              {mode === 'create' ? 'Create page' : 'Save page'}
+              {mode === 'create'
+                ? intl.formatMessage({
+                    id: 'CmsPagesFormButtonsCreate',
+                    defaultMessage: 'Create page'
+                  })
+                : intl.formatMessage({
+                    id: 'CmsPagesFormButtonsSave',
+                    defaultMessage: 'Save page'
+                  })}
             </Button>
           </ButtonGroup>
         </HStack>

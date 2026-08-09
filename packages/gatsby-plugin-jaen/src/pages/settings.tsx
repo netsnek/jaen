@@ -3,6 +3,7 @@ import {PageProps} from 'gatsby'
 import React from 'react'
 
 import {Settings} from '../components/Settings'
+import {intlText} from '../lib/intl'
 
 const SettingsPage: React.FC<PageProps> = () => {
   const authUser = useAuthUser()
@@ -29,7 +30,7 @@ const SettingsPage: React.FC<PageProps> = () => {
 export default SettingsPage
 
 export const pageConfig: PageConfig = {
-  label: 'Settings',
+  label: intlText('AuthSettings', 'Settings'),
   icon: 'FaUserCog',
   menu: {
     order: 100,

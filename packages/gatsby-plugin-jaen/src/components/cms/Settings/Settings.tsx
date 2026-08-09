@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react'
 import React, {useEffect} from 'react'
 import {Controller, useForm} from 'react-hook-form'
+import {useIntl} from 'react-intl'
 
 import FormMediaChooser from '../../../containers/form-media-chooser'
 import {FieldGroup} from '../../shared/FieldGroup'
@@ -43,6 +44,83 @@ export interface SettingsProps {
 }
 
 export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
+  const intl = useIntl()
+  const t = (id: string, defaultMessage: string) =>
+    intl.formatMessage({id, defaultMessage})
+
+  const headingLabel = t('CmsSettingsFormHeading', 'Settings')
+  const siteInfoGroupTitle = t('CmsSettingsFormSiteInfoGroupTitle', 'Site Info')
+  const siteTitleLabel = t('CmsSettingsFormSiteInfoTitleLabel', 'Title')
+  const siteTitlePlaceholder = t(
+    'CmsSettingsFormSiteInfoTitlePlaceholder',
+    'Title'
+  )
+  const siteTitleTooLong = t(
+    'CmsSettingsFormSiteInfoTitleTooLong',
+    'Title is too long'
+  )
+  const siteUrlLabel = t('CmsSettingsFormSiteInfoUrlLabel', 'URL')
+  const siteUrlPlaceholder = t(
+    'CmsSettingsFormSiteInfoUrlPlaceholder',
+    'https://snek.at'
+  )
+  const siteUrlInvalid = t(
+    'CmsSettingsFormSiteInfoUrlInvalid',
+    'URL must start with http:// or https://'
+  )
+  const siteDescriptionLabel = t(
+    'CmsSettingsFormSiteInfoDescriptionLabel',
+    'Description'
+  )
+  const siteDescriptionPlaceholder = t(
+    'CmsSettingsFormSiteInfoDescriptionPlaceholder',
+    'The description that appears in search engines and social media.'
+  )
+  const siteDescriptionHelper = t(
+    'CmsSettingsFormSiteInfoDescriptionHelper',
+    'Brief description for your site.'
+  )
+  const siteImageLabel = t('CmsSettingsFormSiteInfoImageLabel', 'Image')
+  const siteImageDescription = t(
+    'CmsSettingsFormSiteInfoImageDescription',
+    'Upload a photo to represent the site.'
+  )
+  const organisationGroupTitle = t(
+    'CmsSettingsFormOrganisationGroupTitle',
+    'Organisation'
+  )
+  const organisationNameLabel = t(
+    'CmsSettingsFormOrganisationNameLabel',
+    'Name'
+  )
+  const organisationNamePlaceholder = t(
+    'CmsSettingsFormOrganisationNamePlaceholder',
+    'Snek'
+  )
+  const organisationNameTooLong = t(
+    'CmsSettingsFormOrganisationNameTooLong',
+    'Name is too long'
+  )
+  const organisationUrlLabel = t('CmsSettingsFormOrganisationUrlLabel', 'URL')
+  const organisationUrlPlaceholder = t(
+    'CmsSettingsFormOrganisationUrlPlaceholder',
+    'https://snek.at'
+  )
+  const organisationUrlInvalid = t(
+    'CmsSettingsFormOrganisationUrlInvalid',
+    'URL must start with http:// or https://'
+  )
+  const organisationLogoLabel = t(
+    'CmsSettingsFormOrganisationLogoLabel',
+    'Image'
+  )
+  const organisationLogoDescription = t(
+    'CmsSettingsFormOrganisationLogoDescription',
+    'Upload a photo to represent the organization.'
+  )
+  const cancelLabel = t('CmsSettingsFormCancel', 'Cancel')
+  const saveLabel = t('CmsSettingsFormSave', 'Save')
+
   const [defaultValues, setDefaultValues] = React.useState(data)
 
   const {
@@ -81,16 +159,16 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
           spacing="4"
           divider={<StackDivider />}
           px={{base: '4', md: '10'}}>
-          <Heading size="sm">Settings</Heading>
+          <Heading size="sm">{headingLabel}</Heading>
 
-          <FieldGroup title="Site Info">
+          <FieldGroup title={siteInfoGroupTitle}>
             <VStack width="full" spacing="6">
               <FormControl isInvalid={!!errors?.siteMetadata?.title}>
-                <FormLabel>Title</FormLabel>
+                <FormLabel>{siteTitleLabel}</FormLabel>
                 <Input
-                  placeholder="Title"
+                  placeholder={siteTitlePlaceholder}
                   {...register('siteMetadata.title', {
-                    maxLength: {value: 100, message: 'Title is too long'}
+                    maxLength: {value: 100, message: siteTitleTooLong}
                   })}
                 />
                 <FormErrorMessage>
@@ -99,14 +177,14 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
               </FormControl>
 
               <FormControl isInvalid={!!errors?.siteMetadata?.siteUrl}>
-                <FormLabel>URL</FormLabel>
+                <FormLabel>{siteUrlLabel}</FormLabel>
                 <Input
-                  placeholder="https://snek.at"
+                  placeholder={siteUrlPlaceholder}
                   {...register('siteMetadata.siteUrl', {
                     validate: {
                       checkUrl: value =>
                         value && !/^https?:\/\//.test(value)
-                          ? 'URL must start with http:// or https://'
+                          ? siteUrlInvalid
                           : undefined
                     }
                   })}
@@ -117,16 +195,14 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
               </FormControl>
 
               <FormControl isInvalid={!!errors?.siteMetadata?.description}>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>{siteDescriptionLabel}</FormLabel>
                 <Textarea
                   rows={5}
-                  placeholder="The description that appears in search engines and social media."
+                  placeholder={siteDescriptionPlaceholder}
                   {...register('siteMetadata.description')}
                 />
                 {!errors.siteMetadata?.description && (
-                  <FormHelperText>
-                    Brief description for your site.
-                  </FormHelperText>
+                  <FormHelperText>{siteDescriptionHelper}</FormHelperText>
                 )}
 
                 <FormErrorMessage>
@@ -135,7 +211,7 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
               </FormControl>
 
               <FormControl id="image">
-                <FormLabel>Image</FormLabel>
+                <FormLabel>{siteImageLabel}</FormLabel>
 
                 <Controller
                   control={control}
@@ -154,7 +230,7 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                             shouldDirty: true
                           })
                         }}
-                        description="Upload a photo to represent the site."
+                        description={siteImageDescription}
                       />
                     )
                   }}
@@ -163,15 +239,18 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
             </VStack>
           </FieldGroup>
 
-          <FieldGroup title="Organisation">
+          <FieldGroup title={organisationGroupTitle}>
             <VStack width="full" spacing="6">
               <FormControl
                 isInvalid={!!errors?.siteMetadata?.organization?.name}>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>{organisationNameLabel}</FormLabel>
                 <Input
-                  placeholder="Snek"
+                  placeholder={organisationNamePlaceholder}
                   {...register('siteMetadata.organization.name', {
-                    maxLength: {value: 100, message: 'Name is too long'}
+                    maxLength: {
+                      value: 100,
+                      message: organisationNameTooLong
+                    }
                   })}
                 />
                 <FormErrorMessage>
@@ -180,14 +259,14 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
               </FormControl>
               <FormControl
                 isInvalid={!!errors?.siteMetadata?.organization?.url}>
-                <FormLabel>Url</FormLabel>
+                <FormLabel>{organisationUrlLabel}</FormLabel>
                 <Input
-                  placeholder="https://snek.at"
+                  placeholder={organisationUrlPlaceholder}
                   {...register('siteMetadata.organization.url', {
                     validate: {
                       checkUrl: value =>
                         value && !/^https?:\/\//.test(value)
-                          ? 'Url must start with http:// or https://'
+                          ? organisationUrlInvalid
                           : undefined
                     }
                   })}
@@ -197,7 +276,7 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                 </FormErrorMessage>
               </FormControl>
               <FormControl id="image">
-                <FormLabel>Image</FormLabel>
+                <FormLabel>{organisationLogoLabel}</FormLabel>
 
                 <Controller
                   control={control}
@@ -215,7 +294,7 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                           shouldDirty: true
                         })
                       }}
-                      description="Upload a photo to represent the organization."
+                      description={organisationLogoDescription}
                     />
                   )}
                 />
@@ -233,13 +312,13 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                     keepDirty: false
                   })
                 }}>
-                Cancel
+                {cancelLabel}
               </Button>
               <Button
                 type="submit"
                 isLoading={isSubmitting}
                 isDisabled={!isDirty}>
-                Save
+                {saveLabel}
               </Button>
             </ButtonGroup>
           </HStack>

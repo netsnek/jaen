@@ -4,6 +4,7 @@ import React from 'react'
 
 import {JaenLogout} from '../components/JaenLogout/JaenLogout'
 import {useCMSManagement, withCMSManagement} from '../connectors/cms-management'
+import {intlText} from '../lib/intl'
 
 const LogoutPage: React.FC<PageProps> = withCMSManagement(() => {
   const auth = useAuth()
@@ -26,7 +27,7 @@ const LogoutPage: React.FC<PageProps> = withCMSManagement(() => {
 export default LogoutPage
 
 export const pageConfig: PageConfig = {
-  label: 'Logout',
+  label: intlText('AuthLogout', 'Logout'),
   icon: 'FaSignOutAlt',
   withoutJaenFrame: true,
   menu: {

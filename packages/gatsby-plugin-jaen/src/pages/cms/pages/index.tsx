@@ -3,6 +3,7 @@ import {navigate, PageProps} from 'gatsby'
 
 import {PageConfig, useNotificationsContext} from 'jaen'
 import {useCallback, useEffect, useMemo, useState} from 'react'
+import {useIntl} from 'react-intl'
 import {FaArrowRight} from '@react-icons/all-files/fa/FaArrowRight'
 import {FaEdit} from '@react-icons/all-files/fa/FaEdit'
 import {FaTrash} from '@react-icons/all-files/fa/FaTrash'
@@ -13,8 +14,10 @@ import {
   CMSManagement,
   useCMSManagement
 } from '../../../connectors/cms-management'
+import {intlText} from '../../../lib/intl'
 
 const PagesPage: React.FC = () => {
+  const intl = useIntl()
   const {toast, prompt, confirm} = useNotificationsContext()
   const manager = useCMSManagement()
 
@@ -59,8 +62,18 @@ const PagesPage: React.FC = () => {
     return pages.map(p => {
       return {
         id: p.id,
-        title: p.jaenPageMetadata.title || 'No title',
-        description: p.jaenPageMetadata.description || 'No description',
+        title:
+          p.jaenPageMetadata.title ||
+          intl.formatMessage({
+            id: 'CmsPagesLabelsNoTitle',
+            defaultMessage: 'No title'
+          }),
+        description:
+          p.jaenPageMetadata.description ||
+          intl.formatMessage({
+            id: 'CmsPagesLabelsNoDescription',
+            defaultMessage: 'No description'
+          }),
         createdAt: p.createdAt,
         modifiedAt: p.modifiedAt
         // author: p.jaenPageMetadata.blogPost?.author
@@ -157,13 +170,16 @@ const PagesPage: React.FC = () => {
 
         _parentPages[page.id] = {
           label: page.jaenPageMetadata.title || page.slug,
-          templates: pageTemplates.reduce((acc, template) => {
-            acc[template.id] = {
-              label: template.label
-            }
+          templates: pageTemplates.reduce(
+            (acc, template) => {
+              acc[template.id] = {
+                label: template.label
+              }
 
-            return acc
-          }, {} as {[key: string]: {label: string}})
+              return acc
+            },
+            {} as {[key: string]: {label: string}}
+          )
         }
       }
     }
@@ -187,14 +203,23 @@ const PagesPage: React.FC = () => {
         // Always disable slug because the slug can only be changed in the danger zone
         disableSlug: true,
         values: {
-          title: currentPage.jaenPageMetadata?.title || 'No title',
+          title:
+            currentPage.jaenPageMetadata?.title ||
+            intl.formatMessage({
+              id: 'CmsPagesLabelsNoTitle',
+              defaultMessage: 'No title'
+            }),
           image: {
             src: currentPage.jaenPageMetadata?.image
           },
           slug: currentPage.slug,
           template: currentPage.template,
           description:
-            currentPage.jaenPageMetadata.description || 'No description',
+            currentPage.jaenPageMetadata.description ||
+            intl.formatMessage({
+              id: 'CmsPagesLabelsNoDescription',
+              defaultMessage: 'No description'
+            }),
           parentPage: currentPage.parentPage?.id,
           isExcludedFromIndex: currentPage.excludedFromIndex,
           blogPost: currentPage.jaenPageMetadata.blogPost
@@ -217,8 +242,17 @@ const PagesPage: React.FC = () => {
           })
 
           toast({
-            title: 'Page updated',
-            description: `Page ${data.title} has been updated`,
+            title: intl.formatMessage({
+              id: 'CmsPagesNotificationsUpdated',
+              defaultMessage: 'Page updated'
+            }),
+            description: intl.formatMessage(
+              {
+                id: 'CmsPagesNotificationsUpdatedDescription',
+                defaultMessage: 'Page {title} has been updated'
+              },
+              {title: data.title}
+            ),
             status: 'success'
           })
         },
@@ -232,18 +266,45 @@ const PagesPage: React.FC = () => {
       disableNewButton={manager.templatesForPage(currentPage.id).length === 0}
       dangerZoneActions={[
         {
-          title: 'Duplicate page',
-          description: 'This will duplicate the page with its subpages.',
-          buttonText: 'Duplicate page',
+          title: intl.formatMessage({
+            id: 'CmsPagesActionsDuplicate',
+            defaultMessage: 'Duplicate page'
+          }),
+          description: intl.formatMessage({
+            id: 'CmsPagesDescriptionsDuplicate',
+            defaultMessage: 'This will duplicate the page with its subpages.'
+          }),
+          buttonText: intl.formatMessage({
+            id: 'CmsPagesActionsDuplicate',
+            defaultMessage: 'Duplicate page'
+          }),
           icon: FaClone,
           onClick: async () => {
             const slug = await prompt({
-              title: 'Duplicate page',
-              message:
-                'Please enter a new slug for the duplicated page. This will affect the path.',
-              confirmText: 'Duplicate',
-              cancelText: 'Cancel',
-              placeholder: `${currentPage.slug}-copy`
+              title: intl.formatMessage({
+                id: 'CmsPagesPromptsDuplicateTitle',
+                defaultMessage: 'Duplicate page'
+              }),
+              message: intl.formatMessage({
+                id: 'CmsPagesPromptsDuplicateMessage',
+                defaultMessage:
+                  'Please enter a new slug for the duplicated page. This will affect the path.'
+              }),
+              confirmText: intl.formatMessage({
+                id: 'CmsPagesPromptsDuplicateConfirm',
+                defaultMessage: 'Duplicate'
+              }),
+              cancelText: intl.formatMessage({
+                id: 'CmsPagesPromptsDuplicateCancel',
+                defaultMessage: 'Cancel'
+              }),
+              placeholder: intl.formatMessage(
+                {
+                  id: 'CmsPagesPromptsDuplicatePlaceholder',
+                  defaultMessage: '{slug}-copy'
+                },
+                {slug: currentPage.slug}
+              )
             })
 
             if (slug) {
@@ -251,13 +312,25 @@ const PagesPage: React.FC = () => {
                 manager.clonePage(currentPage.id, slug)
 
                 toast({
-                  title: 'Page duplicated',
-                  description: `Page ${currentPage.slug} has been duplicated`,
+                  title: intl.formatMessage({
+                    id: 'CmsPagesNotificationsDuplicated',
+                    defaultMessage: 'Page duplicated'
+                  }),
+                  description: intl.formatMessage(
+                    {
+                      id: 'CmsPagesNotificationsDuplicatedDescription',
+                      defaultMessage: 'Page {slug} has been duplicated'
+                    },
+                    {slug: currentPage.slug}
+                  ),
                   status: 'success'
                 })
               } catch (e) {
                 toast({
-                  title: 'Could not duplicate page',
+                  title: intl.formatMessage({
+                    id: 'CmsPagesNotificationsDuplicateFailed',
+                    defaultMessage: 'Could not duplicate page'
+                  }),
                   description: e.message,
                   status: 'error'
                 })
@@ -267,9 +340,18 @@ const PagesPage: React.FC = () => {
           isDisabled: !currentPage.template
         },
         {
-          title: 'Move page',
-          description: 'This will move the page and all its subpages.',
-          buttonText: 'Move page',
+          title: intl.formatMessage({
+            id: 'CmsPagesActionsMove',
+            defaultMessage: 'Move page'
+          }),
+          description: intl.formatMessage({
+            id: 'CmsPagesDescriptionsMove',
+            defaultMessage: 'This will move the page and all its subpages.'
+          }),
+          buttonText: intl.formatMessage({
+            id: 'CmsPagesActionsMove',
+            defaultMessage: 'Move page'
+          }),
           icon: FaArrowRight,
           onClick: async () => {
             const options = Object.entries(parentPages).map(
@@ -283,10 +365,22 @@ const PagesPage: React.FC = () => {
 
             const parentPageId = await prompt(
               {
-                title: 'Move page',
-                message: 'Please select a new parent page.',
-                confirmText: 'Move',
-                cancelText: 'Cancel',
+                title: intl.formatMessage({
+                  id: 'CmsPagesPromptsMoveTitle',
+                  defaultMessage: 'Move page'
+                }),
+                message: intl.formatMessage({
+                  id: 'CmsPagesPromptsMoveMessage',
+                  defaultMessage: 'Please select a new parent page.'
+                }),
+                confirmText: intl.formatMessage({
+                  id: 'CmsPagesPromptsMoveConfirm',
+                  defaultMessage: 'Move'
+                }),
+                cancelText: intl.formatMessage({
+                  id: 'CmsPagesPromptsMoveCancel',
+                  defaultMessage: 'Cancel'
+                }),
                 options
               },
               currentPage.parentPage?.id
@@ -301,13 +395,25 @@ const PagesPage: React.FC = () => {
                 })
 
                 toast({
-                  title: 'Page moved',
-                  description: `Page ${currentPage.slug} has been moved`,
+                  title: intl.formatMessage({
+                    id: 'CmsPagesNotificationsMoved',
+                    defaultMessage: 'Page moved'
+                  }),
+                  description: intl.formatMessage(
+                    {
+                      id: 'CmsPagesNotificationsMovedDescription',
+                      defaultMessage: 'Page {slug} has been moved'
+                    },
+                    {slug: currentPage.slug}
+                  ),
                   status: 'success'
                 })
               } catch (e) {
                 toast({
-                  title: 'Could not move page',
+                  title: intl.formatMessage({
+                    id: 'CmsPagesNotificationsMoveFailed',
+                    defaultMessage: 'Could not move page'
+                  }),
                   description: e.message,
                   status: 'error'
                 })
@@ -317,17 +423,39 @@ const PagesPage: React.FC = () => {
           isDisabled: !currentPage.template
         },
         {
-          title: 'Update slug',
-          description:
-            'This will rename the slug and thus affects the path of the page and all its subpages.',
-          buttonText: 'Rename slug',
+          title: intl.formatMessage({
+            id: 'CmsPagesActionsUpdateSlug',
+            defaultMessage: 'Update slug'
+          }),
+          description: intl.formatMessage({
+            id: 'CmsPagesDescriptionsUpdateSlug',
+            defaultMessage:
+              'This will rename the slug and thus affects the path of the page and all its subpages.'
+          }),
+          buttonText: intl.formatMessage({
+            id: 'CmsPagesActionsRenameSlug',
+            defaultMessage: 'Rename slug'
+          }),
           icon: FaEdit,
           onClick: async () => {
             const slug = await prompt({
-              title: 'Rename slug',
-              message: 'Please enter a new slug. This will affect the path.',
-              confirmText: 'Rename',
-              cancelText: 'Cancel',
+              title: intl.formatMessage({
+                id: 'CmsPagesPromptsRenameSlugTitle',
+                defaultMessage: 'Rename slug'
+              }),
+              message: intl.formatMessage({
+                id: 'CmsPagesPromptsRenameSlugMessage',
+                defaultMessage:
+                  'Please enter a new slug. This will affect the path.'
+              }),
+              confirmText: intl.formatMessage({
+                id: 'CmsPagesPromptsRenameSlugConfirm',
+                defaultMessage: 'Rename'
+              }),
+              cancelText: intl.formatMessage({
+                id: 'CmsPagesPromptsRenameSlugCancel',
+                defaultMessage: 'Cancel'
+              }),
               placeholder: currentPage.slug
             })
 
@@ -338,13 +466,25 @@ const PagesPage: React.FC = () => {
                 })
 
                 toast({
-                  title: 'Slug updated',
-                  description: `Slug has been updated to ${slug}`,
+                  title: intl.formatMessage({
+                    id: 'CmsPagesNotificationsSlugUpdated',
+                    defaultMessage: 'Slug updated'
+                  }),
+                  description: intl.formatMessage(
+                    {
+                      id: 'CmsPagesNotificationsSlugUpdatedDescription',
+                      defaultMessage: 'Slug has been updated to {slug}'
+                    },
+                    {slug}
+                  ),
                   status: 'success'
                 })
               } catch (e) {
                 toast({
-                  title: 'Could not update slug',
+                  title: intl.formatMessage({
+                    id: 'CmsPagesNotificationsSlugUpdateFailed',
+                    defaultMessage: 'Could not update slug'
+                  }),
                   description: e.message,
                   status: 'error'
                 })
@@ -354,23 +494,47 @@ const PagesPage: React.FC = () => {
           isDisabled: !currentPage.template
         },
         {
-          title: 'Delete this page',
-          description: 'This will delete the page and all its subpages.',
-          buttonText: 'Delete page',
+          title: intl.formatMessage({
+            id: 'CmsPagesActionsDeleteThis',
+            defaultMessage: 'Delete this page'
+          }),
+          description: intl.formatMessage({
+            id: 'CmsPagesDescriptionsDelete',
+            defaultMessage: 'This will delete the page and all its subpages.'
+          }),
+          buttonText: intl.formatMessage({
+            id: 'CmsPagesActionsDelete',
+            defaultMessage: 'Delete page'
+          }),
           icon: FaTrash,
           onClick: async () => {
             const ok = await confirm({
-              title: 'Delete page',
-              message:
-                'Are you sure you want to delete this page and all its subpages?'
+              title: intl.formatMessage({
+                id: 'CmsPagesPromptsDeleteTitle',
+                defaultMessage: 'Delete page'
+              }),
+              message: intl.formatMessage({
+                id: 'CmsPagesPromptsDeleteMessage',
+                defaultMessage:
+                  'Are you sure you want to delete this page and all its subpages?'
+              })
             })
 
             if (ok) {
               manager.removePage(currentPage.id)
 
               toast({
-                title: 'Page deleted',
-                description: `Page ${currentPage.slug} has been deleted`,
+                title: intl.formatMessage({
+                  id: 'CmsPagesNotificationsDeleted',
+                  defaultMessage: 'Page deleted'
+                }),
+                description: intl.formatMessage(
+                  {
+                    id: 'CmsPagesNotificationsDeletedDescription',
+                    defaultMessage: 'Page {slug} has been deleted'
+                  },
+                  {slug: currentPage.slug}
+                ),
                 status: 'success'
               })
             }
@@ -395,22 +559,22 @@ const Page: React.FC<PageProps> = () => {
 export default Page
 
 export const pageConfig: PageConfig = {
-  label: 'Jaen CMS | Pages',
+  label: intlText('CmsPagesTitle', 'Jaen CMS | Pages'),
   icon: 'FaSitemap',
 
   menu: {
-    label: 'Pages',
+    label: intlText('CmsPagesMenuLabel', 'Pages'),
     type: 'app',
     group: 'cms',
     order: 200
   },
   breadcrumbs: [
     {
-      label: 'CMS',
+      label: intlText('CmsLabelsRoot', 'CMS'),
       path: '/cms/'
     },
     {
-      label: 'Pages',
+      label: intlText('CmsPagesBreadcrumbsPages', 'Pages'),
       path: '/cms/pages/'
     }
   ],

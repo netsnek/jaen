@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react'
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
 import {FaGripVertical} from '@react-icons/all-files/fa/FaGripVertical'
+import {FormattedMessage, useIntl} from 'react-intl'
 import {Link} from '../../shared/Link'
 import {DangerZone, DangerZoneProps} from './components/DangerZone'
 import {TreeNode} from './components/PageVisualizer'
@@ -52,6 +53,7 @@ export interface PagesProps {
 }
 
 export const Pages: React.FC<PagesProps> = props => {
+  const intl = useIntl()
   const [canReorder, setCanReorder] = React.useState(false)
 
   const handleDragEnd: OnDragEndResponder = result => {
@@ -63,7 +65,12 @@ export const Pages: React.FC<PagesProps> = props => {
     const [movedItem] = reorderedChildren.splice(result.source.index, 1)
 
     if (!movedItem) {
-      alert('Something went wrong while reordering the pages.')
+      alert(
+        intl.formatMessage({
+          id: 'CmsPagesTableReorderError',
+          defaultMessage: 'Something went wrong while reordering the pages.'
+        })
+      )
       return
     }
 
@@ -92,7 +99,10 @@ export const Pages: React.FC<PagesProps> = props => {
       <Stack spacing="4" divider={<StackDivider />}>
         <HStack justifyContent="space-between">
           <Heading as="h2" size="sm">
-            Subpages
+            <FormattedMessage
+              id="CmsPagesTableSubpagesHeading"
+              defaultMessage="Subpages"
+            />
           </Heading>
 
           <ButtonGroup>
@@ -106,7 +116,15 @@ export const Pages: React.FC<PagesProps> = props => {
                   <Icon as={FaGripVertical} />
                 )
               }>
-              {canReorder ? 'Done' : 'Reorder'}
+              {canReorder
+                ? intl.formatMessage({
+                    id: 'CmsPagesTableReorderDisable',
+                    defaultMessage: 'Done'
+                  })
+                : intl.formatMessage({
+                    id: 'CmsPagesTableReorderEnable',
+                    defaultMessage: 'Reorder'
+                  })}
             </Button>
 
             <Link
@@ -115,7 +133,10 @@ export const Pages: React.FC<PagesProps> = props => {
               to={`./new/#${btoa(props.pageId)}`}
               leftIcon={<FaPlus />}
               variant="outline">
-              New page
+              <FormattedMessage
+                id="CmsPagesTableNewPage"
+                defaultMessage="New page"
+              />
             </Link>
           </ButtonGroup>
         </HStack>
@@ -123,9 +144,24 @@ export const Pages: React.FC<PagesProps> = props => {
         <Table>
           <Thead>
             <Tr>
-              <Th>Title</Th>
-              <Th>Description</Th>
-              <Th>Date</Th>
+              <Th>
+                <FormattedMessage
+                  id="CmsPagesTableColumnsTitle"
+                  defaultMessage="Title"
+                />
+              </Th>
+              <Th>
+                <FormattedMessage
+                  id="CmsPagesTableColumnsDescription"
+                  defaultMessage="Description"
+                />
+              </Th>
+              <Th>
+                <FormattedMessage
+                  id="CmsPagesTableColumnsDate"
+                  defaultMessage="Date"
+                />
+              </Th>
               <Th></Th>
             </Tr>
           </Thead>
@@ -156,23 +192,41 @@ export const Pages: React.FC<PagesProps> = props => {
                             {page.createdAt || page.modifiedAt
                               ? page.modifiedAt &&
                                 page.modifiedAt !== page.createdAt
-                                ? `Last modified ${new Date(
-                                    page.modifiedAt
-                                  ).toLocaleDateString('en-US')} at ${new Date(
-                                    page.modifiedAt
-                                  ).toLocaleTimeString('en-US', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}`
-                                : `Created ${new Date(
-                                    page.createdAt
-                                  ).toLocaleDateString('en-US')} at ${new Date(
-                                    page.createdAt
-                                  ).toLocaleTimeString('en-US', {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })}`
-                              : '-'}
+                                ? intl.formatMessage(
+                                    {
+                                      id: 'CmsPagesTableDateUpdated',
+                                      defaultMessage:
+                                        'Last modified {date} at {time}'
+                                    },
+                                    {
+                                      date: intl.formatDate(page.modifiedAt, {
+                                        dateStyle: 'medium'
+                                      }),
+                                      time: intl.formatTime(page.modifiedAt, {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })
+                                    }
+                                  )
+                                : intl.formatMessage(
+                                    {
+                                      id: 'CmsPagesTableDateCreated',
+                                      defaultMessage: 'Created {date} at {time}'
+                                    },
+                                    {
+                                      date: intl.formatDate(page.createdAt, {
+                                        dateStyle: 'medium'
+                                      }),
+                                      time: intl.formatTime(page.createdAt, {
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      })
+                                    }
+                                  )
+                              : intl.formatMessage({
+                                  id: 'CmsPagesTableDateEmpty',
+                                  defaultMessage: '-'
+                                })}
                           </Td>
                           <Td w="8">
                             {canReorder && (
@@ -190,10 +244,16 @@ export const Pages: React.FC<PagesProps> = props => {
                       <Td colSpan={4}>
                         <HStack>
                           <Text>
-                            This page doesn&apos;t have any subpages yet.{' '}
+                            <FormattedMessage
+                              id="CmsPagesTableEmptyStateDescription"
+                              defaultMessage="This page doesn't have any subpages yet."
+                            />{' '}
                           </Text>
                           <Link to={`./new/#${btoa(props.pageId)}`}>
-                            Create a new page
+                            <FormattedMessage
+                              id="CmsPagesTableEmptyStateAction"
+                              defaultMessage="Create a new page"
+                            />
                           </Link>
                         </HStack>
                       </Td>
@@ -208,7 +268,10 @@ export const Pages: React.FC<PagesProps> = props => {
 
       <Stack spacing="4" divider={<StackDivider />}>
         <Heading as="h2" size="sm">
-          Danger zone
+          <FormattedMessage
+            id="CmsPagesTableDangerZoneHeading"
+            defaultMessage="Danger zone"
+          />
         </Heading>
 
         <DangerZone actions={props.dangerZoneActions || []} />

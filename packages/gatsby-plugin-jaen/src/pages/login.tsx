@@ -2,6 +2,8 @@ import {PageConfig, useAuth} from 'jaen'
 import {PageProps} from 'gatsby'
 import React, {useEffect} from 'react'
 
+import {intlText} from '../lib/intl'
+
 const LoginPage: React.FC<PageProps> = () => {
   const auth = useAuth()
 
@@ -15,7 +17,7 @@ const LoginPage: React.FC<PageProps> = () => {
 export default LoginPage
 
 export const pageConfig: PageConfig = {
-  label: 'Login',
+  label: intlText('AuthLogin', 'Login'),
   withoutJaenFrame: true,
   layout: {
     name: 'jaen',
