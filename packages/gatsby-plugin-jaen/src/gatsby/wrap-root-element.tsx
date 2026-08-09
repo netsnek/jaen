@@ -62,7 +62,7 @@ const matchLocale = (candidate?: string | null): LocaleKey | undefined => {
  * sign-in, before the profile query resolves), then the browser languages,
  * then en-US.
  */
-const JaenIntlProvider: FC<{children: ReactNode}> = ({children}) => {
+export const JaenIntlProvider: FC<{children: ReactNode}> = ({children}) => {
   const authUser = useAuthUser()
   const auth = useAuth()
 
