@@ -198,11 +198,13 @@ export interface SendEnvelopeOverrideInput {
 export interface SendTemplateMailArgsInput {
   templateId: Scalars['String']['input']
   /**
-   * Recipient list (`[String!]!`). GraphQL input coercion also accepts a bare
-   * string and wraps it into a one-element list. One Message row is enqueued
-   * per recipient; the returned MessageView is the first recipient's row.
+   * Recipient list (`[String!]`). GraphQL input coercion also accepts a bare
+   * string and wraps it into a one-element list. When omitted or empty, the
+   * template's stored envelope recipients are used server-side. One Message
+   * row is enqueued per recipient; the returned MessageView is the first
+   * recipient's row.
    */
-  to: Array<Scalars['String']['input']>
+  to?: InputMaybe<Array<Scalars['String']['input']>>
   values?: InputMaybe<Scalars['JSONObject']['input']>
   envelopeOverride?: InputMaybe<SendEnvelopeOverrideInput>
   scheduledAt?: InputMaybe<Scalars['String']['input']>
@@ -321,7 +323,7 @@ export const generatedSchema = {
     signerEmail: {__type: 'String'},
     signerName: {__type: 'String'},
     templateId: {__type: 'String!'},
-    to: {__type: '[String!]!'},
+    to: {__type: '[String!]'},
     values: {__type: 'JSONObject'}
   },
   SenderApiInput: {
@@ -420,7 +422,7 @@ export const generatedSchema = {
     __typename: {__type: 'String!'},
     replyTo: {__type: 'String'},
     subject: {__type: 'String'},
-    to: {__type: '[String!]!'}
+    to: {__type: '[String!]'}
   },
   TemplateListArgsInput: {
     after: {__type: 'String'},

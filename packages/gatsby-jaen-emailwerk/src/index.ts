@@ -22,10 +22,9 @@ export type SendTemplateMailResult =
  * values) and is mapped onto emailwerk's
  * `sendTemplateMail(args: {templateId, to, values, envelopeOverride})`:
  *
- * - `envelope.to`      -> `to` (emailwerk requires a non-empty recipient
- *   list; when omitted, the template's STORED envelope recipients are
- *   resolved via `query.template` first and used instead — emailwerk does
- *   not fall back server-side)
+ * - `envelope.to`      -> `to` (optional: an empty list falls back to the
+ *   template's STORED envelope recipients server-side, so sending only
+ *   needs the emailwerk:send role — no template read required)
  * - `envelope.subject` -> `envelopeOverride.subject`
  * - `envelope.replyTo` -> `envelopeOverride.replyTo`
  * - `values`           -> `values`
@@ -38,24 +37,7 @@ export const sendTemplateMail = async (
   }
 ): Promise<SendTemplateMailResult> => {
   try {
-    let to = options?.envelope?.to?.filter(Boolean) ?? []
-
-    if (to.length === 0) {
-      // emailwerk's `to` is required: fall back to the template's stored
-      // envelope recipients (mailpress resolved these server-side).
-      to = await resolve(
-        ({query}) => query.template({args: {id}})?.envelope?.to?.slice() ?? [],
-        {cachePolicy: 'no-store'}
-      )
-    }
-
-    if (to.length === 0) {
-      return {
-        ok: false,
-        message:
-          'No recipients: pass envelope.to or store recipients on the template envelope'
-      }
-    }
+    const to = options?.envelope?.to?.filter(Boolean) ?? []
 
     const subject = options?.envelope?.subject
     const replyTo = options?.envelope?.replyTo
@@ -72,7 +54,7 @@ export const sendTemplateMail = async (
         const message = mutation.sendTemplateMail({
           args: {
             templateId: id,
-            to,
+            ...(to.length > 0 ? {to} : {}),
             values: options?.values,
             envelopeOverride
           }
