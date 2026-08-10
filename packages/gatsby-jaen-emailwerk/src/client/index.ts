@@ -25,31 +25,71 @@ import {
  */
 const apiURL = __JAEN_EMAILWERK_URL__ || 'https://emailwerk.com/graphql'
 
+/**
+ * The Zitadel access token of the current Jaen CMS session, or `null` when
+ * there is no session.
+ *
+ * `null` is a first-class, expected outcome, not a failure: the same client
+ * serves anonymous website visitors. emailwerk's anonymous branch of
+ * `sendTemplateMail` is reachable *only* by a request that carries no
+ * credentials at all — a present-but-invalid token is treated as a forgery and
+ * still 401s (emailwerk `docs/public-send.md`, "Per adapter"). So there is
+ * deliberately no fallback and no placeholder header here: when there is no
+ * session we send nothing and let the server take the public branch.
+ *
+ * It must also never throw, because it runs in contexts that have no session
+ * machinery at all: Gatsby SSR/build, where `sessionStorage` is undefined, and
+ * sites that configure no `zitadelGql`, where the webpack define is absent.
+ * Every one of those cases is simply "no session".
+ */
+function sessionAccessToken(): string | null {
+  if (typeof sessionStorage === 'undefined') return null
+  if (typeof __JAEN_ZITADEL_GQL__ === 'undefined' || !__JAEN_ZITADEL_GQL__) {
+    return null
+  }
+
+  try {
+    const oidcStorage = sessionStorage.getItem(
+      `oidc.user:${__JAEN_ZITADEL_GQL__.authority}:${__JAEN_ZITADEL_GQL__.clientId}`
+    )
+
+    if (!oidcStorage) return null
+
+    return User.fromStorageString(oidcStorage)?.access_token || null
+  } catch {
+    // Unreadable or malformed session state is no session either.
+    return null
+  }
+}
+
 const queryFetcher: QueryFetcher = async function (
   {query, variables, operationName},
   fetchOptions
 ) {
   const headers: Record<string, string> = {}
 
-  // Authentication is two-layered:
+  // Authentication is two-layered, and both layers are OPTIONAL:
   //
   // 1. `credentials: 'include'` — production emailwerk sits behind Cloudflare
   //    Access; the CF_Authorization cookie set by the Access login carries the
   //    auth there (emailwerk itself only trusts the Cf-Access-Jwt-Assertion
-  //    header CF Access derives from it).
+  //    header CF Access derives from it). Kept unconditionally, and harmless
+  //    for an anonymous visitor: they simply have no such cookie, so the
+  //    request arrives with no assertion and emailwerk's anonymous gate offers
+  //    it to the public branch. (A *missing* assertion is anonymous; only a
+  //    present-but-invalid one 401s.) The public-form deployment needs a CF
+  //    Access bypass policy on `/graphql` regardless.
   // 2. The Zitadel Bearer access token of the current Jaen session — for
   //    deployments that accept it directly (dev/basic modes, or a future
   //    Bearer introspection path). Harmless to send alongside the cookie.
-  const oidcStorage = sessionStorage.getItem(
-    `oidc.user:${__JAEN_ZITADEL_GQL__.authority}:${__JAEN_ZITADEL_GQL__.clientId}`
-  )
+  //
+  // With no CMS session, no Authorization header is attached at all. That is
+  // what makes the one exported `sendTemplateMail` helper work unchanged for
+  // anonymous callers.
+  const accessToken = sessionAccessToken()
 
-  if (oidcStorage) {
-    const user = User.fromStorageString(oidcStorage)
-
-    if (user?.access_token) {
-      headers['Authorization'] = `Bearer ${user.access_token}`
-    }
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`
   }
 
   const response = await fetch(apiURL, {
