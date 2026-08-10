@@ -181,13 +181,15 @@ export const Editor: React.FC<EditorProps> = props => {
 
                 <MemoizedCodeMirror
                   value={state.value}
-                  extensions={[
-                    markdown({
-                      base: markdownLanguage,
-                      codeLanguages: languages
-                    }),
-                    EditorView.lineWrapping
-                  ]}
+                  extensions={
+                    props.editorExtensions ?? [
+                      markdown({
+                        base: markdownLanguage,
+                        codeLanguages: languages
+                      }),
+                      EditorView.lineWrapping
+                    ]
+                  }
                   onCreateEditor={editorView => {
                     setView(editorView)
                   }}
