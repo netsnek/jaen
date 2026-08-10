@@ -11,7 +11,7 @@ import {
   resolveLocales,
   translatePagePath,
   translatePagePaths,
-  isPathBlacklisted,
+  isLocalizedPathBlacklisted,
   JaenI18nOptions
 } from '../utils/i18n'
 import {
@@ -94,12 +94,12 @@ export const onCreatePage = async (
       for (const entry of paths) {
         const locale = locales.find(l => l.locale === entry.locale)!
 
-        if (isPathBlacklisted(entry.path, locale)) continue
+        if (isLocalizedPathBlacklisted(page.path, entry.path, locale)) continue
 
         const translations = paths.filter(other => {
           if (other.locale === entry.locale) return false
           const otherLocale = locales.find(l => l.locale === other.locale)!
-          return !isPathBlacklisted(other.path, otherLocale)
+          return !isLocalizedPathBlacklisted(page.path, other.path, otherLocale)
         })
 
         // A client-only route's matchPath must be scoped per locale, or all

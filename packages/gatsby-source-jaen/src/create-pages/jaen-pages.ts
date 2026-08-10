@@ -5,7 +5,7 @@ import {readPageConfig} from '../utils/page-config-reader'
 import {generatePageOriginPath} from '../utils/path'
 import {
   createLocalePagesId,
-  isPathBlacklisted,
+  isLocalizedPathBlacklisted,
   localeForPrefix,
   parsePathPrefix,
   resolveLocales,
@@ -169,7 +169,7 @@ export const createPages = async (
 
     const entries = translatePagePaths(pagePath, i18n).filter(entry => {
       const locale = locales.find(l => l.locale === entry.locale)!
-      return !isPathBlacklisted(entry.path, locale)
+      return !isLocalizedPathBlacklisted(pagePath, entry.path, locale)
     })
 
     for (const entry of entries) {

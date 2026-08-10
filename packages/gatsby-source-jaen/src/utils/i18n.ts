@@ -20,7 +20,12 @@ export interface JaenLocaleOption {
   prefix?: string
   /** Slug translations keyed by the untranslated path segment. */
   slugs?: Record<string, string>
-  /** Path prefixes never cloned for this locale (system pages etc). */
+  /**
+   * Path prefixes never cloned for this locale (system pages etc).
+   * An entry may be written in either form of a page's path: the canonical
+   * (unprefixed, untranslated) path (`/nur-de`) or the localized (prefixed,
+   * slug-translated) path (`/en/only-de`). Both match.
+   */
   pageBlacklist?: string[]
 }
 
@@ -170,3 +175,17 @@ export const isPathBlacklisted = (
     return normalized === prefix || normalized.startsWith(`${prefix}/`)
   })
 }
+
+/**
+ * True when either form of a localized page's path is blacklisted for its
+ * locale: the localized (prefixed, slug-translated) variant path or the
+ * canonical (unprefixed, untranslated) origin path. Blacklist entries may
+ * be written in either form — see `JaenLocaleOption.pageBlacklist`.
+ */
+export const isLocalizedPathBlacklisted = (
+  canonicalPath: string,
+  localizedPath: string,
+  locale: ResolvedLocale
+): boolean =>
+  isPathBlacklisted(localizedPath, locale) ||
+  isPathBlacklisted(canonicalPath, locale)
