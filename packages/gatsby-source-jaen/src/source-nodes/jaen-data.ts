@@ -90,7 +90,42 @@ export const sourceNodes = async (args: SourceNodesArgs) => {
         // createContentDigest(jaenData) invalidates the Gatsby cache
         // whenever the local patch file changes.
         const patchBuffer = await fs.readFile(realPath)
-        response = JSON.parse(patchBuffer.toString())
+
+        let parsed: unknown
+        try {
+          parsed = JSON.parse(patchBuffer.toString())
+        } catch (parseError) {
+          reporter.panicOnBuild(
+            `${link}: invalid JSON in local patch file: ${
+              (parseError as Error).message
+            }`
+          )
+          continue
+        }
+
+        // A patch without a proper data object would die deep inside
+        // deepmerge with an unreadable error — fail with the expected shape
+        // and the offending file instead.
+        const shaped = parsed as {data?: unknown} | null
+        if (
+          shaped === null ||
+          typeof shaped !== 'object' ||
+          Array.isArray(shaped) ||
+          typeof shaped.data !== 'object' ||
+          shaped.data === null ||
+          Array.isArray(shaped.data)
+        ) {
+          reporter.panicOnBuild(
+            `${link}: patch must be {createdAt?, message?, data}`
+          )
+          continue
+        }
+
+        response = shaped as {
+          createdAt?: Date
+          message?: string
+          data: JaenData
+        }
       }
 
       jaenData.patches.push({
