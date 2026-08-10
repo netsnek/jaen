@@ -141,6 +141,12 @@ export const Editor: React.FC<EditorProps> = props => {
         }
       }}>
       <TabsTemplateComponent
+        stats={{
+          fatal: stats.fatal ?? 0,
+          warn: stats.warn ?? 0,
+          info: stats.info ?? 0,
+          total: stats.total ?? 0
+        }}
         tabs={[
           {
             label: (
