@@ -3,6 +3,28 @@ import {createContext, useContext, useEffect, useState} from 'react'
 import 'vanilla-cookieconsent'
 
 /**
+ * Event dispatched on `window` whenever the visitor accepts the banner for
+ * the first time or changes their categories later on.
+ *
+ * The context value is the plugin instance and its identity never changes,
+ * so a consumer that only reads `allowedCategory` inside an effect keyed on
+ * the context never learns about a consent change. The event is the missing
+ * signal; it also crosses component trees, which matters because the plugin
+ * renders its own modals outside of React.
+ *
+ * Consumers should not need this constant: `useCookieConsentCategory` wraps
+ * both the event and the read.
+ */
+export const COOKIE_CONSENT_CHANGE_EVENT = 'jaen:cookie-consent-change'
+
+export interface CookieConsentChangeDetail {
+  /** Categories the visitor allows after the change. */
+  categories: string[]
+  /** Categories whose value flipped, empty on the first acceptance. */
+  changedCategories: string[]
+}
+
+/**
  * Language the plugin falls back to when the page locale has no
  * translation of its own.
  */
@@ -465,6 +487,16 @@ const resolveLanguage = (
     : FALLBACK_LANGUAGE
 }
 
+const dispatchConsentChange = (detail: CookieConsentChangeDetail): void => {
+  if (typeof window === 'undefined') return
+
+  window.dispatchEvent(
+    new CustomEvent<CookieConsentChangeDetail>(COOKIE_CONSENT_CHANGE_EVENT, {
+      detail
+    })
+  )
+}
+
 const CookieContext = createContext<CookieConsent | null>(null)
 
 export interface CookieConsentProviderProps {
@@ -502,7 +534,19 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
       _cc.run({
         ...pluginConfig,
-        current_lang: currentLang
+        current_lang: currentLang,
+        onAccept: cookie => {
+          dispatchConsentChange({
+            categories: cookie?.categories ?? [],
+            changedCategories: []
+          })
+        },
+        onChange: (cookie, changedCookieCategories) => {
+          dispatchConsentChange({
+            categories: cookie?.categories ?? [],
+            changedCategories: changedCookieCategories ?? []
+          })
+        }
       })
 
       window.cookieConsent = _cc
@@ -530,4 +574,45 @@ export function useCookieConsentContext(): CookieConsent | null {
   const context = useContext(CookieContext)
 
   return context
+}
+
+/**
+ * Whether the visitor currently allows a cookie category, re-read whenever
+ * consent changes.
+ *
+ * Returns `false` until the plugin is up, so a gated embed stays closed
+ * during server rendering and hydration instead of flickering.
+ */
+export function useCookieConsentCategory(category: string): boolean {
+  const cc = useCookieConsentContext()
+
+  const [isAllowed, setIsAllowed] = useState(false)
+
+  useEffect(() => {
+    const plugin =
+      cc ?? (typeof window !== 'undefined' ? window.cookieConsent : null)
+
+    const read = (): void => {
+      if (!plugin) {
+        setIsAllowed(false)
+        return
+      }
+
+      try {
+        setIsAllowed(plugin.allowedCategory(category))
+      } catch {
+        setIsAllowed(false)
+      }
+    }
+
+    read()
+
+    window.addEventListener(COOKIE_CONSENT_CHANGE_EVENT, read)
+
+    return () => {
+      window.removeEventListener(COOKIE_CONSENT_CHANGE_EVENT, read)
+    }
+  }, [cc, category])
+
+  return isAllowed
 }
