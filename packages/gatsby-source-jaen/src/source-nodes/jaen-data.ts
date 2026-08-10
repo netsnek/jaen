@@ -1,6 +1,7 @@
 import {JaenPage, JaenSite, Widget} from 'jaen'
 import deepmerge from 'deepmerge'
 import fs from 'fs/promises' // Import the fs module for asynchronous file operations
+import path from 'path'
 import {SourceNodesArgs} from 'gatsby'
 import {deepmergeArrayIdMerge} from '../utils/deepmerge'
 
@@ -31,17 +32,44 @@ export const sourceNodes = async (args: SourceNodesArgs) => {
       patches: []
     } as JaenData
 
+    const jaenDataDir = path.join(process.cwd(), 'jaen-data')
+
     for (const link of data) {
       // skip empty lines
       if (link === '') {
         continue
       }
 
-      const response = await fetchWithCache<{
-        createdAt: Date
-        message: string
+      let response: {
+        createdAt?: Date
+        message?: string
         data: JaenData
-      }>(link, {cache})
+      }
+
+      if (link.startsWith('http://') || link.startsWith('https://')) {
+        response = await fetchWithCache<{
+          createdAt: Date
+          message: string
+          data: JaenData
+        }>(link, {cache})
+      } else {
+        // Local patch file: the line is a path relative to the jaen-data
+        // directory. Reject anything resolving outside of it (path traversal).
+        const resolvedPath = path.resolve(jaenDataDir, link)
+
+        if (!resolvedPath.startsWith(jaenDataDir + path.sep)) {
+          reporter.panicOnBuild(
+            `Invalid patch path "${link}": local patch files must resolve inside ${jaenDataDir}`
+          )
+          continue
+        }
+
+        // The parsed file content is merged into jaenData below, so
+        // createContentDigest(jaenData) invalidates the Gatsby cache
+        // whenever the local patch file changes.
+        const patchBuffer = await fs.readFile(resolvedPath)
+        response = JSON.parse(patchBuffer.toString())
+      }
 
       jaenData.patches.push({
         createdAt: response.createdAt || new Date(2001, 20, 10),
