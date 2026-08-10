@@ -126,8 +126,8 @@ export const TextField = connectField<string, TextFieldProps>(
           typeof Wrapper === 'string'
             ? Wrapper
             : typeof asAs === 'string'
-            ? asAs
-            : undefined
+              ? asAs
+              : undefined
 
         jaenField.register({
           as
@@ -366,9 +366,17 @@ export const TextField = connectField<string, TextFieldProps>(
           }
         }}
         sx={{
+          // Links inside a text field are brand coloured, and they have to
+          // match the brand colour the rest of the site uses for controls.
+          // brand.300 is a light tint that reads as a different orange next
+          // to a brand.500 button, so the light mode takes 500 and only the
+          // dark mode keeps the lighter tint for legibility.
           a: {
-            color: 'brand.300',
-            textDecoration: 'underline'
+            color: 'brand.500',
+            textDecoration: 'underline',
+            _dark: {
+              color: 'brand.300'
+            }
           }
         }}
       />
