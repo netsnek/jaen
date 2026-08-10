@@ -54,7 +54,10 @@ export const sourceNodes = async (args: SourceNodesArgs) => {
         }>(link, {cache})
       } else {
         // Local patch file: the line is a path relative to the jaen-data
-        // directory. Reject anything resolving outside of it (path traversal).
+        // directory. Reject anything resolving outside of it (path
+        // traversal). path.resolve is lexical, so the containment check runs
+        // on real paths below as well — a symlink inside jaen-data must not
+        // point outside of it.
         const resolvedPath = path.resolve(jaenDataDir, link)
 
         if (!resolvedPath.startsWith(jaenDataDir + path.sep)) {
@@ -64,10 +67,29 @@ export const sourceNodes = async (args: SourceNodesArgs) => {
           continue
         }
 
+        let realPath: string
+        try {
+          realPath = await fs.realpath(resolvedPath)
+        } catch {
+          reporter.panicOnBuild(
+            `Local patch file "${link}" not found (resolved to ${resolvedPath})`
+          )
+          continue
+        }
+
+        const realJaenDataDir = await fs.realpath(jaenDataDir)
+
+        if (!realPath.startsWith(realJaenDataDir + path.sep)) {
+          reporter.panicOnBuild(
+            `Invalid patch path "${link}": local patch files must resolve inside ${jaenDataDir}`
+          )
+          continue
+        }
+
         // The parsed file content is merged into jaenData below, so
         // createContentDigest(jaenData) invalidates the Gatsby cache
         // whenever the local patch file changes.
-        const patchBuffer = await fs.readFile(resolvedPath)
+        const patchBuffer = await fs.readFile(realPath)
         response = JSON.parse(patchBuffer.toString())
       }
 
