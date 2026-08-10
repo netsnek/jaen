@@ -9,6 +9,7 @@ import {
   localeForPrefix,
   parsePathPrefix,
   resolveLocales,
+  translatePagePath,
   translatePagePaths,
   JaenI18nOptions
 } from '../utils/i18n'
@@ -188,11 +189,28 @@ export const createPages = async (
       let component = template.absolutePath
 
       if (!locale.isDefault) {
-        fannedOutPaths.add(normalizePath(entry.path))
+        // A localized CMS tree may live at either variant of the localized
+        // path: the slug-translated fan-out path or the prefixed but
+        // untranslated path (a tree that kept the canonical slugs). Both
+        // fold into this fan-out instead of becoming a duplicate page.
+        const variantPaths = [
+          normalizePath(entry.path),
+          normalizePath(
+            translatePagePath(
+              pagePath,
+              {...locale, slugs: {}},
+              i18n.trailingSlash
+            )
+          )
+        ]
 
-        const localizedResolved = templatedNodeByPath.get(
-          normalizePath(entry.path)
-        )
+        let localizedResolved: ResolvedPage | undefined
+
+        for (const variantPath of variantPaths) {
+          fannedOutPaths.add(variantPath)
+          localizedResolved =
+            localizedResolved ?? templatedNodeByPath.get(variantPath)
+        }
 
         if (localizedResolved) {
           jaenPageId = localizedResolved.node.id
