@@ -79,7 +79,16 @@ export const onCreatePage = async (
   // -------------------------------------------------------------------------
 
   if (i18n && !hasLocaleContext && isFanOutCandidate(page.path)) {
-    if (isStateful) {
+    // A stateful page whose path already carries a configured locale prefix
+    // (a physical src/pages/en/foo.tsx) is a hand-written localized variant.
+    // Fanning it out again would double the prefix (/en/en/foo/), so it
+    // falls through to the prefix handling below and only receives its
+    // locale context. Same rule as the programmatic branch.
+    const alreadyPrefixed = Boolean(
+      localeForPrefix(parsePathPrefix(page.path), i18n)
+    )
+
+    if (isStateful && !alreadyPrefixed) {
       // Stateful pages (src/pages) fan out into one page per locale. Every
       // clone gets its own jaenPageId derived from the localized path, so
       // each locale's content is edited independently in the CMS.
