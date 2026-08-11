@@ -1,12 +1,31 @@
-import {ColorModeScript} from '@chakra-ui/react'
 import {GatsbySSR} from 'gatsby'
 
 import './dist/jaen.css'
 
-import {theme} from './src/theme/jaen-theme/index'
-
 export {wrapPageElement} from './src/gatsby/wrap-page-element'
 export {wrapRootElement} from './src/gatsby/wrap-root-element'
+
+/**
+ * The no-flash script, hand-written because next-themes only ships a Next.js
+ * one. It has to agree with next-themes' storage contract exactly, or the two
+ * disagree for one paint: key `theme`, values light|dark|system, class on the
+ * <html> element. The class is what v3's conditions select on
+ * (`.dark, .dark .chakra-theme:not(.light)`), and `color-scheme` is what stops
+ * the browser painting white scrollbars over a dark page.
+ *
+ * It moves from setPreBodyComponents to setHeadComponents so it runs before the
+ * first paint rather than after the opening body tag.
+ *
+ * No suppressHydrationWarning is needed, unlike in Next.js: Gatsby renders
+ * <html> from its own default-html.js and hydrates only #___gatsby, so React
+ * never diffs the class this writes.
+ */
+const NO_FLASH = `(function(){try{
+var d=document.documentElement,s=localStorage.getItem('theme')||'system',
+m=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',
+r=s==='system'?m:s;
+d.classList.remove('light','dark');d.classList.add(r);d.style.colorScheme=r;
+}catch(e){}})()`
 
 interface I18nRenderOptions {
   siteUrl?: string
@@ -24,13 +43,12 @@ export const onRenderBody: GatsbySSR['onRenderBody'] = (
   args,
   pluginOptions
 ) => {
-  const {setPreBodyComponents, setHtmlAttributes, setHeadComponents, pathname} =
-    args
+  const {setHtmlAttributes, setHeadComponents, pathname} = args
 
-  setPreBodyComponents([
-    <ColorModeScript
-      initialColorMode={theme.config.initialColorMode}
-      key="chakra-ui-no-flash"
+  setHeadComponents([
+    <script
+      key="jaen-color-mode"
+      dangerouslySetInnerHTML={{__html: NO_FLASH}}
     />
   ])
 
