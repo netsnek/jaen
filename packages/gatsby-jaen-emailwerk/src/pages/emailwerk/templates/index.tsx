@@ -1,5 +1,6 @@
 import {PageConfig, useNotificationsContext} from 'jaen'
 import {
+  Badge,
   Button,
   HStack,
   Heading,
@@ -18,8 +19,8 @@ import {
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
 import {Link as GatsbyLink, graphql} from 'gatsby'
 import {useEffect} from 'react'
-import {resolve, useQuery} from '../../../client/index'
-import {EmailSMTPModal} from '../../../EmailSMTPModal'
+import {SenderTransport, resolve, useQuery} from '../../../client/index'
+import {SenderModal} from '../../../SenderModal'
 
 const SkeletonRow = () => (
   <Tr>
@@ -34,41 +35,6 @@ const SkeletonRow = () => (
 const Page: React.FC = () => {
   const {prompt, toast} = useNotificationsContext()
 
-  // const [templates, setTemplates] = useState<MailPressTemplate[]>([])
-  // const [isLoading, setIsLoading] = useState(true)
-
-  // useEffect(() => {
-  //   // mock data
-  //   const load = async () => {
-  //     const [data, errors] = await sq.query(q => {
-  //       return q.mailpressAllTemplate.map(t => {
-  //         return {
-  //           id: t.id,
-  //           description: t.description,
-  //           subject: t.envelope?.subject,
-  //           from: t.envelope?.from?.value,
-  //           replyTo: t.envelope?.replyTo?.value,
-  //           updatedAt: t.updatedAt,
-  //           createdAt: t.createdAt
-  //         }
-  //       })
-  //     })
-
-  //     if (errors?.length) {
-  //       toast({
-  //         title: 'Error',
-  //         description: 'Failed to load templates'
-  //       })
-  //     } else {
-  //       setTemplates(data)
-  //     }
-
-  //     setIsLoading(false)
-  //   }
-
-  //   load()
-  // }, [])
-
   const data = useQuery({})
 
   useEffect(() => {
@@ -77,7 +43,6 @@ const Page: React.FC = () => {
 
   useEffect(() => {
     if (data.$state.error) {
-      console.log('error', data.$state.error)
       toast({
         title: `Failed to load templates (${data.$state.error.name})`,
         description: data.$state.error.message,
@@ -85,6 +50,20 @@ const Page: React.FC = () => {
       })
     }
   }, [data.$state.error])
+
+  // The org's senders replace mailpress' single "connected email"
+  // (me.organization.email); the default sender is what emailwerk uses when a
+  // template has no explicit senderId.
+  const senders = data.senders.map(sender => ({
+    id: sender.id,
+    address: sender.address,
+    displayName: sender.displayName,
+    transport: sender.transport,
+    isDefault: sender.isDefault,
+    enabled: sender.enabled
+  }))
+
+  const defaultSender = senders.find(sender => sender.isDefault)
 
   const handleAddTemplateClick = async () => {
     const description = await prompt({
@@ -97,7 +76,7 @@ const Page: React.FC = () => {
         await resolve(
           ({mutation}) => {
             const template = mutation.templateCreate({
-              input: {
+              args: {
                 description: description,
                 content: 'Hello!',
                 variables: [],
@@ -132,24 +111,67 @@ const Page: React.FC = () => {
 
         <HStack spacing="4" justifyContent="space-between">
           <HStack>
-            {data.me.organization.email?.email ? (
+            {defaultSender?.address ? (
               <Text>
-                Connected email:{' '}
-                <strong>{data.me.organization.email?.email}</strong>
+                Default sender: <strong>{defaultSender.address}</strong>{' '}
+                <Badge colorScheme={defaultSender.enabled ? 'green' : 'red'}>
+                  {defaultSender.transport}
+                </Badge>
               </Text>
             ) : (
-              <Text color="yellow.500">No email connected</Text>
+              <Text color="yellow.500">No sender configured</Text>
             )}
           </HStack>
           <HStack>
-            <EmailSMTPModal
-              onSubmit={async input => {
-                await resolve(({mutation}) => {
-                  return mutation.organizationSetEmail({
-                    email: input.email,
-                    config: input.config
-                  }).id
+            <SenderModal
+              senders={senders}
+              onCreate={async input => {
+                await resolve(
+                  ({mutation}) => {
+                    return mutation.senderCreate({
+                      args: {
+                        address: input.address,
+                        displayName: input.displayName || undefined,
+                        transport: SenderTransport.SMTP,
+                        isDefault: input.isDefault,
+                        smtp: input.smtp
+                      }
+                    }).id
+                  },
+                  {cachePolicy: 'no-store'}
+                )
+
+                await data.$refetch(true)
+              }}
+              onSetDefault={async id => {
+                await resolve(
+                  ({mutation}) => mutation.senderSetDefault({args: {id}})?.id,
+                  {cachePolicy: 'no-store'}
+                )
+
+                await data.$refetch(true)
+              }}
+              onVerify={async id => {
+                const result = await resolve(
+                  ({mutation}) => {
+                    const verify = mutation.senderVerify({args: {id}})
+
+                    return {ok: verify.ok, error: verify.error}
+                  },
+                  {cachePolicy: 'no-store'}
+                )
+
+                toast({
+                  title: result.ok ? 'Sender verified' : 'Verification failed',
+                  description: result.error ?? undefined,
+                  status: result.ok ? 'success' : 'error'
                 })
+              }}
+              onDelete={async id => {
+                await resolve(
+                  ({mutation}) => mutation.senderDelete({args: {id}}).ok,
+                  {cachePolicy: 'no-store'}
+                )
 
                 await data.$refetch(true)
               }}
@@ -182,7 +204,7 @@ const Page: React.FC = () => {
               </>
             )}
 
-            {data.allTemplate().nodes.map(template => {
+            {data.templates().nodes.map(template => {
               return (
                 <Tr
                   key={template.id}
@@ -193,7 +215,7 @@ const Page: React.FC = () => {
                     </Link>
                   </Td>
                   <Td>{template.envelope?.subject}</Td>
-                  <Td>{template.envelope?.to}</Td>
+                  <Td>{template.envelope?.to?.join(', ')}</Td>
                   <Td>{template.envelope?.replyTo}</Td>
                   <Td>{template.updatedAt}</Td>
                   <Td>{template.createdAt}</Td>
@@ -201,7 +223,7 @@ const Page: React.FC = () => {
               )
             })}
 
-            {data.allTemplate().totalCount === 0 && (
+            {data.templates().totalCount === 0 && (
               <Tr visibility={data.$state.isLoading ? 'hidden' : 'visible'}>
                 <Td colSpan={6}>No templates found</Td>
               </Tr>
@@ -220,8 +242,8 @@ export const pageConfig: PageConfig = {
   icon: 'FaEnvelope',
   menu: {
     type: 'app',
-    group: 'mailpress',
-    groupLabel: 'Mailpress',
+    group: 'emailwerk',
+    groupLabel: 'Emailwerk',
     order: 500
   },
   layout: {
@@ -229,12 +251,12 @@ export const pageConfig: PageConfig = {
   },
   breadcrumbs: [
     {
-      label: 'Mailpress',
-      path: '/mailpress/'
+      label: 'Emailwerk',
+      path: '/emailwerk/'
     },
     {
       label: 'Templates',
-      path: '/mailpress/templates/'
+      path: '/emailwerk/templates/'
     }
   ],
   auth: {

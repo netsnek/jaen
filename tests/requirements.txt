@@ -1,0 +1,4 @@
+# The testkit uses only the standard library. These are for running notebooks.
+jupyterlab>=4
+papermill>=2.5
+ipykernel>=6

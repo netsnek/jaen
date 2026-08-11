@@ -7,12 +7,14 @@ export interface JaenPluginOptions extends PluginOptions {
     cwd?: string
   }
   pylonUrl?: string
-  zitadel: {
+  zitadelGql: {
     organizationId: string
     clientId: string
     authority: string
     redirectUri: string
     projectIds?: string[]
+    /** GraphQL endpoint of the zitadel-gql server. Defaults to `${authority}/graphql`. */
+    graphqlUrl?: string
   }
   googleAnalytics?: {
     trackingIds?: string[]
@@ -21,6 +23,23 @@ export interface JaenPluginOptions extends PluginOptions {
     org: string
     project: string
     dsn: string
+  }
+  /** Absolute site origin; forwarded to gatsby-source-jaen for the sitemap. */
+  siteUrl?: string
+  /**
+   * Localized page generation, forwarded to gatsby-source-jaen. The default
+   * locale keeps unprefixed paths; every other locale is served under its
+   * prefix. System routes (cms, login, ...) are never localized.
+   */
+  i18n?: {
+    defaultLocale: string
+    locales: Array<{
+      locale: string
+      prefix?: string
+      slugs?: Record<string, string>
+      pageBlacklist?: string[]
+    }>
+    trailingSlash?: 'always' | 'never' | 'ignore'
   }
 }
 
@@ -33,12 +52,13 @@ export const pluginOptionsSchema: GatsbyNode['pluginOptionsSchema'] = ({
       cwd: Joi.string()
     }).required(),
     pylonUrl: Joi.string(),
-    zitadel: Joi.object({
+    zitadelGql: Joi.object({
       organizationId: Joi.string().required(),
       clientId: Joi.string().required(),
       authority: Joi.string().required(),
       redirectUri: Joi.string().required(),
-      projectIds: Joi.array().items(Joi.string())
+      projectIds: Joi.array().items(Joi.string()),
+      graphqlUrl: Joi.string().uri()
     }).required(),
 
     googleAnalytics: Joi.object({
@@ -49,6 +69,34 @@ export const pluginOptionsSchema: GatsbyNode['pluginOptionsSchema'] = ({
       project: Joi.string().required(),
       dsn: Joi.string().required(),
       feedbackIntegration: Joi.object()
+    }),
+    siteUrl: Joi.string().uri(),
+    i18n: Joi.object({
+      defaultLocale: Joi.string().required(),
+      locales: Joi.array()
+        .items(
+          Joi.object({
+            locale: Joi.string().required(),
+            prefix: Joi.string(),
+            slugs: Joi.object().pattern(Joi.string(), Joi.string()),
+            pageBlacklist: Joi.array().items(Joi.string())
+          })
+        )
+        .min(1)
+        .required(),
+      trailingSlash: Joi.string().valid('always', 'never', 'ignore')
+    }).custom((i18n: any, helpers: any) => {
+      // A defaultLocale that matches no locale entry would strip the
+      // unprefixed pages and silently drop x-default — fail the build.
+      if (
+        !i18n.locales.some((entry: any) => entry.locale === i18n.defaultLocale)
+      ) {
+        return helpers.message({
+          custom: `i18n.defaultLocale "${i18n.defaultLocale}" is not in i18n.locales`
+        })
+      }
+
+      return i18n
     })
   })
 }
@@ -118,7 +166,7 @@ export const onCreateWebpackConfig: GatsbyNode['onCreateWebpackConfig'] =
 
           __JAEN_REMOTE__: JSON.stringify(pluginOptions.remote),
           __JAEN_PYLON_URL__: JSON.stringify(pluginOptions.pylonUrl),
-          __JAEN_ZITADEL__: JSON.stringify(pluginOptions.zitadel)
+          __JAEN_ZITADEL_GQL__: JSON.stringify(pluginOptions.zitadelGql)
         })
       ]
     })

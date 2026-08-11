@@ -50,6 +50,29 @@ function extractDataFromConfig(
       return value.elements.map(element => processValue(element as any))
     } else if (t.isObjectExpression(value)) {
       return extractDataFromConfig(value)
+    } else if (t.isCallExpression(value)) {
+      if (t.isIdentifier(value.callee) && value.callee.name === 'intlText') {
+        const [idArg, defaultMessageArg] = value.arguments
+
+        if (t.isStringLiteral(idArg)) {
+          const id = idArg.value
+          const defaultMessage =
+            defaultMessageArg && t.isStringLiteral(defaultMessageArg)
+              ? defaultMessageArg.value
+              : undefined
+
+          const messageObject = defaultMessage
+            ? `{ id: ${JSON.stringify(id)}, defaultMessage: ${JSON.stringify(
+                defaultMessage
+              )} }`
+            : `{ id: ${JSON.stringify(id)} }`
+
+          return {
+            type: 'function',
+            value: `({intl}) => intl.formatMessage(${messageObject})`
+          }
+        }
+      }
     } else if (
       t.isFunctionExpression(value) ||
       t.isArrowFunctionExpression(value)

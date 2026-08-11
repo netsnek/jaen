@@ -7,14 +7,16 @@ declare global {
   }
 
   var __JAEN_PYLON_URL__: string | undefined
-  var __JAEN_MAILPRESS_PYLON_URL__: string | undefined
+  var __JAEN_EMAILWERK_URL__: string | undefined
 
-  var __JAEN_ZITADEL__: {
+  var __JAEN_ZITADEL_GQL__: {
     organizationId: string
     clientId: string
     authority: string
     redirectUri: string
     projectIds?: string[]
+    /** GraphQL endpoint of the zitadel-gql server. Defaults to `${authority}/graphql`. */
+    graphqlUrl?: string
   }
 
   interface Window {

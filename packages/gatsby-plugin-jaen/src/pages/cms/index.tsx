@@ -3,6 +3,7 @@ import {PageProps, graphql, useStaticQuery} from 'gatsby'
 
 import {Dashboard} from '../../components/cms/Dashboard'
 import {CMSManagement, useCMSManagement} from '../../connectors/cms-management'
+import {intlText} from '../../lib/intl'
 
 const DashboardPage: React.FC<PageProps> = () => {
   const auth = useAuth()
@@ -51,18 +52,18 @@ const Page: React.FC<PageProps> = props => {
 export default Page
 
 export const pageConfig: PageConfig = {
-  label: 'Jaen CMS',
+  label: intlText('CmsDashboardTitle', 'Jaen CMS'),
   icon: 'FaTachometerAlt',
   menu: {
     type: 'app',
     group: 'cms',
-    label: 'Dashboard',
-    groupLabel: 'Jaen CMS',
+    label: intlText('CmsDashboardMenuLabel', 'Dashboard'),
+    groupLabel: intlText('CmsDashboardMenuGroupLabel', 'Jaen CMS'),
     order: 100
   },
   breadcrumbs: [
     {
-      label: 'CMS',
+      label: intlText('CmsLabelsRoot', 'CMS'),
       path: '/cms/'
     }
   ],

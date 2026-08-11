@@ -20,8 +20,8 @@ export const pageConfig: PageConfig = {
   },
   breadcrumbs: [
     {
-      label: 'Mailpress',
-      path: '/mailpress/'
+      label: 'Emailwerk',
+      path: '/emailwerk/'
     }
   ],
   auth: {

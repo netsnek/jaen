@@ -1,4 +1,5 @@
 export * from './connectors'
+export * as zitadelGql from './clients/zitadel-gql'
 export {
   AuthenticationProvider,
   useAuth,
@@ -60,7 +61,10 @@ export {
 
 export {
   CookieConsentProvider,
-  useCookieConsentContext
+  useCookieConsentContext,
+  useCookieConsentCategory,
+  COOKIE_CONSENT_CHANGE_EVENT,
+  CookieConsentChangeDetail
 } from './contexts/cookie-consent'
 
 export {WidgetProvider, useWidgetContext} from './contexts/widget'

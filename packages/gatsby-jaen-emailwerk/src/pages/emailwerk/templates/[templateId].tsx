@@ -39,7 +39,12 @@ import {Editor} from '@monaco-editor/react'
 import {Link as GatsbyLink, navigate} from 'gatsby'
 import {sanitize} from 'isomorphic-dompurify'
 import {Controller, useFieldArray, useForm} from 'react-hook-form'
-import {resolve} from '../../../client'
+import {
+  EngineKind,
+  TemplateEngine,
+  VariableType,
+  resolve
+} from '../../../client'
 
 const Page: React.FC<PageProps> = ({params}) => {
   const templateId = params.templateId
@@ -55,6 +60,7 @@ const Page: React.FC<PageProps> = ({params}) => {
     handleSubmit,
     reset,
     watch,
+    getValues,
     control,
     formState: {errors, isSubmitting, isDirty}
   } = useForm<{
@@ -63,7 +69,7 @@ const Page: React.FC<PageProps> = ({params}) => {
     description: string
     verifyReplyTo?: boolean
     content: string
-    transformer?: string
+    engine: string
     updatedAt: string
     createdAt: string
     envelope: {
@@ -76,6 +82,7 @@ const Page: React.FC<PageProps> = ({params}) => {
     variables: {
       id?: string
       name: string
+      type?: string
       isRequired?: boolean
       isConstant?: boolean
       description?: string
@@ -86,6 +93,7 @@ const Page: React.FC<PageProps> = ({params}) => {
       id: '',
       description: '',
       content: '',
+      engine: TemplateEngine.LIQUID,
       updatedAt: '',
       createdAt: '',
       envelope: {
@@ -117,7 +125,7 @@ const Page: React.FC<PageProps> = ({params}) => {
         id: string
         description: string
         content: string
-        transformer?: string
+        engine: string
         verifyReplyTo?: boolean
         envelope?: {
           subject?: string
@@ -129,19 +137,13 @@ const Page: React.FC<PageProps> = ({params}) => {
         variables: {
           id?: string
           name: string
+          type?: string
           isRequired?: boolean
           isConstant?: boolean
           description?: string
           defaultValue?: string
         }[]
-        parent?: {
-          id: string
-          description: string
-        }
-        links: {
-          id: string
-          description: string
-        }[]
+        parentId?: string
         updatedAt: string
         createdAt: string
       }
@@ -152,25 +154,37 @@ const Page: React.FC<PageProps> = ({params}) => {
     {
       id: string
       description: string
+      parentId?: string
     }[]
   >([])
+
+  const [serverPreview, setServerPreview] = useState<string | null>(null)
 
   const [state, setState] = useState<{isLoading: boolean; error?: Error}>({
     isLoading: true
   })
+
+  // TemplateView has no `links`/`parent` object fields anymore (only
+  // `parentId`), so linked templates are derived from the template list:
+  // every template whose parentId points at this one.
+  const linkedTemplates = useMemo(
+    () => parentTemplates.filter(t => t.parentId === templateId),
+    [parentTemplates, templateId]
+  )
 
   const fetchData = async () => {
     setState({isLoading: true})
 
     try {
       const {template, parentTemplates} = await resolve(({query}) => {
-        const template = query.template({id: templateId})!
+        const template = query.template({args: {id: templateId}})!
 
         const parentTemplates = query
-          .allTemplate()
+          .templates()
           .nodes.map(t => ({
             id: t.id,
-            description: t.description
+            description: t.description,
+            parentId: t.parentId || undefined
           }))
           .filter(t => t.id !== templateId)
 
@@ -179,7 +193,7 @@ const Page: React.FC<PageProps> = ({params}) => {
             id: template.id,
             description: template.description,
             content: template.content,
-            transformer: template.transformer || undefined,
+            engine: template.engine,
             verifyReplyTo: template.verifyReplyTo || undefined,
             envelope: {
               subject: template.envelope?.subject || undefined,
@@ -189,21 +203,13 @@ const Page: React.FC<PageProps> = ({params}) => {
             variables: template.variables.map(v => ({
               id: v.id,
               name: v.name,
+              type: v.type,
               isRequired: v.isRequired || undefined,
               isConstant: v.isConstant || undefined,
               description: v.description || undefined,
               defaultValue: v.defaultValue || undefined
             })),
-            parent: template.parent?.id
-              ? {
-                  id: template.parent.id,
-                  description: template.parent.description
-                }
-              : undefined,
-            links: template.links.map(l => ({
-              id: l.id,
-              description: l.description
-            })),
+            parentId: template.parentId || undefined,
             updatedAt: template.updatedAt,
             createdAt: template.createdAt
           },
@@ -236,39 +242,19 @@ const Page: React.FC<PageProps> = ({params}) => {
 
   useEffect(() => {
     reset(template)
-    console.log('defaultValues', template)
   }, [JSON.stringify(template)])
 
   const onSubmit = handleSubmit(async input => {
-    console.log('input', input)
-
-    if (input.transformer) {
-      try {
-        await resolve(({mutation}) => {
-          return mutation.templateTransformer({
-            id: templateId,
-            transformer: input.transformer!
-          }).id
-        })
-        console.log('transformer updated')
-      } catch (e) {
-        toast({
-          title: 'Error!',
-          description: `Error updating transformer for template ${templateId}`,
-          status: 'error'
-        })
-      }
-    }
-
     try {
       await resolve(({mutation}) => {
         return mutation.templateUpdate({
-          id: templateId,
-          input: {
+          args: {
+            id: templateId,
             description: input.description,
             parentId: input.parentId || null,
             verifyReplyTo: input.verifyReplyTo ?? undefined,
             content: input.content,
+            engine: (input.engine as TemplateEngine) || undefined,
             envelope: {
               subject: input.envelope.subject || undefined,
               to: input.envelope.to?.map(to => to.email) || undefined,
@@ -276,13 +262,14 @@ const Page: React.FC<PageProps> = ({params}) => {
             },
             variables: input.variables.map(v => ({
               name: v.name,
-              isRequired: v.isRequired ?? undefined,
-              isConstant: v.isConstant ?? undefined,
+              type: (v.type as VariableType) || VariableType.STRING,
+              isRequired: v.isRequired ?? false,
+              isConstant: v.isConstant ?? false,
               description: v.description || undefined,
               defaultValue: v.defaultValue || undefined
             }))
           }
-        }).id
+        })?.id
       })
 
       toast({
@@ -312,8 +299,10 @@ const Page: React.FC<PageProps> = ({params}) => {
       try {
         await resolve(({mutation}) => {
           return mutation.templateDelete({
-            id: templateId
-          })
+            args: {
+              id: templateId
+            }
+          }).ok
         })
 
         toast({
@@ -330,6 +319,44 @@ const Page: React.FC<PageProps> = ({params}) => {
           status: 'error'
         })
       }
+    }
+  }
+
+  // Server-side render preview through emailwerk's stateless
+  // `templatePreview` (real engine output, unlike the sanitized raw
+  // content below).
+  const handleServerPreviewClick = async () => {
+    try {
+      const values = getValues()
+
+      const preview = await resolve(
+        ({mutation}) => {
+          const result = mutation.templatePreview({
+            args: {
+              content: values.content || '',
+              engine: (values.engine as EngineKind) || undefined,
+              variables: (values.variables || []).map(v => ({
+                name: v.name,
+                type: (v.type as VariableType) || VariableType.STRING,
+                defaultValue: v.defaultValue || undefined,
+                isRequired: v.isRequired ?? false,
+                isConstant: v.isConstant ?? false
+              }))
+            }
+          })
+
+          return result.html
+        },
+        {cachePolicy: 'no-store'}
+      )
+
+      setServerPreview(sanitize(preview))
+    } catch (e) {
+      toast({
+        title: 'Error!',
+        description: 'Error rendering the server preview',
+        status: 'error'
+      })
     }
   }
 
@@ -391,6 +418,19 @@ const Page: React.FC<PageProps> = ({params}) => {
             </Skeleton>
 
             <Skeleton isLoaded={!state.isLoading}>
+              <FormControl id="engine">
+                <FormLabel>Engine</FormLabel>
+                <Select {...register('engine')}>
+                  {Object.values(TemplateEngine).map(engine => (
+                    <option key={engine} value={engine}>
+                      {engine}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+            </Skeleton>
+
+            <Skeleton isLoaded={!state.isLoading}>
               <FormControl id="verifyReplyTo">
                 <FormLabel>Verify Reply To</FormLabel>
                 <Checkbox {...register('verifyReplyTo')} />
@@ -400,9 +440,9 @@ const Page: React.FC<PageProps> = ({params}) => {
             <Skeleton isLoaded={!state.isLoading}>
               <FormControl id="linked">
                 <FormLabel>Linked</FormLabel>
-                {template?.links.length ? (
+                {linkedTemplates.length ? (
                   <UnorderedList>
-                    {template.links.map(t => (
+                    {linkedTemplates.map(t => (
                       <ListItem key={t.id}>
                         <Link as={GatsbyLink} to={`../${t.id}`}>
                           {t.description} ({t.id})
@@ -479,33 +519,6 @@ const Page: React.FC<PageProps> = ({params}) => {
 
             <Card>
               <CardHeader>
-                <Heading size="sm">Transformer</Heading>
-              </CardHeader>
-              <CardBody>
-                <Stack>
-                  <Skeleton isLoaded={!state.isLoading}>
-                    <FormControl id="transformer">
-                      <Controller
-                        control={control}
-                        name="transformer"
-                        render={({field}) => (
-                          <Editor
-                            theme={'vs-dark'}
-                            height="var(--chakra-sizes-xs)"
-                            defaultLanguage="javascript"
-                            defaultValue={field.value || undefined}
-                            onChange={(value, _) => field.onChange(value)}
-                          />
-                        )}
-                      />
-                    </FormControl>
-                  </Skeleton>
-                </Stack>
-              </CardBody>
-            </Card>
-
-            <Card>
-              <CardHeader>
                 <Heading size="sm">Content</Heading>
               </CardHeader>
               <CardBody>
@@ -538,6 +551,19 @@ const Page: React.FC<PageProps> = ({params}) => {
                       />
                     </Skeleton>
                   </Stack>
+
+                  <Stack>
+                    <Heading size="sm">Rendered Preview</Heading>
+                    <Button
+                      alignSelf="start"
+                      variant="outline"
+                      onClick={handleServerPreviewClick}>
+                      Render Preview
+                    </Button>
+                    {serverPreview !== null && (
+                      <Box dangerouslySetInnerHTML={{__html: serverPreview}} />
+                    )}
+                  </Stack>
                 </Stack>
               </CardBody>
             </Card>
@@ -552,6 +578,7 @@ const Page: React.FC<PageProps> = ({params}) => {
                     <Thead>
                       <Tr>
                         <Th>Name</Th>
+                        <Th>Type</Th>
                         <Th>Description</Th>
                         <Th>Default Value</Th>
                         <Th>Required</Th>
@@ -568,6 +595,15 @@ const Page: React.FC<PageProps> = ({params}) => {
                               defaultValue={field.name}
                               {...register(`variables.${index}.name`)}
                             />
+                          </Td>
+                          <Td>
+                            <Select {...register(`variables.${index}.type`)}>
+                              {Object.values(VariableType).map(type => (
+                                <option key={type} value={type}>
+                                  {type}
+                                </option>
+                              ))}
+                            </Select>
                           </Td>
                           <Td>
                             <Textarea
@@ -605,7 +641,10 @@ const Page: React.FC<PageProps> = ({params}) => {
 
                   <Button
                     onClick={() =>
-                      variablesField.append({name: 'NEW_VARIABLE'})
+                      variablesField.append({
+                        name: 'NEW_VARIABLE',
+                        type: VariableType.STRING
+                      })
                     }>
                     Add Variable
                   </Button>
@@ -655,12 +694,12 @@ export const pageConfig: PageConfig = {
   },
   breadcrumbs: [
     {
-      label: 'Mailpress',
-      path: '/mailpress/'
+      label: 'Emailwerk',
+      path: '/emailwerk/'
     },
     {
       label: 'Templates',
-      path: '/mailpress/templates/'
+      path: '/emailwerk/templates/'
     }
   ],
   auth: {

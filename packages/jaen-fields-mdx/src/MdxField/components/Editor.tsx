@@ -141,6 +141,12 @@ export const Editor: React.FC<EditorProps> = props => {
         }
       }}>
       <TabsTemplateComponent
+        stats={{
+          fatal: stats.fatal ?? 0,
+          warn: stats.warn ?? 0,
+          info: stats.info ?? 0,
+          total: stats.total ?? 0
+        }}
         tabs={[
           {
             label: (
@@ -175,13 +181,15 @@ export const Editor: React.FC<EditorProps> = props => {
 
                 <MemoizedCodeMirror
                   value={state.value}
-                  extensions={[
-                    markdown({
-                      base: markdownLanguage,
-                      codeLanguages: languages
-                    }),
-                    EditorView.lineWrapping
-                  ]}
+                  extensions={
+                    props.editorExtensions ?? [
+                      markdown({
+                        base: markdownLanguage,
+                        codeLanguages: languages
+                      }),
+                      EditorView.lineWrapping
+                    ]
+                  }
                   onCreateEditor={editorView => {
                     setView(editorView)
                   }}

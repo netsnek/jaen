@@ -19,6 +19,8 @@ import {
 } from '@chakra-ui/react'
 import {graphql, PageProps, useStaticQuery} from 'gatsby'
 
+import {intlText} from '../../lib/intl'
+
 import {JaenWidgetProvider} from '../../contexts/jaen-widget'
 
 const Page: React.FC<PageProps> = () => {
@@ -209,15 +211,15 @@ const WidgetsTable: React.FC = () => {
 export default Page
 
 export const pageConfig: PageConfig = {
-  label: 'Jaen CMS | Debug',
+  label: intlText('CmsDebugTitle', 'Jaen CMS | Debug'),
 
   breadcrumbs: [
     {
-      label: 'CMS',
+      label: intlText('CmsLabelsRoot', 'CMS'),
       path: '/cms/'
     },
     {
-      label: 'Debug',
+      label: intlText('CmsDebugBreadcrumbsDebug', 'Debug'),
       path: '/cms/debug/'
     }
   ],

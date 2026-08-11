@@ -18,7 +18,7 @@ import {
 import {FC} from 'react'
 import {SubmitHandler, useForm} from 'react-hook-form'
 
-import {sq} from 'gatsby-jaen-mailpress'
+import {sendTemplateMail} from 'gatsby-jaen-emailwerk'
 
 type FormValues = {
   name: string
@@ -37,21 +37,21 @@ const ContactContent: FC = () => {
   const {errors, isSubmitting, isValid} = formState
 
   const onSubmit: SubmitHandler<FormValues> = async data => {
-    const [_, errors] = await sq.mutate(m =>
-      m.sendTemplateMail({
+    const result = await sendTemplateMail(
+      '77c7adf2-1b1b-4c1a-8d99-d44366764814',
+      {
         envelope: {
           to: [data.email],
           replyTo: data.email
         },
-        id: '77c7adf2-1b1b-4c1a-8d99-d44366764814',
         values: {
           name: data.name,
           message: data.message
         }
-      })
+      }
     )
 
-    if (errors) {
+    if (!result.ok) {
       toast({
         title: 'Error',
         description: 'Something went wrong while sending your message',

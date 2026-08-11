@@ -46,9 +46,34 @@ const cleanRichText = (
   })
 }
 
-const checkForHTMLTags = (input: string) => {
-  const htmlTagsRegex = /<("[^"]*"|'[^']*'|[^'">])*>/g
-  return htmlTagsRegex.test(input)
+/**
+ * Elements that may legally sit inside a heading or a paragraph.
+ *
+ * The list is HTML's phrasing content, trimmed to what a rich text value
+ * actually produces. Anything outside it is flow content, which a heading
+ * cannot contain, and a value carrying it has to be rendered in a div.
+ */
+const PHRASING_CONTENT =
+  /^(a|abbr|b|bdi|bdo|br|cite|code|data|dfn|em|i|kbd|mark|q|rp|rt|ruby|s|samp|small|span|strong|sub|sup|time|u|var|wbr)$/i
+
+/**
+ * Whether the value contains anything a heading may not hold.
+ *
+ * Asking "does this contain any tag at all" was the old test, and it cost the
+ * site its document outline: a heading whose only markup is the brand span
+ * around its final dot, which is how every section heading here is written,
+ * came out as a div. Screen readers and search engines then saw a page with no
+ * headings on it. A span is phrasing content and belongs inside the heading;
+ * only a div, a list or a table forces the fallback.
+ */
+const containsFlowContent = (input: string) => {
+  const tags = input.match(/<\s*\/?\s*([a-zA-Z][a-zA-Z0-9-]*)/g)
+
+  if (!tags) return false
+
+  return tags.some(
+    tag => !PHRASING_CONTENT.test(tag.replace(/^<\s*\/?\s*/, ''))
+  )
 }
 
 export interface TextFieldProps extends Omit<TextProps, 'children'> {
@@ -89,13 +114,18 @@ export const TextField = connectField<string, TextFieldProps>(
     const {toast} = useNotificationsContext()
 
     const asAs = useMemo(() => {
-      if (checkForHTMLTags(value)) {
+      if (containsFlowContent(value)) {
         return 'div'
-      } else if ((Wrapper as any).displayName === 'Heading') {
-        return 'h2'
-      } else {
+      }
+
+      // asAs is the caller's explicit choice and outranks the guess. It used
+      // to be dropped for headings, so asAs="h3" silently rendered an h2 and
+      // there was no way to place a heading at any level but the second.
+      if (definedAsAs) {
         return definedAsAs
       }
+
+      return (Wrapper as any).displayName === 'Heading' ? 'h2' : undefined
     }, [value, (Wrapper as any).displayName, definedAsAs])
 
     const handleTextSave = useDebouncedCallback(
@@ -126,8 +156,8 @@ export const TextField = connectField<string, TextFieldProps>(
           typeof Wrapper === 'string'
             ? Wrapper
             : typeof asAs === 'string'
-            ? asAs
-            : undefined
+              ? asAs
+              : undefined
 
         jaenField.register({
           as
@@ -366,9 +396,17 @@ export const TextField = connectField<string, TextFieldProps>(
           }
         }}
         sx={{
+          // Links inside a text field are brand coloured, and they have to
+          // match the brand colour the rest of the site uses for controls.
+          // brand.300 is a light tint that reads as a different orange next
+          // to a brand.500 button, so the light mode takes 500 and only the
+          // dark mode keeps the lighter tint for legibility.
           a: {
-            color: 'brand.300',
-            textDecoration: 'underline'
+            color: 'brand.500',
+            textDecoration: 'underline',
+            _dark: {
+              color: 'brand.300'
+            }
           }
         }}
       />

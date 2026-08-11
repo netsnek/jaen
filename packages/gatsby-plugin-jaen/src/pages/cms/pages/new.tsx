@@ -2,14 +2,17 @@ import {useLocation} from '@reach/router'
 import {PageConfig, useNotificationsContext} from 'jaen'
 import {navigate, PageProps} from 'gatsby'
 import {useEffect, useMemo, useState} from 'react'
+import {useIntl} from 'react-intl'
 
 import {New} from '../../../components/cms/Pages/New'
 import {
   CMSManagement,
   useCMSManagement
 } from '../../../connectors/cms-management'
+import {intlText} from '../../../lib/intl'
 
 const PagesNew: React.FC = () => {
+  const intl = useIntl()
   const {toast} = useNotificationsContext()
   const manager = useCMSManagement()
 
@@ -33,13 +36,16 @@ const PagesNew: React.FC = () => {
       if (pageTemplates.length > 0) {
         _parentPages[page.id] = {
           label: page.jaenPageMetadata.title || page.slug,
-          templates: pageTemplates.reduce((acc, template) => {
-            acc[template.id] = {
-              label: template.label
-            }
+          templates: pageTemplates.reduce(
+            (acc, template) => {
+              acc[template.id] = {
+                label: template.label
+              }
 
-            return acc
-          }, {} as {[key: string]: {label: string}})
+              return acc
+            },
+            {} as {[key: string]: {label: string}}
+          )
         }
       }
     }
@@ -103,8 +109,17 @@ const PagesNew: React.FC = () => {
           })
 
           toast({
-            title: 'Page created',
-            description: `Page ${data.title} has been created`,
+            title: intl.formatMessage({
+              id: 'CmsPagesNotificationsCreated',
+              defaultMessage: 'Page created'
+            }),
+            description: intl.formatMessage(
+              {
+                id: 'CmsPagesNotificationsCreatedDescription',
+                defaultMessage: 'Page {title} has been created'
+              },
+              {title: data.title}
+            ),
             status: 'success'
           })
 
@@ -126,18 +141,18 @@ const Page: React.FC<PageProps> = () => {
 export default Page
 
 export const pageConfig: PageConfig = {
-  label: 'New page',
+  label: intlText('CmsPagesTableNewPage', 'New page'),
   breadcrumbs: [
     {
-      label: 'CMS',
+      label: intlText('CmsLabelsRoot', 'CMS'),
       path: '/cms/'
     },
     {
-      label: 'Pages',
+      label: intlText('CmsPagesBreadcrumbsPages', 'Pages'),
       path: '/cms/pages/'
     },
     {
-      label: 'New',
+      label: intlText('CmsPagesBreadcrumbsNew', 'New'),
       path: '/cms/pages/new/'
     }
   ],

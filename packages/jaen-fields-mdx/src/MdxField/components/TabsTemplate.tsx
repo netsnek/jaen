@@ -50,6 +50,18 @@ export interface TabsProps {
   }>
   selectedTab: number
   componentsInfo?: ComponentInfoProps['items']
+  /**
+   * Health of the document currently in the editor, as vfile-statistics
+   * reports it. The built-in template only shows it as a badge on the preview
+   * label, but a custom template needs the raw numbers to react to them, for
+   * instance by outlining the editor while the source parses.
+   */
+  stats?: {
+    fatal: number
+    warn: number
+    info: number
+    total: number
+  }
 }
 
 const TabsTemplate: React.FC<TabsProps> = props => {

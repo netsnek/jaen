@@ -2,6 +2,7 @@ import {PageConfig} from 'jaen'
 import {graphql} from 'gatsby'
 import React, {useMemo} from 'react'
 import {useForm} from 'react-hook-form'
+import {useIntl} from 'react-intl'
 import Link from '@tiptap/extension-link'
 import Underline from '@tiptap/extension-underline'
 import {EditorContent, useEditor} from '@tiptap/react'
@@ -51,6 +52,7 @@ import {
   PopoverTrigger
 } from '../../../components/ui/popover'
 import {toast} from '../../../components/ui/use-toast'
+import {intlText} from '../../../lib/intl'
 import {cn} from '../../../lib/utils'
 
 import {Toggle} from '../../../components/ui/toggle'
@@ -67,6 +69,7 @@ const NotificationPopupSchema = z.object({
 })
 
 const Page: React.FC = () => {
+  const intl = useIntl()
   const [{data}, write] = useNotificationPopupWidget()
 
   const id = useMemo(() => {
@@ -95,14 +98,25 @@ const Page: React.FC = () => {
     })
 
     toast({
-      title: 'Notification updated',
-      description: 'The notification has been updated'
+      title: intl.formatMessage({
+        id: 'CmsNotificationNotificationsUpdated',
+        defaultMessage: 'Notification updated'
+      }),
+      description: intl.formatMessage({
+        id: 'CmsNotificationNotificationsUpdatedDescription',
+        defaultMessage: 'The notification has been updated'
+      })
     })
   }
 
   const editor = useEditor({
     extensions,
-    content: form.getValues().message ?? '<p>This is a example message</p>',
+    content:
+      form.getValues().message ??
+      `<p>${intl.formatMessage({
+        id: 'CmsNotificationFormMessageExample',
+        defaultMessage: 'This is a example message'
+      })}</p>`,
     editorProps: {
       attributes: {
         // prose dark:prose-invert prose-sm sm:prose-base lg:prose-lg xl:prose-2xl m-5 focus:outline-none
@@ -120,10 +134,18 @@ const Page: React.FC = () => {
       <CardHeader>
         <div className="flex justify-between">
           <div className="space-y-4">
-            <CardTitle>Notification Popup</CardTitle>
+            <CardTitle>
+              {intl.formatMessage({
+                id: 'CmsNotificationCardTitle',
+                defaultMessage: 'Notification Popup'
+              })}
+            </CardTitle>
             <CardDescription>
-              Configure the notification popup. The notification will be shown
-              when the user visits the page.
+              {intl.formatMessage({
+                id: 'CmsNotificationCardDescription',
+                defaultMessage:
+                  'Configure the notification popup. The notification will be shown when the user visits the page.'
+              })}
             </CardDescription>
           </div>
 
@@ -135,7 +157,10 @@ const Page: React.FC = () => {
                 popup.click()
               }
             }}>
-            Preview
+            {intl.formatMessage({
+              id: 'CmsNotificationPreview',
+              defaultMessage: 'Preview'
+            })}
           </Button>
         </div>
       </CardHeader>
@@ -148,12 +173,26 @@ const Page: React.FC = () => {
               name="title"
               render={({field}) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>
+                    {intl.formatMessage({
+                      id: 'CmsNotificationFormTitleLabel',
+                      defaultMessage: 'Title'
+                    })}
+                  </FormLabel>
                   <FormControl>
-                    <Input placeholder="News" {...field} />
+                    <Input
+                      placeholder={intl.formatMessage({
+                        id: 'CmsNotificationFormTitlePlaceholder',
+                        defaultMessage: 'News'
+                      })}
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
-                    The title of the notification
+                    {intl.formatMessage({
+                      id: 'CmsNotificationFormTitleDescription',
+                      defaultMessage: 'The title of the notification'
+                    })}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -165,7 +204,12 @@ const Page: React.FC = () => {
               name="message"
               render={({field}) => (
                 <FormItem>
-                  <FormLabel>Message</FormLabel>
+                  <FormLabel>
+                    {intl.formatMessage({
+                      id: 'CmsNotificationFormMessageLabel',
+                      defaultMessage: 'Message'
+                    })}
+                  </FormLabel>
 
                   {editor && (
                     <div className="flex flex-row space-x-1">
@@ -301,7 +345,12 @@ const Page: React.FC = () => {
                         type="button"
                         variant="outline"
                         onClick={() => {
-                          const url = prompt('Enter the URL')
+                          const url = prompt(
+                            intl.formatMessage({
+                              id: 'CmsNotificationFormEnterUrl',
+                              defaultMessage: 'Enter the URL'
+                            })
+                          )
                           if (url) {
                             editor.chain().focus().setLink({href: url}).run()
                           }
@@ -333,7 +382,10 @@ const Page: React.FC = () => {
                     <EditorContent editor={editor} className="" />
                   </FormControl>
                   <FormDescription>
-                    The message of the notification
+                    {intl.formatMessage({
+                      id: 'CmsNotificationFormMessageDescription',
+                      defaultMessage: 'The message of the notification'
+                    })}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -345,7 +397,12 @@ const Page: React.FC = () => {
               name="from"
               render={({field}) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>From</FormLabel>
+                  <FormLabel>
+                    {intl.formatMessage({
+                      id: 'CmsNotificationFormFromLabel',
+                      defaultMessage: 'From'
+                    })}
+                  </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -358,7 +415,12 @@ const Page: React.FC = () => {
                           {field.value ? (
                             format(field.value, 'PPP')
                           ) : (
-                            <span>Pick a date</span>
+                            <span>
+                              {intl.formatMessage({
+                                id: 'CmsNotificationFormPickDate',
+                                defaultMessage: 'Pick a date'
+                              })}
+                            </span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -379,7 +441,14 @@ const Page: React.FC = () => {
                     </PopoverContent>
                   </Popover>
                   <FormDescription>
-                    The notification will be shown <b>after</b> this date
+                    {intl.formatMessage(
+                      {
+                        id: 'CmsNotificationFormFromDescription',
+                        defaultMessage:
+                          'The notification will be shown <b>after</b> this date'
+                      },
+                      {b: chunks => <b>{chunks}</b>}
+                    )}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -391,7 +460,12 @@ const Page: React.FC = () => {
               name="to"
               render={({field}) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>To</FormLabel>
+                  <FormLabel>
+                    {intl.formatMessage({
+                      id: 'CmsNotificationFormToLabel',
+                      defaultMessage: 'To'
+                    })}
+                  </FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -404,7 +478,12 @@ const Page: React.FC = () => {
                           {field.value ? (
                             format(field.value, 'PPP')
                           ) : (
-                            <span>Pick a date</span>
+                            <span>
+                              {intl.formatMessage({
+                                id: 'CmsNotificationFormPickDate',
+                                defaultMessage: 'Pick a date'
+                              })}
+                            </span>
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -425,7 +504,14 @@ const Page: React.FC = () => {
                     </PopoverContent>
                   </Popover>
                   <FormDescription>
-                    The notification will be shown <b>until</b> this date
+                    {intl.formatMessage(
+                      {
+                        id: 'CmsNotificationFormToDescription',
+                        defaultMessage:
+                          'The notification will be shown <b>until</b> this date'
+                      },
+                      {b: chunks => <b>{chunks}</b>}
+                    )}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -445,7 +531,11 @@ const Page: React.FC = () => {
                   </FormControl>
                   <div className="space-y-1 leading-none">
                     <FormLabel>
-                      Show notification popup when the user visits the page
+                      {intl.formatMessage({
+                        id: 'CmsNotificationFormEnabledLabel',
+                        defaultMessage:
+                          'Show notification popup when the user visits the page'
+                      })}
                     </FormLabel>
                     {/* <FormDescription>
                       You can manage your mobile notifications in the{' '}
@@ -456,7 +546,12 @@ const Page: React.FC = () => {
               )}
             />
 
-            <Button type="submit">Submit</Button>
+            <Button type="submit">
+              {intl.formatMessage({
+                id: 'CmsNotificationFormSubmit',
+                defaultMessage: 'Submit'
+              })}
+            </Button>
           </form>
         </Form>
       </CardContent>
@@ -469,7 +564,7 @@ export default Page
 export {Head} from 'jaen'
 
 export const pageConfig: PageConfig = {
-  label: 'Jaen CMS | Notification',
+  label: intlText('CmsNotificationTitle', 'Jaen CMS | Notification'),
   icon: 'FaBell',
   layout: {
     name: 'jaen'
@@ -477,14 +572,14 @@ export const pageConfig: PageConfig = {
   menu: {
     type: 'app',
     group: 'cms',
-    label: 'Popup',
-    groupLabel: 'Jaen CMS',
+    label: intlText('CmsNotificationMenuLabel', 'Popup'),
+    groupLabel: intlText('CmsDashboardMenuGroupLabel', 'Jaen CMS'),
 
     order: 450
   },
   breadcrumbs: [
     {
-      label: 'Popup',
+      label: intlText('CmsNotificationBreadcrumbsPopup', 'Popup'),
       path: '/notification/popup/'
     }
   ],

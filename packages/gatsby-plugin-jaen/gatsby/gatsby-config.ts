@@ -1,54 +1,39 @@
 import {GatsbyConfig} from 'gatsby'
 
-const Config: GatsbyConfig = {
+interface JaenThemeI18nOptions {
+  defaultLocale: string
+  locales: Array<{
+    locale: string
+    prefix?: string
+    slugs?: Record<string, string>
+    pageBlacklist?: string[]
+  }>
+  trailingSlash?: 'always' | 'never' | 'ignore'
+}
+
+interface JaenThemeOptions {
+  i18n?: JaenThemeI18nOptions
+  siteUrl?: string
+}
+
+/**
+ * Theme config. i18n and siteUrl options are forwarded to gatsby-source-jaen,
+ * which owns localized page generation and the hreflang-aware sitemap.xml /
+ * robots.txt emission (the former gatsby-plugin-sitemap had neither i18n
+ * awareness nor system-route knowledge and is gone).
+ */
+const Config = (themeOptions: JaenThemeOptions): GatsbyConfig => ({
   jsxRuntime: 'automatic',
   jsxImportSource: '@emotion/react',
   plugins: [
     `gatsby-plugin-image`,
     `gatsby-plugin-sharp`,
     `gatsby-transformer-sharp`,
-    `gatsby-source-jaen`,
     {
-      resolve: `gatsby-plugin-sitemap`,
+      resolve: `gatsby-source-jaen`,
       options: {
-        excludes: [
-          '/cms',
-          '/cms/*',
-          '/login',
-          '/logout',
-          '/password_reset',
-          '/settings',
-          '/signup'
-        ],
-        query: `
-        {
-          jaenSite {
-            id
-            siteMetadata {
-              siteUrl
-            }
-          }
-          allSitePage {
-            nodes {
-              path
-            }
-          }
-        }`,
-        resolveSiteUrl: data => {
-          console.log('RESOLVE SITE URL', data)
-          return data.jaenSite?.siteMetadata?.siteUrl || 'https://page.jaen.io'
-        },
-        resolvePages: data => {
-          return data.allSitePage.nodes.map(page => {
-            return {...page}
-          })
-        },
-        serialize: ({path, modifiedGmt}: any) => {
-          return {
-            url: path,
-            lastmod: modifiedGmt
-          }
-        }
+        ...(themeOptions.i18n ? {i18n: themeOptions.i18n} : {}),
+        ...(themeOptions.siteUrl ? {siteUrl: themeOptions.siteUrl} : {})
       }
     },
     {
@@ -96,6 +81,6 @@ const Config: GatsbyConfig = {
       }
     }
   ]
-}
+})
 
 export default Config

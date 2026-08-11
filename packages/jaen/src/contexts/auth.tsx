@@ -4,8 +4,22 @@ import {AuthProvider} from 'react-oidc-context'
 import {PageProps} from '../types'
 
 import {useAuth as useOIDCAuth} from 'react-oidc-context'
+import {fetchCurrentUserRoles} from '../clients/zitadel-gql'
 import {AuthUserProvider} from './auth-user'
 import {useNotificationsContext} from './notifications'
+
+/**
+ * Role keys carried in the token itself. Zitadel emits the claim as one
+ * object (single project) or an array of objects (multi-project audience);
+ * both shapes map role keys to org projections.
+ */
+const rolesFromTokenClaim = (claim: unknown): string[] => {
+  const items = Array.isArray(claim) ? claim : claim ? [claim] : []
+
+  return items.flatMap(item =>
+    item && typeof item === 'object' ? Object.keys(item) : []
+  )
+}
 
 export const useAuth = () => {
   const oidcAuth = useOIDCAuth()
@@ -14,51 +28,48 @@ export const useAuth = () => {
   const [roles, setRoles] = React.useState<string[]>([])
 
   useEffect(() => {
-    const getUsergrants = async () => {
-      setIsRolesLoading(true)
-      // https://accounts.cronit.io/auth/v1/usergrants/me/_search
+    let cancelled = false
 
-      const response = await fetch(
-        `${__JAEN_ZITADEL__.authority}/auth/v1/usergrants/me/_search`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${oidcAuth.user?.access_token}`
-          }
-        }
+    const getRoles = async () => {
+      const claimRoles = rolesFromTokenClaim(
+        oidcAuth.user?.profile['urn:zitadel:iam:org:project:roles']
       )
 
-      const data = await response.json()
+      // Token-claim roles are available synchronously; merge them into the
+      // current set (a token refresh must not blank previously fetched
+      // roles) while the authoritative zitadel-gql query resolves.
+      setRoles(prev => Array.from(new Set([...prev, ...claimRoles])))
+      setIsRolesLoading(true)
 
-      const userRoles = (data.result?.map((grant: any) => {
-        return (grant.roles || []).map((role: any) => {
-          return `${grant.projectId}:${role}`
-        })
-      }) || []) as string[][]
+      try {
+        const {plainRoles, projectScopedRoles} = await fetchCurrentUserRoles(
+          oidcAuth.user!.access_token
+        )
 
-      const projectScopedRoles = userRoles.flat()
+        if (cancelled) return
 
-      const roles = (oidcAuth.user?.profile[
-        'urn:zitadel:iam:org:project:roles'
-      ] || []) as {
-        [roleKey: string]: {
-          [id: string]: string
+        setRoles(
+          Array.from(
+            new Set([...projectScopedRoles, ...plainRoles, ...claimRoles])
+          )
+        )
+      } catch (error) {
+        // The claim-derived roles stay in place; a failing roles query must
+        // not sign the user out.
+        console.error('jaen: zitadel-gql roles query failed', error)
+      } finally {
+        if (!cancelled) {
+          setIsRolesLoading(false)
         }
-      }[]
-
-      const rolesSet = new Set<string>([
-        ...projectScopedRoles,
-        ...roles.flatMap(item => Object.keys(item))
-      ])
-
-      setRoles(Array.from(rolesSet))
-
-      setIsRolesLoading(false)
+      }
     }
 
     if (oidcAuth.user) {
-      getUsergrants()
+      void getRoles()
+    }
+
+    return () => {
+      cancelled = true
     }
   }, [oidcAuth.user])
 
@@ -89,17 +100,19 @@ export const AuthenticationProvider: React.FC<{
   children: React.ReactNode
 }> = ({children}) => {
   const scope = useMemo(() => {
-    const projectIds: string[] = __JAEN_ZITADEL__.projectIds || []
-
-    // Add "zitadel" to projectIds
-    projectIds.push('zitadel')
+    // Copy before extending: mutating the DefinePlugin-injected array would
+    // append 'zitadel' again on every provider mount.
+    const projectIds: string[] = [
+      ...(__JAEN_ZITADEL_GQL__.projectIds || []),
+      'zitadel'
+    ]
 
     const parts = new Set<string>()
 
     parts.add('openid')
     parts.add('profile')
     parts.add('email')
-    parts.add(`urn:zitadel:iam:org:id:${__JAEN_ZITADEL__.organizationId}`)
+    parts.add(`urn:zitadel:iam:org:id:${__JAEN_ZITADEL_GQL__.organizationId}`)
     projectIds.forEach(projectId => {
       parts.add(`urn:zitadel:iam:org:project:id:${projectId}:aud`)
     })
@@ -110,11 +123,11 @@ export const AuthenticationProvider: React.FC<{
 
   return (
     <AuthProvider
-      client_id={__JAEN_ZITADEL__.clientId}
-      redirect_uri={__JAEN_ZITADEL__.redirectUri}
+      client_id={__JAEN_ZITADEL_GQL__.clientId}
+      redirect_uri={__JAEN_ZITADEL_GQL__.redirectUri}
       scope={scope}
       loadUserInfo
-      authority={__JAEN_ZITADEL__.authority}
+      authority={__JAEN_ZITADEL_GQL__.authority}
       onSigninCallback={() => {
         window.history.replaceState(
           {},

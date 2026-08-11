@@ -1,12 +1,15 @@
 import {PageProps} from 'gatsby'
 import {PageConfig, useNotificationsContext} from 'jaen'
+import {useIntl} from 'react-intl'
 
 import {FormDataType, Settings} from '../../components/cms/Settings/Settings'
 import {CMSManagement, useCMSManagement} from '../../connectors/cms-management'
+import {intlText} from '../../lib/intl'
 
 const SettingsPage: React.FC<PageProps> = () => {
   const manager = useCMSManagement()
   const {toast} = useNotificationsContext()
+  const intl = useIntl()
 
   return (
     <Settings
@@ -15,7 +18,10 @@ const SettingsPage: React.FC<PageProps> = () => {
         manager.updateSiteMetadata(siteMetadata || {})
 
         toast({
-          title: 'Settings updated',
+          title: intl.formatMessage({
+            id: 'CmsSettingsNotificationsUpdated',
+            defaultMessage: 'Settings updated'
+          }),
           status: 'success'
         })
       }}
@@ -34,10 +40,10 @@ const Page: React.FC<PageProps> = props => {
 export default Page
 
 export const pageConfig: PageConfig = {
-  label: 'Jaen CMS | Settings',
+  label: intlText('CmsSettingsTitle', 'Jaen CMS | Settings'),
   icon: 'FaCog',
   menu: {
-    label: 'Settings',
+    label: intlText('CmsSettingsMenuLabel', 'Settings'),
     type: 'app',
     group: 'cms',
     order: 400
@@ -45,11 +51,11 @@ export const pageConfig: PageConfig = {
 
   breadcrumbs: [
     {
-      label: 'CMS',
+      label: intlText('CmsLabelsRoot', 'CMS'),
       path: '/cms/'
     },
     {
-      label: 'Settings',
+      label: intlText('CmsSettingsBreadcrumbsSettings', 'Settings'),
       path: '/cms/settings/'
     }
   ],
