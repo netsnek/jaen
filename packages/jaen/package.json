@@ -24,7 +24,6 @@
     "dev": "yarn build --watch"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.8.0",
     "@react-icons/all-files": "https://github.com/react-icons/react-icons/releases/download/v4.11.0/react-icons-all-files-4.11.0.tgz",
     "@reduxjs/toolkit": "^1.9.5",
     "deepmerge": "^4.3.1",
@@ -41,6 +40,8 @@
     "vanilla-cookieconsent": "^2.9.2"
   },
   "devDependencies": {
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.6",
     "@types/react-icons": "^3.0.0",
@@ -48,6 +49,8 @@
     "microbundle": "^0.15.1"
   },
   "peerDependencies": {
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   }

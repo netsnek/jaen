@@ -13,9 +13,13 @@
     "react-hook-form": "^7.46.1",
     "snek-query": "^0.0.83"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.0"
+  },
   "peerDependencies": {
     "@chakra-ui/react": "^2.8.1",
+    "@emotion/react": "^11.11.0",
     "@snek-functions/origin": "^0.9.0",
     "gatsby": "^5.12.4",
     "react": "^18.2.0"

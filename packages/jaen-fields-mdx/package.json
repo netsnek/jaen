@@ -23,7 +23,6 @@
     "dev": "yarn build --watch"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.8.0",
     "@codemirror/lang-markdown": "^6.2.0",
     "@codemirror/language-data": "^6.3.1",
     "@mdx-js/mdx": "^3.0.0",
@@ -56,6 +55,8 @@
     "vfile-statistics": "^3.0.0"
   },
   "devDependencies": {
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.0",
     "@types/react": "^18.2.15",
     "@types/react-syntax-highlighter": "^15.5.7",
     "@types/uuid": "^9.0.2",
@@ -63,6 +64,8 @@
     "rimraf": "^5.0.1"
   },
   "peerDependencies": {
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.0",
     "gatsby": "^5.12.3",
     "jaen": "^1.0.0",
     "react": "^18.2.0",

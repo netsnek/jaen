@@ -16,9 +16,6 @@
     "build:css:watch": "tailwindcss -i ./src/styles/globals.css -o dist/jaen.css --watch"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.8.0",
-    "@emotion/react": "^11.11.1",
-    "@emotion/styled": "^11.11.0",
     "@hookform/resolvers": "^3.4.2",
     "@radix-ui/react-checkbox": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -37,7 +34,6 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "date-fns": "^3.6.0",
-    "framer-motion": "^10.13.0",
     "gatsby-plugin-google-gtag": "^5.12.0",
     "gatsby-plugin-image": "^3.13.1",
     "gatsby-plugin-manifest": "^5.12.0",
@@ -70,6 +66,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.0",
     "@tailwindcss/typography": "^0.5.13",
     "@types/lodash.throttle": "^4.1.7",
     "@types/react-beautiful-dnd": "^13.1.8",
@@ -77,6 +75,8 @@
     "tailwindcss": "^3.4.1"
   },
   "peerDependencies": {
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.0",
     "@react-icons/all-files": "https://github.com/react-icons/react-icons/releases/download/v4.11.0/react-icons-all-files-4.11.0.tgz",
     "gatsby": "^5.11.0",
     "jaen": "^1.0.0",
