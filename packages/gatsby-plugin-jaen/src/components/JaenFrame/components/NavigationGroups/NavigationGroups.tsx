@@ -1,13 +1,19 @@
-import {ReloadIcon} from '@radix-ui/react-icons'
+import {
+  Button,
+  Icon,
+  List,
+  ListItem,
+  Spinner,
+  Stack,
+  StackDivider,
+  Text
+} from '@chakra-ui/react'
 import {useLocation} from '@reach/router'
-import {Link} from 'gatsby'
 
-import {cn} from '../../../../lib/utils'
-import {Button} from '../../../ui/button'
-import {Separator} from '../../../ui/separator'
-import {SheetClose} from '../../../ui/sheet'
+import {Link} from '../../../shared/Link/Link'
 
 export interface NavigationItem {
+  /** A component, because the frame slice resolves these by dynamic import. */
   icon: React.ComponentType
   label: string
   onClick?: () => void
@@ -33,143 +39,66 @@ export const NavigationGroups: React.FC<NavigationGroupsProps> = ({
   const location = useLocation()
 
   return (
-    <div className="flex flex-col py-4">
-      {Object.entries(groups).map(([key, value]) => {
+    <Stack divider={<StackDivider borderColor="border.default" />}>
+      {Object.entries(groups).map(([groupKey, group]) => {
         return (
-          <div key={key} className="flex flex-col">
-            {value.label && (
-              <p className="px-1 font-semibold text-sm text-muted-foreground">
-                {value.label}
-              </p>
+          <Stack key={groupKey}>
+            {group.label && (
+              <Text px="1" fontWeight="semibold" fontSize="sm" color="fg.muted">
+                {group.label}
+              </Text>
             )}
+            <List>
+              {Object.entries(group.items)
+                // `order` came in with the Tailwind version and the frame
+                // slice sets it on every item, so the groups would shuffle
+                // without it.
+                .sort((a, b) => (a[1].order || 0) - (b[1].order || 0))
+                .map(([itemKey, item]) => {
+                  const isActive = location.pathname === item.path
 
-            <div className="flex flex-col mt-1">
-              {Object.entries(value.items)
-                .sort((a, b) => {
-                  return (a[1].order || 0) - (b[1].order || 0)
-                })
-                .map(([key, value]) => {
-                  const icon = <value.icon />
-
-                  // Check if path is active
-                  const isActive = location.pathname === value.path
-
-                  const btn = (
-                    <Button
-                      key={key}
-                      asChild={!!value.path}
-                      className={cn('justify-start', {
-                        'bg-accent': isActive
-                      })}
-                      variant="ghost"
-                      disabled={isActive || value.isLoading}
-                      onClick={() => {
-                        value.onClick?.()
-
-                        onClick?.()
-                      }}>
-                      {value.path ? (
-                        <Link to={value.path}>
-                          {value.isLoading ? (
-                            <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+                  return (
+                    <ListItem key={itemKey}>
+                      <Link
+                        as={Button}
+                        to={item.path}
+                        // The shared Link drops the anchor when disabled, so
+                        // the entry you are already on reads as a button that
+                        // does nothing rather than a link back to itself.
+                        isDisabled={isActive || item.isLoading}
+                        bg={isActive ? 'bg.muted' : undefined}
+                        leftIcon={
+                          item.isLoading ? (
+                            <Spinner mr="2" size="sm" />
                           ) : (
-                            <span
-                              className="mr-2 h-4 w-4"
-                              style={{
-                                color: 'var(--chakra-colors-brand-500)'
-                              }}>
-                              {icon}
-                            </span>
-                          )}
-                          {value.label}
-                        </Link>
-                      ) : (
-                        <>
-                          {value.isLoading ? (
-                            <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <span
-                              className="mr-2 h-4 w-4"
-                              style={{
-                                color: 'var(--chakra-colors-brand-500)'
-                              }}>
-                              {icon}
-                            </span>
-                          )}
-                          {value.label}
-                        </>
-                      )}
-                    </Button>
+                            <Icon
+                              as={item.icon}
+                              fontSize="lg"
+                              mr="2"
+                              color="brand.500"
+                            />
+                          )
+                        }
+                        variant="ghost"
+                        w="full"
+                        px="2"
+                        justifyContent="flex-start"
+                        fontWeight="medium"
+                        fontSize="sm"
+                        onClick={() => {
+                          item.onClick?.()
+
+                          onClick?.()
+                        }}>
+                        {item.label}
+                      </Link>
+                    </ListItem>
                   )
-
-                  if (value.path) {
-                    return (
-                      <SheetClose key={key} asChild>
-                        {btn}
-                      </SheetClose>
-                    )
-                  }
-
-                  return btn
                 })}
-            </div>
-
-            <Separator className="my-2" />
-          </div>
+            </List>
+          </Stack>
         )
       })}
-    </div>
+    </Stack>
   )
-
-  // return (
-  //   <div className='flex'>
-  //     {Object.entries(groups).map(([key, value]) => {
-  //       return (
-  //         <Stack key={key}>
-  //           {value.label && (
-  //             <Text px="1" fontWeight="semibold" fontSize="sm" color="muted">
-  //               {value.label}
-  //             </Text>
-  //           )}
-  //           <List>
-  //             {Object.entries(value.items).map(([key, value]) => {
-  //               return (
-  //                 <ListItem key={key}>
-  //                   <Link
-  //                     as={Button}
-  //                     leftIcon={
-  //                       value.isLoading ? (
-  //                         <Spinner mr="2" size="sm" />
-  //                       ) : (
-  //                         <Icon
-  //                           as={value.icon}
-  //                           fontSize="lg"
-  //                           mr="2"
-  //                           color="brand.500"
-  //                         />
-  //                       )
-  //                     }
-  //                     variant="ghost"
-  //                     w="full"
-  //                     px="2"
-  //                     justifyContent="flex-start"
-  //                     fontWeight="medium"
-  //                     fontSize="sm"
-  //                     to={value.path}
-  //                     onClick={() => {
-  //                       value.onClick?.()
-
-  //                       onClick?.()
-  //                     }}>
-  //                     {value.label}
-  //                   </Link>
-  //                 </ListItem>
-  //               )
-  //             })}
-  //           </List>
-  //         </Stack>
-  //       )
-  //     })}
-  //   </Stack>
-  // )
 }
