@@ -18,7 +18,6 @@
   "dependencies": {
     "jaen": "*",
     "jaen-fields-mdx": "*",
-    "@radix-ui/react-icons": "^1.3.0",
     "@react-icons/all-files": "https://github.com/react-icons/react-icons/releases/download/v4.11.0/react-icons-all-files-4.11.0.tgz",
     "gatsby": "^5.11.0",
     "gatsby-plugin-jaen": "*",
