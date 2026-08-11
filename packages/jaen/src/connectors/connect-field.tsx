@@ -33,6 +33,19 @@ export interface FieldOptions<_IValue, _IProps = {}> {
  * ```
  */
 
+/**
+ * What connectField hands back.
+ *
+ * Naming it matters: without it the return type is inferred, and a consumer
+ * that re-exports a connected field cannot write its own declaration without
+ * pointing at a path inside jaen's dist. Under classic node resolution
+ * TypeScript let that slide; under "bundler" it reports TS2742 and the package
+ * stops building. Every field in every consuming package goes through here.
+ */
+export type ConnectedField<P = {}> = React.NamedExoticComponent<
+  P & JaenFieldProps
+>
+
 export const connectField = <IValue, P = {}>(
   Component: React.ComponentType<
     React.PropsWithChildren<
@@ -52,7 +65,7 @@ export const connectField = <IValue, P = {}>(
     >
   >,
   options: FieldOptions<IValue, P>
-) => {
+): ConnectedField<P> => {
   const MyComp: IJaenConnection<P & JaenFieldProps, typeof options> = ({
     id,
     name,

@@ -1,0 +1,17 @@
+{
+  // The emit. gatsby-jaen-emailwerk is the one package whose build runs a bare
+  // `tsc`, so this config produces what ends up in dist and what consumers
+  // import. It stays on CommonJS, which is what Gatsby's node APIs need, and
+  // therefore on classic node resolution: "bundler" is not allowed alongside
+  // a CommonJS module target.
+  //
+  // tsconfig.json next to it is the typecheck, on "bundler", because that is
+  // how the bundler actually resolves at build time and how Chakra v3's types
+  // expect to be read.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "noEmit": false
+  }
+}

@@ -36,6 +36,7 @@ export {useEditingContext, EditingProvider} from './contexts/editing'
 export {usePage} from './hooks/use-page'
 export {useSectionField, UseSectionField} from './hooks/use-section-field'
 export {Field} from './fields'
+export type {ImageFieldProps, TextFieldProps} from './fields'
 export {useField} from './hooks/use-field'
 export {
   JaenPage,
