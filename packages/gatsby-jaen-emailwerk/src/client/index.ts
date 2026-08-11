@@ -104,7 +104,14 @@ const queryFetcher: QueryFetcher = async function (
       operationName
     }),
     mode: 'cors',
-    credentials: 'include',
+    // Credentials only when there is something to send. An anonymous
+    // visitor has no session and no Access cookie, and asking the browser
+    // to include credentials anyway turns a plain cross-origin request into
+    // a credentialed one, which the server must then answer with
+    // Access-Control-Allow-Credentials or the browser blocks it outright.
+    // That is what broke the public contact form: the preflight was
+    // answered correctly and rejected anyway.
+    credentials: accessToken ? 'include' : 'omit',
     ...fetchOptions
   })
 
