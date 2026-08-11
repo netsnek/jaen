@@ -33,13 +33,13 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@chakra-ui/react": "^2.8.0",
+    "@chakra-ui/react": "^3.36.1",
     "@emotion/react": "^11.11.0",
     "graphql": "^16.9.0",
     "typescript": "^5.7.2"
   },
   "peerDependencies": {
-    "@chakra-ui/react": "^2.8.1",
+    "@chakra-ui/react": "^3.36.1",
     "@emotion/react": "^11.11.0",
     "gatsby": "^5.12.4",
     "gatsby-plugin-jaen": "^1.0.0",
