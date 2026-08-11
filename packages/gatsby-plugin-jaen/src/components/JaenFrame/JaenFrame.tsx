@@ -1,11 +1,10 @@
+import {Box, Flex, HStack, Icon} from '@chakra-ui/react'
+import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
 import React from 'react'
 
 import {Toolbar} from '../Toolbar'
 
-import {Icon} from '@chakra-ui/react'
-import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
-import {Link} from 'gatsby'
-import {cn} from '../../lib/utils'
+import {Link} from '../../components/shared/Link'
 import {JaenLogo} from '../shared/JaenLogo/JaenLogo'
 import {MenuButton, MenuButtonProps} from '../shared/MenuButton/MenuButton'
 import {
@@ -41,33 +40,111 @@ export interface JaenFrameProps {
   }
 }
 
+/**
+ * The bar across the top of every CMS surface.
+ *
+ * `id="coco"` is load bearing, not decoration. The provider mounts as
+ * `<ChakraProvider cssVarsRoot="#coco">`, so every Chakra custom property is
+ * emitted onto that selector rather than onto `:root`. The frame renders as a
+ * sibling of the page layout, which owns the only other `#coco`, so without
+ * its own the header sits outside the variable scope entirely: `bg.subtle`,
+ * `border.emphasized` and `brand.500` all resolve against nothing, and the
+ * children that inherit from here go with it. That is what happened when this
+ * header was rewritten without the id, and why the colours ended up written
+ * out by hand.
+ */
 export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
   return (
-    <header
-      className={cn(
-        'flex h-16 px-4 border-b border-border backdrop-blur-sm gap-2 z-40 bg-white justify-center',
-        {
-          'sticky top-0': !props.navigation.isStickyDisabled
-        }
-      )}>
-      <div className="flex w-full max-w-7xl justify-center">
-        <div className="flex flex-1 gap-4 my-auto">
+    <HStack
+      id="coco"
+      as="header"
+      bg="bg.subtle"
+      {...(!props.navigation.isStickyDisabled && {
+        pos: 'sticky',
+        top: '0',
+        zIndex: 'sticky',
+        transition: 'top 0.3s'
+      })}
+      h="16"
+      px="16px"
+      borderBottom="1px"
+      borderColor="border.emphasized"
+      backdropBlur={8}
+      justifyContent="space-between"
+      zIndex="sticky">
+      <HStack spacing="5" w="full" h="full">
+        <HStack
+          h="full"
+          spacing="4"
+          w={{
+            base: '24',
+            md: 'full'
+          }}>
           <DrawerLeft
             navigationGroups={props.navigation.app.navigationGroups}
             version={props.navigation.app.version}
             logo={props.navigation.app.logo}
           />
 
-          <Breadcrumbs links={props.navigation.breadcrumbs.links} />
-        </div>
+          <Flex
+            maxW="12rem"
+            h="full"
+            display={{
+              base: 'none',
+              md: 'block'
+            }}>
+            <Link
+              to="/"
+              textDecoration="none"
+              sx={{
+                _before: {
+                  content: 'none'
+                }
+              }}>
+              {props.logo || <JaenLogo />}
+            </Link>
+          </Flex>
 
-        <div className="flex justify-center items-center flex-1">
-          <Link className="no-underline h-full max-w-xs" to="/">
-            {props.logo || <JaenLogo />}
-          </Link>
-        </div>
+          <Box
+            display={{
+              base: 'none',
+              md: 'block'
+            }}>
+            <Breadcrumbs links={props.navigation.breadcrumbs.links} />
+          </Box>
+        </HStack>
 
-        <div className="flex flex-1 my-auto gap-4 justify-end">
+        {/* The same logo again, centred, for the widths where the left group
+            collapses to the drawer button alone. */}
+        <Flex mx="auto" alignItems="center" h="full">
+          <Box
+            h="full"
+            maxW="12rem"
+            display={{
+              base: 'block',
+              md: 'none'
+            }}>
+            <Link
+              to="/"
+              textDecoration="none"
+              sx={{
+                _before: {
+                  content: 'none'
+                }
+              }}>
+              {props.logo || <JaenLogo h="full" w="auto" />}
+            </Link>
+          </Box>
+        </Flex>
+
+        <HStack
+          spacing={4}
+          w={{
+            base: '24',
+            md: 'full'
+          }}
+          h="full"
+          justifyContent="end">
           <Toolbar />
 
           <MenuButton
@@ -85,9 +162,9 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
             navigationGroups={props.navigation.user.navigationGroups}
             isBadgeVisible={props.navigation.user.isBadgeVisible}
           />
-        </div>
-      </div>
-    </header>
+        </HStack>
+      </HStack>
+    </HStack>
   )
 })
 
