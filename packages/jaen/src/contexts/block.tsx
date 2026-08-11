@@ -49,10 +49,19 @@ export const JaenSectionBlockProvider: React.FC<SectionType> = memo(
           <Component />
         ) : (
           <Text>
-            <>
-              No block component found for section {id} at path {path}. Please
-              contact the site administrator.
-            </>
+            No block component found for section {id} at path{' '}
+            {/* path is a list of {fieldName, sectionId} steps, not a string.
+                Interpolated as it stood, React would have been handed objects
+                as children and thrown, so the message meant to explain a
+                missing block would itself have taken the page down. */}
+            {path
+              .map(step =>
+                step.sectionId
+                  ? `${step.fieldName}[${step.sectionId}]`
+                  : step.fieldName
+              )
+              .join(' / ')}
+            . Please contact the site administrator.
           </Text>
         )}
       </SectionBlockContext.Provider>

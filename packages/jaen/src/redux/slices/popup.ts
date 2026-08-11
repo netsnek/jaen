@@ -56,7 +56,6 @@ const statusSlice = createSlice({
         }
       }
 
-      // @ts-expect-error
       state.advanced[popupId].pageViews++
     }
   }
