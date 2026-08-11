@@ -45,5 +45,8 @@
     "semantic-release": "^24.0.0",
     "semantic-release-monorepo": "^8.0.2",
     "typescript": "^5.7.2"
+  },
+  "resolutions": {
+    "typescript": "5.7.2"
   }
 }
