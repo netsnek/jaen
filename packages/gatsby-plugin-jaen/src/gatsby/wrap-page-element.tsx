@@ -11,7 +11,6 @@ import {GatsbyBrowser, Slice} from 'gatsby'
 import React, {useEffect, useMemo} from 'react'
 import * as Sentry from '@sentry/gatsby'
 
-import {theme} from '../theme/jaen-theme/index'
 import {DynamicPageRenderer} from './DynamicPageRenderer'
 import Layout from './Layout'
 
@@ -84,7 +83,7 @@ export const wrapPageElement: GatsbyBrowser['wrapPageElement'] = ({
   props
 }) => {
   return (
-    <FieldHighlighterProvider path={props.location.pathname} theme={theme}>
+    <FieldHighlighterProvider path={props.location.pathname}>
       <JaenPageElement {...(props as any)} children={element} />
     </FieldHighlighterProvider>
   )

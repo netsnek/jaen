@@ -26,7 +26,6 @@ export const FieldHighlighterProviderContext =
 
 export interface HighlightProviderProps {
   path: string
-  theme: Record<string, unknown>
   children: React.ReactNode
 }
 

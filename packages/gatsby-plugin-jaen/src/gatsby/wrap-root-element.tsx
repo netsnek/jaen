@@ -1,4 +1,5 @@
 import {ChakraProvider} from '@chakra-ui/react'
+import {ThemeProvider as NextThemeProvider} from 'next-themes'
 import {
   AuthenticationProvider,
   MediaModalProvider,
@@ -21,7 +22,7 @@ import {IntlProvider} from 'react-intl'
 
 import {JaenWidgetProvider} from '../contexts/jaen-widget'
 import {SiteMetadataProvider} from '../connectors/site-metadata'
-import {theme} from '../theme/jaen-theme/index'
+import {system} from '../theme'
 import {JaenFrameMenuProvider} from '../contexts/jaen-frame-menu'
 import {Toaster} from '../components/ui/toaster'
 import {Popup} from '../components/Popup'
@@ -123,30 +124,52 @@ export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = (
   }
 
   return (
-    <ChakraProvider theme={theme} cssVarsRoot="#momo">
-      <NotificationsProvider>
-        <AuthenticationProvider>
-          <JaenIntlProvider>
-            <Toaster />
+    /**
+     * Two things changed here, and they are the same change seen from two ends.
+     *
+     * next-themes sits OUTSIDE Chakra because it writes the class onto <html>
+     * that v3's dark condition selects on, so the provider reading tokens has
+     * to be inside the one setting the class. defaultTheme="system" with
+     * enableSystem is what the site asked for in v2 and never actually got.
+     *
+     * cssVarsRoot="#momo" is gone, and its absence is what lets that work. In
+     * v3 only the base bucket honours cssVarsRoot; the dark bucket always lands
+     * on `.dark, .dark .chakra-theme:not(.light)`. With `.dark` on <html> and
+     * #momo a descendant, the scoped block would win every time and dark mode
+     * would be dead inside the CMS. The two systems are kept apart by their
+     * variable prefix instead, which no selector can defeat. #momo stays on the
+     * elements, as the portal container id it also always was.
+     */
+    <NextThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      disableTransitionOnChange>
+      <ChakraProvider value={system}>
+        <NotificationsProvider>
+          <AuthenticationProvider>
+            <JaenIntlProvider>
+              <Toaster />
 
-            <CookieConsentProvider>
-              <JaenUpdateModalProvider>
-                <SiteMetadataProvider>
-                  <JaenFrameMenuProvider>
-                    <MediaModalProvider
-                      MediaModalComponent={MediaModalComponent}>
-                      <JaenWidgetProvider>
-                        <Popup />
-                        {element}
-                      </JaenWidgetProvider>
-                    </MediaModalProvider>
-                  </JaenFrameMenuProvider>
-                </SiteMetadataProvider>
-              </JaenUpdateModalProvider>
-            </CookieConsentProvider>
-          </JaenIntlProvider>
-        </AuthenticationProvider>
-      </NotificationsProvider>
-    </ChakraProvider>
+              <CookieConsentProvider>
+                <JaenUpdateModalProvider>
+                  <SiteMetadataProvider>
+                    <JaenFrameMenuProvider>
+                      <MediaModalProvider
+                        MediaModalComponent={MediaModalComponent}>
+                        <JaenWidgetProvider>
+                          <Popup />
+                          {element}
+                        </JaenWidgetProvider>
+                      </MediaModalProvider>
+                    </JaenFrameMenuProvider>
+                  </SiteMetadataProvider>
+                </JaenUpdateModalProvider>
+              </CookieConsentProvider>
+            </JaenIntlProvider>
+          </AuthenticationProvider>
+        </NotificationsProvider>
+      </ChakraProvider>
+    </NextThemeProvider>
   )
 }
