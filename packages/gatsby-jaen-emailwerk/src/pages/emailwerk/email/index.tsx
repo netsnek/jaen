@@ -3,7 +3,6 @@ import {graphql} from 'gatsby'
 import {z} from 'zod'
 import {useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {format} from 'date-fns'
 import {PageConfig} from 'jaen'
 
 // Tiptap
@@ -28,9 +27,6 @@ import {
   Unlink
 } from 'lucide-react'
 
-// Calendar from Jaen UI
-import {Calendar} from 'gatsby-plugin-jaen/src/components/ui/calendar'
-
 // Chakra UI
 import {
   Box,
@@ -50,10 +46,6 @@ import {
   HStack,
   IconButton,
   useToast,
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-  Portal,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -68,7 +60,6 @@ import {
   AlertTitle,
   AlertDescription
 } from '@chakra-ui/react'
-import {CalendarIcon} from '@radix-ui/react-icons'
 
 // GQty client (template listing)
 import * as emailwerkClient from '../../../client'
@@ -86,10 +77,6 @@ const EmailSendSchema = z.object({
   templateId: z.string().nonempty('Template is required'),
   subject: z.string().nonempty('Subject is required'),
   message: z.string().nonempty('Message is required'),
-  schedule: z
-    .date()
-    .or(z.string().transform(val => new Date(val)))
-    .optional(),
   to: z
     .string()
     .nonempty('To is required')
@@ -256,7 +243,6 @@ const EmailSendFormComponent: React.FC = () => {
       sendEmailOnSubmitConsent: false, // Changed to false as default
       subject: '',
       message: '',
-      schedule: undefined,
       to: '',
       bcc: ''
     }
@@ -281,9 +267,11 @@ const EmailSendFormComponent: React.FC = () => {
       )?.defaultValue || '',
     editorProps: {
       attributes: {
-        // Chakra styling: bigger min-height, slimmer border
-        class:
-          'focus:outline-none min-h-96 rounded-md border border-input bg-background px-3 py-2 prose max-w-full max-h-full'
+        // Only the focus ring stays a class; the frame around the editor is a
+        // Chakra Box below. The rest used to be Tailwind utilities, which
+        // resolved only because gatsby-plugin-jaen shipped tailwind to every
+        // page of every consuming site.
+        class: 'jaen-mdx-editor'
       }
     },
     onUpdate: ({editor}) => {
@@ -291,7 +279,6 @@ const EmailSendFormComponent: React.FC = () => {
     }
   })
 
-  const currentSchedule = form.watch('schedule')
   const selectedEmailTemplateId = form.watch('templateId')
   const currentMessage = form.watch('message') // Added to watch 'message'
 
@@ -347,7 +334,6 @@ const EmailSendFormComponent: React.FC = () => {
           replyTo: values.to,
           subject: values.subject
           //bcc: (values.bcc || "").split(','),
-          //schedule: values.schedule
         },
         values: {
           message: values.message
@@ -677,61 +663,35 @@ const EmailSendFormComponent: React.FC = () => {
               border="1px"
               borderColor="gray.300"
               rounded="md"
-              p={2}>
+              p={2}
+              // What the `prose` and `focus:outline-none` utilities did before,
+              // stated here instead. tiptap emits plain HTML with no classes of
+              // its own, so the block elements need to be given their shape
+              // back or the message reads as one undifferentiated paragraph.
+              sx={{
+                '.jaen-mdx-editor': {outline: 'none'},
+                h1: {fontSize: '2xl', fontWeight: 'bold', mt: 4, mb: 2},
+                h2: {fontSize: 'xl', fontWeight: 'bold', mt: 4, mb: 2},
+                h3: {fontSize: 'lg', fontWeight: 'semibold', mt: 3, mb: 2},
+                p: {mb: 2},
+                'ul, ol': {pl: 6, mb: 2},
+                ul: {listStyleType: 'disc'},
+                ol: {listStyleType: 'decimal'},
+                blockquote: {
+                  borderLeft: '3px solid',
+                  borderColor: 'gray.300',
+                  pl: 3,
+                  color: 'fg.muted',
+                  my: 2
+                },
+                a: {color: 'brand.500', textDecoration: 'underline'}
+              }}>
               <EditorContent editor={editor} />
             </Box>
             <FormHelperText>The message of the email.</FormHelperText>
             <FormErrorMessage>
               {form.formState.errors.message &&
                 form.formState.errors.message.message}
-            </FormErrorMessage>
-          </FormControl>
-
-          {/* Schedule DISABLED */}
-          <FormControl
-            mb={5}
-            isInvalid={!!form.formState.errors.schedule}
-            display="none">
-            <FormLabel>Schedule</FormLabel>
-
-            <Popover placement="bottom-start">
-              <PopoverTrigger>
-                <Button
-                  variant="outline"
-                  w="240px"
-                  justifyContent="flex-start"
-                  // If no date is selected, show muted text
-                  color={currentSchedule ? 'inherit' : 'gray.500'}
-                  rightIcon={
-                    <CalendarIcon style={{opacity: 0.5, marginLeft: 'auto'}} />
-                  }>
-                  {currentSchedule
-                    ? format(new Date(currentSchedule), 'PPP')
-                    : 'Pick a date'}
-                </Button>
-              </PopoverTrigger>
-              <Portal>
-                <PopoverContent w="auto">
-                  <Calendar
-                    mode="single"
-                    selected={
-                      currentSchedule ? new Date(currentSchedule) : undefined
-                    }
-                    onSelect={date =>
-                      form.setValue('schedule', date || undefined)
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Portal>
-            </Popover>
-
-            <FormHelperText>
-              The email will be sent <b>at 8:00</b> on this date.
-            </FormHelperText>
-            <FormErrorMessage>
-              {form.formState.errors.schedule &&
-                String(form.formState.errors.schedule.message)}
             </FormErrorMessage>
           </FormControl>
 
