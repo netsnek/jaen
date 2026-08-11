@@ -1,14 +1,19 @@
+/*
+ MIGRATION NOTE: The following Chakra UI hooks have been removed.
+ Please replace them with the suggested alternatives:
+
+//   - useMergeRefs: Use react-use: useMergeRefs
+
+ See: https://chakra-ui.com/docs/get-started/migration#hooks
+*/
 import {
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
   IconButton,
   Input,
   InputGroup,
   InputProps,
   InputRightElement,
   useDisclosure,
-  useMergeRefs
+  Field
 } from '@chakra-ui/react'
 import {forwardRef, useRef} from 'react'
 import {FaEye} from '@react-icons/all-files/fa/FaEye'
@@ -16,7 +21,7 @@ import {FaEyeSlash} from '@react-icons/all-files/fa/FaEyeSlash'
 
 export const PasswordField = forwardRef<HTMLInputElement, InputProps>(
   ({isInvalid, isRequired, ...props}, ref) => {
-    const {isOpen, onToggle} = useDisclosure()
+    const {open, onToggle} = useDisclosure()
     const inputRef = useRef<HTMLInputElement>(null)
 
     const mergeRef = useMergeRefs(inputRef, ref)
@@ -28,11 +33,11 @@ export const PasswordField = forwardRef<HTMLInputElement, InputProps>(
     }
 
     return (
-      <FormControl
+      <Field.Root
         id="login_form_password"
-        isInvalid={isInvalid}
-        isRequired={isRequired}>
-        <FormLabel htmlFor="password">Password</FormLabel>
+        invalid={isInvalid}
+        required={isRequired}>
+        <Field.Label htmlFor="password">Password</Field.Label>
         <InputGroup>
           <Input
             id="password"
@@ -48,15 +53,15 @@ export const PasswordField = forwardRef<HTMLInputElement, InputProps>(
               variant="text"
               color="brand.500"
               aria-label={isOpen ? 'Mask password' : 'Reveal password'}
-              icon={isOpen ? <FaEyeSlash /> : <FaEye />}
-              onClick={onClickReveal}
-            />
+              onClick={onClickReveal}>
+              {isOpen ? <FaEyeSlash /> : <FaEye />}
+            </IconButton>
           </InputRightElement>
         </InputGroup>
-        <FormErrorMessage>
+        <Field.ErrorText>
           {props.name === 'password' && 'Password is required'}
-        </FormErrorMessage>
-      </FormControl>
+        </Field.ErrorText>
+      </Field.Root>
     )
   }
 )

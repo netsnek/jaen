@@ -4,11 +4,9 @@ import {
   IconButton,
   Input,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Stack,
-  Text
+  Text,
+  Portal
 } from '@chakra-ui/react'
 import {useState} from 'react'
 import {FaGlobe} from 'react-icons/fa'
@@ -40,56 +38,56 @@ export const IconChooser: React.FC<IconChooserProps> = props => {
 
   if (!props.isEditing) {
     return (
-      <IconButton
-        variant="ghost"
-        aria-label="Icon"
-        icon={
-          <Icon as={icon === 'FaGlobe' ? FaGlobe : SIIcons[icon]} boxSize="6" />
-        }
-      />
+      <IconButton variant="ghost" aria-label="Icon">
+        <Icon as={icon === 'FaGlobe' ? FaGlobe : SIIcons[icon]} boxSize="6" />
+      </IconButton>
     )
   }
 
   return (
-    <Menu isLazy>
-      <MenuButton
-        as={Button}
-        w="3xs"
-        variant="outline"
-        leftIcon={<Icon as={icon === 'FaGlobe' ? FaGlobe : SIIcons[icon]} />}>
-        <Text>{icon.replace('Si', '')}</Text>
-      </MenuButton>
-      <MenuList>
-        <Stack>
-          <Input
-            w="unset"
-            size="sm"
-            mx="2"
-            placeholder="Search icons..."
-            onChange={e => {
-              handleFilterChange(e.target.value)
-            }}
-          />
-          <Stack maxH="xs" overflow="auto">
-            {filteredIcons.length === 0 && <Text>No icons found</Text>}
+    <Menu.Root lazyMount unmountOnExit>
+      <Menu.Trigger asChild>
+        <Button w="3xs" variant="outline">
+          <Icon as={icon === 'FaGlobe' ? FaGlobe : SIIcons[icon]} />
+          <Text>{icon.replace('Si', '')}</Text>
+        </Button>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            <Stack>
+              <Input
+                w="unset"
+                size="sm"
+                mx="2"
+                placeholder="Search icons..."
+                onValueChange={e => {
+                  handleFilterChange(e.target.value)
+                }}
+              />
+              <Stack maxH="xs" overflow="auto">
+                {filteredIcons.length === 0 && <Text>No icons found</Text>}
 
-            {filteredIcons.map(key => {
-              const IconComponent = SIIcons[key]
-              return (
-                <MenuItem
-                  key={key}
-                  icon={<Icon as={IconComponent} />}
-                  onClick={() => {
-                    setIcon(key)
-                    props.setIcon(key)
-                  }}>
-                  {key.replace('Si', '')}
-                </MenuItem>
-              )
-            })}
-          </Stack>
-        </Stack>
-      </MenuList>
-    </Menu>
+                {filteredIcons.map(key => {
+                  const IconComponent = SIIcons[key]
+                  return (
+                    <Menu.Item
+                      key={key}
+                      icon={<Icon as={IconComponent} />}
+                      onSelect={() => {
+                        setIcon(key)
+                        props.setIcon(key)
+                      }}
+                      value="item-0">
+                      {key.replace('Si', '')}
+                    </Menu.Item>
+                  )
+                })}
+              </Stack>
+            </Stack>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   )
 }

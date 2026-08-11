@@ -55,7 +55,7 @@ export const SectionBlockSelector: React.FC<SectionBlockSelectorProps> = ({
           {sectionDescription}
         </Text>
       </Box>
-      <VStack w="100%" align="flex-start" spacing="1">
+      <VStack w="100%" align="flex-start" gap="1">
         {blockTypes.map(block => {
           return (
             <HStack
@@ -77,7 +77,9 @@ export const SectionBlockSelector: React.FC<SectionBlockSelectorProps> = ({
                   setSelection(block)
                 }
               }}>
-              <Icon as={block.Icon} />
+              <Icon asChild>
+                <block.Icon />
+              </Icon>
               <Text fontSize="sm">{block.label}</Text>
             </HStack>
           )
@@ -88,7 +90,7 @@ export const SectionBlockSelector: React.FC<SectionBlockSelectorProps> = ({
           <Button
             size="sm"
             flex="1"
-            isDisabled={selection == null}
+            disabled={selection == null}
             onClick={() => {
               if (selection == null) return
 
@@ -100,7 +102,7 @@ export const SectionBlockSelector: React.FC<SectionBlockSelectorProps> = ({
           <ButtonGroup size="sm">
             <Button
               flex="1"
-              isDisabled={selection == null}
+              disabled={selection == null}
               onClick={() => {
                 if (selection == null) return
                 onBlockAdd(selection, 'prepend')
@@ -109,7 +111,7 @@ export const SectionBlockSelector: React.FC<SectionBlockSelectorProps> = ({
             </Button>
             <Button
               flex="1"
-              isDisabled={selection == null}
+              disabled={selection == null}
               onClick={() => {
                 if (selection == null) return
                 onBlockAdd(selection, 'append')

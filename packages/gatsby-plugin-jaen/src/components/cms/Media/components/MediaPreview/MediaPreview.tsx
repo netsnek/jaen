@@ -7,16 +7,12 @@ import {
   IconButton,
   Image,
   Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Skeleton,
   Spacer,
   Spinner,
-  Text
+  Text,
+  Dialog,
+  Portal
 } from '@chakra-ui/react'
 import {MediaNode} from 'jaen'
 import {useEffect} from 'react'
@@ -121,295 +117,295 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
   const previewItemsLength = Math.min(mediaNodes.length, 9)
 
   return (
-    <Modal
-      isOpen={isPreview !== false}
-      onClose={() => {
-        onPreview(false)
-      }}
+    <Dialog.Root
+      open={isPreview !== false}
       size="full"
-      motionPreset="none">
-      <ModalOverlay />
+      motionPreset="none"
+      onOpenChange={e => {
+        if (!e.open) {
+          onPreview(false)
+        }
+      }}>
+      <Portal>
+        <Dialog.Backdrop />
 
-      <ModalContent
-        overflow="hidden"
-        containerProps={{
-          id: 'momo'
-        }}
-        bg="transparent"
-        sx={{
-          '.react-transform-wrapper': {
-            w: 'full',
-            h: 'full',
-            justifyContent: 'center',
-            display: isPreview === 'PREVIEW' ? 'flex' : 'none'
-          },
-          '.react-transform-component': {
-            w: 'full',
-            h: 'full'
-          }
-        }}>
-        <ModalHeader p="0">
-          <HStack
-            h="12"
-            w="full"
-            p="4"
-            top="0"
-            pos="sticky"
-            zIndex="2"
-            bg="bg.surface"
-            borderBottom="1px solid"
-            borderColor="border.emphasized">
-            <Button
-              variant="text"
-              leftIcon={<FaArrowLeft />}
-              onClick={() => {
-                onPreview(false)
-              }}>
-              Back to media
-            </Button>
-
-            <Spacer />
-
-            <Input
-              key={selectedMediaNode?.description}
-              size="xs"
-              textAlign="center"
-              border="none"
-              fontSize="xs"
-              fontWeight="bold"
-              defaultValue={selectedMediaNode?.description}
-              maxW="sm"
-              onBlur={e => {
-                handleUpdate({
-                  description: e.target.value
-                })
-              }}
-            />
-
-            <Spacer />
-
-            <ButtonGroup
-              variant="outline"
-              size="xs"
-              isDisabled={selectedMediaNode === null}>
-              <IconButton
-                aria-label="Customize selected image"
-                icon={<FaSlidersH />}
-                onClick={handleEdit}
-              />
-
-              <IconButton
-                aria-label="Clone selected image"
-                icon={<FaClone />}
-                onClick={handleClone}
-              />
-
-              <IconButton
-                aria-label="Download selected image"
-                icon={<FaDownload />}
-                onClick={handleDownload}
-              />
-              <IconButton
-                aria-label="Delete selected image"
-                icon={<FaTrash />}
-                onClick={handleDelete}
-              />
-
-              {isSelector && (
-                <Button
-                  variant="solid"
-                  leftIcon={<FaCheck />}
-                  onClick={() => {
-                    if (selectedMediaNode && onSelect) {
-                      onSelect(selectedMediaNode.id)
-                    }
-                  }}>
-                  Choose
-                </Button>
-              )}
-            </ButtonGroup>
-          </HStack>
-        </ModalHeader>
-
-        <ModalBody display="flex" h="calc(100dvh - 3rem - 6rem)" flex="unset">
-          <TransformWrapper
-            doubleClick={{
-              mode: 'reset'
-            }}>
-            {({resetTransform}) => {
-              useEffect(() => {
-                resetTransform()
-              }, [selectedMediaNode?.url])
-
-              return (
-                <TransformComponent>
-                  <Image
-                    w="100%"
-                    h="100%"
-                    objectFit="contain"
-                    src={selectedMediaNode?.url}
-                    alt={selectedMediaNode?.description}
-                    fallback={
-                      <Center boxSize="full">
-                        <Spinner color="brand.300" />
-                      </Center>
-                    }
-                  />
-                </TransformComponent>
-              )
+        <Dialog.Positioner>
+          <Dialog.Content
+            overflow="hidden"
+            containerProps={{
+              id: 'momo'
             }}
-          </TransformWrapper>
+            bg="transparent"
+            css={{
+              '& .react-transform-wrapper': {
+                w: 'full',
+                h: 'full',
+                justifyContent: 'center',
+                display: isPreview === 'PREVIEW' ? 'flex' : 'none'
+              },
 
-          {selectedMediaNode && isPreview === 'EDIT' && (
-            <FilerobotImageEditor
-              source={selectedMediaNode?.url}
-              closeAfterSave
-              onSave={async (editedImageObject, designState) => {
-                editedImageObject.imageCanvas?.toBlob(blob => {
-                  if (blob) {
-                    const newFile = new File(
-                      [blob],
-                      editedImageObject.fullName ?? 'image.png',
-                      {
-                        type: blob.type
+              '& .react-transform-component': {
+                w: 'full',
+                h: 'full'
+              }
+            }}>
+            <Dialog.Header p="0">
+              <HStack
+                h="12"
+                w="full"
+                p="4"
+                top="0"
+                pos="sticky"
+                zIndex="2"
+                bg="bg.surface"
+                borderBottom="1px solid"
+                borderColor="border.emphasized">
+                <Button
+                  variant="text"
+                  onClick={() => {
+                    onPreview(false)
+                  }}>
+                  <FaArrowLeft />
+                  Back to media
+                </Button>
+
+                <Spacer />
+
+                <Input
+                  key={selectedMediaNode?.description}
+                  size="xs"
+                  textAlign="center"
+                  border="none"
+                  fontSize="xs"
+                  fontWeight="bold"
+                  defaultValue={selectedMediaNode?.description}
+                  maxW="sm"
+                  onBlur={e => {
+                    handleUpdate({
+                      description: e.target.value
+                    })
+                  }}
+                />
+
+                <Spacer />
+
+                <ButtonGroup variant="outline" size="xs">
+                  <IconButton
+                    aria-label="Customize selected image"
+                    onClick={handleEdit}
+                    disabled={selectedMediaNode === null}>
+                    <FaSlidersH />
+                  </IconButton>
+
+                  <IconButton
+                    aria-label="Clone selected image"
+                    onClick={handleClone}
+                    disabled={selectedMediaNode === null}>
+                    <FaClone />
+                  </IconButton>
+
+                  <IconButton
+                    aria-label="Download selected image"
+                    onClick={handleDownload}
+                    disabled={selectedMediaNode === null}>
+                    <FaDownload />
+                  </IconButton>
+                  <IconButton
+                    aria-label="Delete selected image"
+                    onClick={handleDelete}
+                    disabled={selectedMediaNode === null}>
+                    <FaTrash />
+                  </IconButton>
+
+                  {isSelector && (
+                    <Button
+                      variant="solid"
+                      onClick={() => {
+                        if (selectedMediaNode && onSelect) {
+                          onSelect(selectedMediaNode.id)
+                        }
+                      }}>
+                      <FaCheck />
+                      Choose
+                    </Button>
+                  )}
+                </ButtonGroup>
+              </HStack>
+            </Dialog.Header>
+
+            <Dialog.Body
+              display="flex"
+              h="calc(100dvh - 3rem - 6rem)"
+              flex="unset">
+              <TransformWrapper
+                doubleClick={{
+                  mode: 'reset'
+                }}>
+                {({resetTransform}) => {
+                  useEffect(() => {
+                    resetTransform()
+                  }, [selectedMediaNode?.url])
+
+                  return (
+                    <TransformComponent>
+                      <Image
+                        w="100%"
+                        h="100%"
+                        objectFit="contain"
+                        src={selectedMediaNode?.url}
+                        alt={selectedMediaNode?.description}
+                      />
+                    </TransformComponent>
+                  )
+                }}
+              </TransformWrapper>
+
+              {selectedMediaNode && isPreview === 'EDIT' && (
+                <FilerobotImageEditor
+                  source={selectedMediaNode?.url}
+                  closeAfterSave
+                  onSave={async (editedImageObject, designState) => {
+                    editedImageObject.imageCanvas?.toBlob(blob => {
+                      if (blob) {
+                        const newFile = new File(
+                          [blob],
+                          editedImageObject.fullName ?? 'image.png',
+                          {
+                            type: blob.type
+                          }
+                        )
+
+                        handleUpdate({
+                          file: newFile
+                        })
                       }
+                    })
+                  }}
+                  onBeforeSave={() => false}
+                  onClose={() => {
+                    onPreview('PREVIEW')
+                  }}
+                  annotationsCommon={{
+                    fill: '#ff0000'
+                  }}
+                  Rotate={{angle: 90, componentType: 'slider'}}
+                  Text={{text: 'Text...'}}
+                  tabsIds={[
+                    TABS.RESIZE,
+                    TABS.ADJUST,
+                    TABS.FILTERS,
+                    TABS.FINETUNE,
+                    TABS.ANNOTATE,
+                    TABS.WATERMARK
+                  ]}
+                  savingPixelRatio={8}
+                  // previewPixelRatio={0}
+                />
+              )}
+            </Dialog.Body>
+
+            <Dialog.Footer p="0">
+              <HStack
+                h="24"
+                w="full"
+                p="4"
+                justifyContent="center"
+                bg="bg.surface"
+                borderTop="1px solid"
+                borderColor="border.emphasized">
+                <IconButton
+                  variant="ghost"
+                  aria-label="Previous image"
+                  onClick={() => {
+                    // use previous image
+                    const currentIndex = mediaNodes.findIndex(
+                      node => node.id === selectedMediaNode?.id
                     )
 
-                    handleUpdate({
-                      file: newFile
-                    })
-                  }
-                })
-              }}
-              onBeforeSave={() => false}
-              onClose={() => {
-                onPreview('PREVIEW')
-              }}
-              annotationsCommon={{
-                fill: '#ff0000'
-              }}
-              Rotate={{angle: 90, componentType: 'slider'}}
-              Text={{text: 'Text...'}}
-              tabsIds={[
-                TABS.RESIZE,
-                TABS.ADJUST,
-                TABS.FILTERS,
-                TABS.FINETUNE,
-                TABS.ANNOTATE,
-                TABS.WATERMARK
-              ]}
-              savingPixelRatio={8}
-              // previewPixelRatio={0}
-            />
-          )}
-        </ModalBody>
+                    // make sure to loop around
+                    const previousIndex =
+                      (currentIndex - 1 + mediaNodes.length) % mediaNodes.length
 
-        <ModalFooter p="0">
-          <HStack
-            h="24"
-            w="full"
-            p="4"
-            justifyContent="center"
-            bg="bg.surface"
-            borderTop="1px solid"
-            borderColor="border.emphasized">
-            <IconButton
-              variant="ghost"
-              aria-label="Previous image"
-              icon={<FaArrowLeft />}
-              onClick={() => {
-                // use previous image
-                const currentIndex = mediaNodes.findIndex(
-                  node => node.id === selectedMediaNode?.id
-                )
+                    const node = mediaNodes[previousIndex]
 
-                // make sure to loop around
-                const previousIndex =
-                  (currentIndex - 1 + mediaNodes.length) % mediaNodes.length
-
-                const node = mediaNodes[previousIndex]
-
-                if (node) {
-                  onSelectMediaNode(node)
-                }
-              }}
-            />
-
-            <HStack>
-              {[...Array(previewItemsLength)].map((_, index) => {
-                const startIndex = mediaNodes.findIndex(
-                  node => node.id === selectedMediaNode?.id
-                )
-
-                const offset = index - Math.floor(previewItemsLength / 2)
-                const nodeIndex =
-                  (startIndex + offset + mediaNodes.length) % mediaNodes.length
-
-                const node = mediaNodes[nodeIndex]
-
-                if (!node) {
-                  return <Text>{nodeIndex}</Text>
-                }
-
-                return (
-                  <AspectRatio
-                    key={node.id}
-                    ratio={node.width / node.height}
-                    objectFit="contain"
-                    w="16"
-                    h="16"
-                    {...(selectedMediaNode?.id === node.id && {
-                      outline: '2px solid',
-                      outlineColor: 'brand.500',
-                      outlineOffset: '2px',
-                      borderRadius: 'lg'
-                    })}
-                    onClick={() => {
+                    if (node) {
                       onSelectMediaNode(node)
-                    }}>
-                    <Image
-                      key={node.id}
-                      id={index === 8 ? 'last-media-item' : undefined}
-                      fallback={
-                        <Skeleton
+                    }
+                  }}>
+                  <FaArrowLeft />
+                </IconButton>
+
+                <HStack>
+                  {[...Array(previewItemsLength)].map((_, index) => {
+                    const startIndex = mediaNodes.findIndex(
+                      node => node.id === selectedMediaNode?.id
+                    )
+
+                    const offset = index - Math.floor(previewItemsLength / 2)
+                    const nodeIndex =
+                      (startIndex + offset + mediaNodes.length) %
+                      mediaNodes.length
+
+                    const node = mediaNodes[nodeIndex]
+
+                    if (!node) {
+                      return <Text>{nodeIndex}</Text>
+                    }
+
+                    return (
+                      <AspectRatio
+                        key={node.id}
+                        ratio={node.width / node.height}
+                        objectFit="contain"
+                        w="16"
+                        h="16"
+                        {...(selectedMediaNode?.id === node.id && {
+                          outline: '2px solid',
+                          outlineColor: 'brand.500',
+                          outlineOffset: '2px',
+                          borderRadius: 'lg'
+                        })}
+                        onClick={() => {
+                          onSelectMediaNode(node)
+                        }}>
+                        <Image
+                          key={node.id}
+                          id={index === 8 ? 'last-media-item' : undefined}
                           w="100%"
-                          borderRadius="lg"
-                          display="inline-block"
+                          h="100%"
+                          src={node.preview?.url ?? node.url}
+                          alt={node.description}
                         />
-                      }
-                      w="100%"
-                      h="100%"
-                      src={node.preview?.url ?? node.url}
-                      alt={node.description}
-                    />
-                  </AspectRatio>
-                )
-              })}
-            </HStack>
+                      </AspectRatio>
+                    )
+                  })}
+                </HStack>
 
-            <IconButton
-              variant="ghost"
-              aria-label="Next image"
-              icon={<FaArrowRight />}
-              onClick={() => {
-                // use next image
-                const currentIndex = mediaNodes.findIndex(
-                  node => node.id === selectedMediaNode?.id
-                )
+                <IconButton
+                  variant="ghost"
+                  aria-label="Next image"
+                  onClick={() => {
+                    // use next image
+                    const currentIndex = mediaNodes.findIndex(
+                      node => node.id === selectedMediaNode?.id
+                    )
 
-                // make sure to loop around
-                const nextIndex = (currentIndex + 1) % mediaNodes.length
+                    // make sure to loop around
+                    const nextIndex = (currentIndex + 1) % mediaNodes.length
 
-                const node = mediaNodes[nextIndex]
+                    const node = mediaNodes[nextIndex]
 
-                if (node) {
-                  onSelectMediaNode(node)
-                }
-              }}
-            />
-          </HStack>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+                    if (node) {
+                      onSelectMediaNode(node)
+                    }
+                  }}>
+                  <FaArrowRight />
+                </IconButton>
+              </HStack>
+            </Dialog.Footer>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 }

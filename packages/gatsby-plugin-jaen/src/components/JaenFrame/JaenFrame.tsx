@@ -72,10 +72,10 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
       backdropBlur={8}
       justifyContent="space-between"
       zIndex="sticky">
-      <HStack spacing="5" w="full" h="full">
+      <HStack gap="5" w="full" h="full">
         <HStack
           h="full"
-          spacing="4"
+          gap="4"
           w={{
             base: '24',
             md: 'full'
@@ -138,7 +138,7 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
         </Flex>
 
         <HStack
-          spacing={4}
+          gap={4}
           w={{
             base: '24',
             md: 'full'
@@ -152,7 +152,11 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
               base: 'none',
               md: 'flex'
             }}
-            leftIcon={<Icon as={FaPlus} color="brand.500" />}
+            leftIcon={
+              <Icon color="brand.500" asChild>
+                <FaPlus />
+              </Icon>
+            }
             variant="outline"
             items={props.navigation.addMenu.items}
           />

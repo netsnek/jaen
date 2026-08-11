@@ -44,7 +44,7 @@ export const IndexField: React.FC<IndexFieldProps> = withRedux(
           <Button
             variant="jaen-highlight-tooltip-text"
             key="jaen-highlight-tooltip-text-index">
-            <Text as="span" noOfLines={1}>
+            <Text as="span" lineClamp={1}>
               Index
             </Text>
           </Button>

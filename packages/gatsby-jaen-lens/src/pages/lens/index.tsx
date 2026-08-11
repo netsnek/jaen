@@ -153,41 +153,41 @@ const Page: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false)
 
   return (
-    <Stack spacing="4">
+    <Stack gap="4">
       <Heading size="md">Services ({services.length})</Heading>
 
-      <HStack spacing="4" justifyContent="end">
+      <HStack gap="4" justifyContent="end">
         {isAuthenticated && (
-          <Link as={GatsbyLink} to="/lens/password">
-            Change password
+          <Link asChild>
+            <GatsbyLink to="/lens/password">Change password</GatsbyLink>
           </Link>
         )}
         {isAdmin && (
           <Button
             variant="outline"
-            leftIcon={<FaEdit />}
             onClick={() => {
               setIsEditing(!isEditing)
             }}>
+            <FaEdit />
             {isEditing ? 'Done' : 'Edit'}
           </Button>
         )}
       </HStack>
 
-      <Table>
-        <Thead>
-          <Tr>
-            <Th>Service</Th>
-            <Th>Host</Th>
-            <Th>Port</Th>
-            {isEditing && <Th>Order</Th>}
-          </Tr>
-        </Thead>
-        <Tbody>
+      <Table.Root>
+        <Table.Header>
+          <Table.Row>
+            <Table.ColumnHeader>Service</Table.ColumnHeader>
+            <Table.ColumnHeader>Host</Table.ColumnHeader>
+            <Table.ColumnHeader>Port</Table.ColumnHeader>
+            {isEditing && <Table.ColumnHeader>Order</Table.ColumnHeader>}
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
           {isLoading && (
-            <Tr>
-              <Td colSpan={4}>Loading...</Td>
-            </Tr>
+            <Table.Row>
+              <Table.Cell colSpan={4}>Loading...</Table.Cell>
+            </Table.Row>
           )}
 
           {services
@@ -198,8 +198,8 @@ const Page: React.FC = () => {
               return aOrder - bOrder
             })
             .map(service => (
-              <Tr key={service.id}>
-                <Td>
+              <Table.Row key={service.id}>
+                <Table.Cell>
                   <HStack>
                     <IconChooser
                       icon={service.meta?.icon as keyof typeof SIIcons}
@@ -225,38 +225,41 @@ const Page: React.FC = () => {
                         }}
                       />
                     ) : (
-                      <Link isExternal href={`https://${service.fqdn}`}>
+                      <Link
+                        href={`https://${service.fqdn}`}
+                        target="_blank"
+                        rel="noopener noreferrer">
                         {service.meta?.label || service.id}
                       </Link>
                     )}
                   </HStack>
-                </Td>
-                <Td>{service.host}</Td>
-                <Td>{service.port}</Td>
+                </Table.Cell>
+                <Table.Cell>{service.host}</Table.Cell>
+                <Table.Cell>{service.port}</Table.Cell>
 
                 {isEditing && (
-                  <Td maxW="24">
-                    <NumberInput
-                      defaultValue={service.meta?.order}
-                      onChange={(value: string) => {
+                  <Table.Cell maxW="24">
+                    <NumberInput.Root
+                      defaultValue={String(service.meta?.order)}
+                      onValueChange={(value: string) => {
                         updateService(service.id, {
                           meta: {
                             order: parseInt(value)
                           }
                         })
                       }}>
-                      <NumberInputField />
-                      <NumberInputStepper>
-                        <NumberIncrementStepper />
-                        <NumberDecrementStepper />
-                      </NumberInputStepper>
-                    </NumberInput>
-                  </Td>
+                      <NumberInput.Input />
+                      <NumberInput.Control>
+                        <NumberInput.IncrementTrigger />
+                        <NumberInput.DecrementTrigger />
+                      </NumberInput.Control>
+                    </NumberInput.Root>
+                  </Table.Cell>
                 )}
-              </Tr>
+              </Table.Row>
             ))}
-        </Tbody>
-      </Table>
+        </Table.Body>
+      </Table.Root>
     </Stack>
   )
 }

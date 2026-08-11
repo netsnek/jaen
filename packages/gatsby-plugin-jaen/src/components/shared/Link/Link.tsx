@@ -6,7 +6,7 @@ import {isInternalLink} from './utils/is-internal-path'
 
 export interface LinkProps<T extends As> extends React.ComponentProps<any> {
   to?: string
-  as?: T
+  asChild?: boolean
   isDisabled?: boolean
   children: React.ReactNode
 }

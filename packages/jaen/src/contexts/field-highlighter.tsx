@@ -45,7 +45,7 @@ const Tooltip = forwardRef<HTMLDivElement, TooltipProps>((props, ref) => {
       p="1"
       mx="auto"
       justifyContent="center"
-      spacing="1"
+      gap="1"
       pointerEvents="all">
       {/* <Button size="xs" colorScheme="blackAlpha">
       Edit block

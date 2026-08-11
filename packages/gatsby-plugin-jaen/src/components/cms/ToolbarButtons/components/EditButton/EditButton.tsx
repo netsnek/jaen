@@ -13,10 +13,12 @@ export const EditButton: React.FC<EditButtonProps> = props => {
   return (
     <Button
       size="sm"
-      leftIcon={<Icon as={FaEdit} color={isEditing ? 'white' : 'brand.500'} />}
-      colorScheme={'brand'}
+      colorPalette={'brand'}
       variant={isEditing ? 'solid' : 'outline'}
       onClick={onToggleEditing}>
+      <Icon color={isEditing ? 'white' : 'brand.500'} asChild>
+        <FaEdit />
+      </Icon>
       {isEditing ? 'Stop editing' : 'Edit'}
     </Button>
   )

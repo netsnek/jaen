@@ -109,7 +109,7 @@ export const TuneSelector: React.FC<TuneSelectorProps> = ({
         <Input
           placeholder="Search"
           value={searchTerm}
-          onChange={handleSearch}
+          onValueChange={handleSearch}
           px="10"
           py="1"
           bg="gray.50"
@@ -122,20 +122,15 @@ export const TuneSelector: React.FC<TuneSelectorProps> = ({
           }}
         />
       </InputGroup>
-      <VStack
-        w="100%"
-        align="flex-start"
-        spacing="1"
-        maxH="xs"
-        overflowY="auto">
+      <VStack w="100%" align="flex-start" gap="1" maxH="xs" overflowY="auto">
         {filteredTunes.map((tune, index) => {
           if ('type' in tune && tune.type === 'groupTune') {
             return (
               <VStack key={index} w="full">
-                <Text fontSize="sm" as="b">
-                  {tune.label}
+                <Text fontSize="sm" asChild>
+                  <b>{tune.label}</b>
                 </Text>
-                <Wrap spacing="1">
+                <Wrap gap="1">
                   {tune.tunes.map((subTune, subIndex) => {
                     const isActive = activeTunes.some(
                       activeTune =>
@@ -155,16 +150,18 @@ export const TuneSelector: React.FC<TuneSelectorProps> = ({
                           size="sm"
                           variant="ghost"
                           aria-label={`${subTune.name}`}
-                          icon={<Icon as={subTune.Icon} />}
                           {...(isActive && {
                             bg: 'gray.100',
                             cursor: 'pointer'
                           })}
-                          isDisabled={isDisabled}
+                          disabled={isDisabled}
                           onClick={() => {
                             handleTune({tune: subTune, group: tune, isActive})
-                          }}
-                        />
+                          }}>
+                          <Icon asChild>
+                            <subTune.Icon />
+                          </Icon>
+                        </IconButton>
                       </WrapItem>
                     )
                   })}
@@ -206,7 +203,11 @@ export const TuneSelector: React.FC<TuneSelectorProps> = ({
                     handleTune({tune, isActive})
                   }
                 }}>
-                {tune.Icon && <Icon as={tune.Icon} />}
+                {tune.Icon && (
+                  <Icon asChild>
+                    <tune.Icon />
+                  </Icon>
+                )}
                 <Text fontSize="sm">{tune.name}</Text>
               </HStack>
             )

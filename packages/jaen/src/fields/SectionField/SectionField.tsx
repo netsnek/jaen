@@ -30,7 +30,7 @@ export interface SectionFieldProps {
   name: string // chapterName
   label: string
   blocks: IBlockConnection[]
-  as?: React.ComponentType<React.HTMLAttributes<HTMLElement>>
+  asChild?: boolean
   sectionAs?: React.ComponentType<React.HTMLAttributes<HTMLElement>>
   props?: Record<string, any>
   sectionProps?: Record<string, any> | SectionPropsCallback
@@ -78,7 +78,7 @@ export const SectionField = withRedux(
             key="section-field-tooltip-button-add"
             variant="field-highlighter-tooltip-text"
             size="xs">
-            <Text as="span" noOfLines={1}>
+            <Text as="span" lineClamp={1}>
               {label}
             </Text>
           </Button>
@@ -145,7 +145,7 @@ export const SectionField = withRedux(
 
     if (blocks.length > 0) {
       tooltipButtons = tooltipButtons.concat([
-        <HStack spacing="0.5" key="section-field-tooltip-buttons">
+        <HStack gap="0.5" key="section-field-tooltip-buttons">
           <SectionBlockSelectorButton
             onBlockAdd={handleSectionAdd}
             blocks={blocksForSelector}
@@ -197,7 +197,7 @@ export const SectionField = withRedux(
                 <Button
                   variant="field-highlighter-tooltip-text"
                   key={`section-field-tooltip-button-${item.id}`}>
-                  <Text as="span" noOfLines={1}>
+                  <Text as="span" lineClamp={1}>
                     {s.Component.options.label}
                   </Text>
                 </Button>,
@@ -216,8 +216,8 @@ export const SectionField = withRedux(
                     item.id === section.ptrHead
                       ? [{name: 'move-up'}]
                       : item.id === section.ptrTail
-                      ? [{name: 'move-down'}]
-                      : []
+                        ? [{name: 'move-down'}]
+                        : []
                   }
                   tunes={[
                     {

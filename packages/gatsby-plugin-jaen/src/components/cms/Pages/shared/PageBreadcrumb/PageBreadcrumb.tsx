@@ -1,4 +1,4 @@
-import {Breadcrumb, BreadcrumbItem, BreadcrumbLink} from '@chakra-ui/react'
+import {Breadcrumb} from '@chakra-ui/react'
 import {useEffect, useState} from 'react'
 
 import {TreeNode} from '../../components/PageVisualizer'
@@ -56,20 +56,22 @@ export const PageBreadcrumb: React.FC<PageBreadcrumbProps> = props => {
   }, [props.tree, props.activePageId])
 
   return (
-    <Breadcrumb color="fg.muted" separator="/">
-      {treePath.map((item, index) => {
-        const isCurrentPage = index === treePath.length - 1
+    <Breadcrumb.Root color="fg.muted">
+      <Breadcrumb.List>
+        {treePath.map((item, index) => {
+          const isCurrentPage = index === treePath.length - 1
 
-        return (
-          <BreadcrumbItem key={item.id} isCurrentPage={isCurrentPage}>
-            <BreadcrumbLink
-              as={isCurrentPage ? undefined : Link}
-              to={`#${btoa(item.id)}`}>
-              {item.label}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        )
-      })}
-    </Breadcrumb>
+          return (
+            <Breadcrumb.Item key={item.id}>
+              <Breadcrumb.Link
+                as={isCurrentPage ? undefined : Link}
+                to={`#${btoa(item.id)}`}>
+                {item.label}
+              </Breadcrumb.Link>
+            </Breadcrumb.Item>
+          )
+        })}
+      </Breadcrumb.List>
+    </Breadcrumb.Root>
   )
 }

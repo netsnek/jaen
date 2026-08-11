@@ -54,15 +54,19 @@ export const Link: React.FC<{
 
   if (isExternal) {
     return (
-      <ChakraLink href={to} isExternal {...linkProps}>
+      <ChakraLink
+        href={to}
+        {...linkProps}
+        target="_blank"
+        rel="noopener noreferrer">
         {children}
       </ChakraLink>
     )
   }
 
   return (
-    <ChakraLink as={GatsbyLink} to={to} {...linkProps}>
-      {children}
+    <ChakraLink {...linkProps} asChild>
+      <GatsbyLink to={to}>{children}</GatsbyLink>
     </ChakraLink>
   )
 }

@@ -24,7 +24,11 @@ export const Basic: Story<ComponentProps> = () => {
         title="In progress"
         subTitle="Your website will be live in a few minutes."
         circleColor={useColorModeValue('orange.500', 'orange.300')}
-        icon={<Icon as={FaRocket} boxSize="6" />}
+        icon={
+          <Icon boxSize="6" asChild>
+            <FaRocket />
+          </Icon>
+        }
       />
       ,
       <ListItem
@@ -32,7 +36,11 @@ export const Basic: Story<ComponentProps> = () => {
         title="In progress"
         subTitle="Your website will be live in a few minutes."
         circleColor={useColorModeValue('orange.500', 'orange.300')}
-        icon={<Icon as={FaRocket} boxSize="6" />}
+        icon={
+          <Icon boxSize="6" asChild>
+            <FaRocket />
+          </Icon>
+        }
       />
     </List>
   )

@@ -10,13 +10,8 @@ import {
   Button,
   ButtonGroup,
   Card,
-  CardBody,
-  CardHeader,
   Checkbox,
   Flex,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
   HStack,
   Input,
   InputGroup,
@@ -32,7 +27,8 @@ import {
   Text,
   Th,
   Thead,
-  Tr
+  Tr,
+  Field
 } from '@chakra-ui/react'
 import {navigate} from 'gatsby'
 import {forwardRef, useEffect, useMemo, useState} from 'react'
@@ -180,11 +176,14 @@ const Page: React.FC<PageProps> = props => {
 
   return (
     <Stack>
-      <Card mt={8} p={4}>
+      <Card.Root mt={8} p={4}>
         <Stack>
           <HStack>
-            <Avatar name={user?.username} src={user?.details?.avatarURL} />
-            <Stack spacing="0.5">
+            <Avatar.Root>
+              <Avatar.Fallback name={user?.username} />
+              <Avatar.Image src={user?.details?.avatarURL} />
+            </Avatar.Root>
+            <Stack gap="0.5">
               <Text fontWeight="bold" lineHeight="none">
                 {user?.username} ({user?.primaryEmailAddress})
               </Text>
@@ -194,25 +193,25 @@ const Page: React.FC<PageProps> = props => {
             </Stack>
           </HStack>
         </Stack>
-      </Card>
+      </Card.Root>
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Stack spacing="4">
-          <FormControl>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-              <FormLabel>ID</FormLabel>
+        <Stack gap="4">
+          <Field.Root>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
+              <Field.Label>ID</Field.Label>
             </Skeleton>
-            <Skeleton isLoaded={!isLoading}>
+            <Skeleton loading={!!isLoading}>
               <Input placeholder={user?.id} disabled />
             </Skeleton>
-          </FormControl>
-          <FormControl isInvalid={!!errors.emailAddress}>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-              <FormLabel>E-Mail</FormLabel>
+          </Field.Root>
+          <Field.Root invalid={!!errors.emailAddress}>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
+              <Field.Label>E-Mail</Field.Label>
             </Skeleton>
-            <Skeleton isLoaded={!isLoading}>
+            <Skeleton loading={!!isLoading}>
               <Input
-                isDisabled
+                disabled
                 placeholder="john.doe@snek.at"
                 {...register('emailAddress', {
                   required: 'This is required',
@@ -223,14 +222,14 @@ const Page: React.FC<PageProps> = props => {
                 })}
               />
             </Skeleton>
-            <FormErrorMessage>{errors.emailAddress?.message}</FormErrorMessage>
-          </FormControl>
+            <Field.ErrorText>{errors.emailAddress?.message}</Field.ErrorText>
+          </Field.Root>
 
-          <FormControl isInvalid={!!errors.username}>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-              <FormLabel>Username</FormLabel>
+          <Field.Root invalid={!!errors.username}>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
+              <Field.Label>Username</Field.Label>
             </Skeleton>
-            <Skeleton isLoaded={!isLoading}>
+            <Skeleton loading={!!isLoading}>
               <Input
                 placeholder="john.doe"
                 {...register('username', {
@@ -238,53 +237,53 @@ const Page: React.FC<PageProps> = props => {
                 })}
               />
             </Skeleton>
-            <FormErrorMessage>
+            <Field.ErrorText>
               {errors.details?.firstName?.message}
-            </FormErrorMessage>
-          </FormControl>
+            </Field.ErrorText>
+          </Field.Root>
 
           <Stack direction="row">
             <Flex flex={1}>
-              <FormControl mt={4} isInvalid={!!errors.details?.lastName}>
-                <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-                  <FormLabel>Firstname</FormLabel>
+              <Field.Root mt={4} invalid={!!errors.details?.lastName}>
+                <Skeleton width={'fit-content'} loading={!!isLoading}>
+                  <Field.Label>Firstname</Field.Label>
                 </Skeleton>
-                <Skeleton isLoaded={!isLoading}>
+                <Skeleton loading={!!isLoading}>
                   <Input
                     placeholder="John"
                     {...register('details.firstName', {})}
                   />
                 </Skeleton>
-                <FormErrorMessage>
+                <Field.ErrorText>
                   {errors.details?.lastName?.message}
-                </FormErrorMessage>
-              </FormControl>
+                </Field.ErrorText>
+              </Field.Root>
             </Flex>
             <Flex flex={1}>
-              <FormControl mt={4} isInvalid={!!errors.details?.lastName}>
-                <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-                  <FormLabel>Lastname</FormLabel>
+              <Field.Root mt={4} invalid={!!errors.details?.lastName}>
+                <Skeleton width={'fit-content'} loading={!!isLoading}>
+                  <Field.Label>Lastname</Field.Label>
                 </Skeleton>
-                <Skeleton isLoaded={!isLoading}>
+                <Skeleton loading={!!isLoading}>
                   <Input
                     width={'full'}
                     placeholder="Doe"
                     {...register('details.lastName', {})}
                   />
                 </Skeleton>
-                <FormErrorMessage>
+                <Field.ErrorText>
                   {errors.details?.lastName?.message}
-                </FormErrorMessage>
-              </FormControl>
+                </Field.ErrorText>
+              </Field.Root>
             </Flex>
           </Stack>
 
-          <FormControl isInvalid={!!errors.password}>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-              <FormLabel>Password</FormLabel>
+          <Field.Root invalid={!!errors.password}>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
+              <Field.Label>Password</Field.Label>
             </Skeleton>
             {changePasword ? (
-              <Skeleton isLoaded={!isLoading}>
+              <Skeleton loading={!!isLoading}>
                 <PasswordInput
                   {...register('password', {
                     required: 'This is required'
@@ -292,18 +291,18 @@ const Page: React.FC<PageProps> = props => {
                 />
               </Skeleton>
             ) : (
-              <Skeleton width={'fit-content'} isLoaded={!isLoading}>
+              <Skeleton width={'fit-content'} loading={!!isLoading}>
                 <Button onClick={() => setChangePassword(true)}>Change </Button>
               </Skeleton>
             )}
-            <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
-          </FormControl>
+            <Field.ErrorText>{errors.password?.message}</Field.ErrorText>
+          </Field.Root>
 
-          <FormControl isInvalid={!!errors.isActive}>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-              <FormLabel>Active</FormLabel>
+          <Field.Root invalid={!!errors.isActive}>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
+              <Field.Label>Active</Field.Label>
             </Skeleton>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
               <Controller
                 control={control}
                 name="isActive"
@@ -311,36 +310,36 @@ const Page: React.FC<PageProps> = props => {
                 render={({field: {value, onChange, onBlur, ref}}) => (
                   <Switch
                     ref={ref}
-                    onChange={onChange}
+                    onValueChange={onChange}
                     onBlur={onBlur}
-                    isChecked={value}
+                    checked={value}
                   />
                 )}
               />
             </Skeleton>
-            <FormErrorMessage>{errors.isActive?.message}</FormErrorMessage>
-          </FormControl>
+            <Field.ErrorText>{errors.isActive?.message}</Field.ErrorText>
+          </Field.Root>
 
-          <FormControl>
-            <FormLabel>Roles</FormLabel>
+          <Field.Root>
+            <Field.Label>Roles</Field.Label>
 
-            <Table>
-              <Thead>
-                <Tr>
-                  <Th>Role</Th>
-                  <Th>ID</Th>
-                  <Th>Active</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
+            <Table.Root>
+              <Table.Header>
+                <Table.Row>
+                  <Table.ColumnHeader>Role</Table.ColumnHeader>
+                  <Table.ColumnHeader>ID</Table.ColumnHeader>
+                  <Table.ColumnHeader>Active</Table.ColumnHeader>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
                 {auth.user?.resource?.roles ? (
                   auth.user.resource.roles.map((role, index) => (
-                    <Tr key={index}>
-                      <Td>{role.description}</Td>
-                      <Td>{role.id}</Td>
-                      <Td textAlign="right">
-                        <Checkbox
-                          onChange={(
+                    <Table.Row key={index}>
+                      <Table.Cell>{role.description}</Table.Cell>
+                      <Table.Cell>{role.id}</Table.Cell>
+                      <Table.Cell textAlign="right">
+                        <Checkbox.Root
+                          onCheckedChange={(
                             e: React.ChangeEvent<HTMLInputElement>
                           ) => {
                             if (e.target.checked) {
@@ -355,33 +354,37 @@ const Page: React.FC<PageProps> = props => {
                               }
                             }
                           }}
-                          isChecked={
+                          checked={
                             !!fields.find(field => field.id === role.id)
-                          }
-                        />
-                      </Td>
-                    </Tr>
+                          }>
+                          <Checkbox.HiddenInput />
+                          <Checkbox.Control>
+                            <Checkbox.Indicator />
+                          </Checkbox.Control>
+                        </Checkbox.Root>
+                      </Table.Cell>
+                    </Table.Row>
                   ))
                 ) : (
-                  <Tr>
-                    <Td colSpan={3}>
+                  <Table.Row>
+                    <Table.Cell colSpan={3}>
                       <HStack>
                         <Text>
                           No roles found. Please contact your administrator.
                         </Text>
                       </HStack>
-                    </Td>
-                  </Tr>
+                    </Table.Cell>
+                  </Table.Row>
                 )}
-              </Tbody>
-            </Table>
-          </FormControl>
+              </Table.Body>
+            </Table.Root>
+          </Field.Root>
 
-          <FormControl isInvalid={!!errors.isAdmin}>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-              <FormLabel>Admin</FormLabel>
+          <Field.Root invalid={!!errors.isAdmin}>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
+              <Field.Label>Admin</Field.Label>
             </Skeleton>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
               <Controller
                 control={control}
                 name="isAdmin"
@@ -389,43 +392,43 @@ const Page: React.FC<PageProps> = props => {
                 render={({field: {value, onChange, onBlur, ref}}) => (
                   <Switch
                     ref={ref}
-                    onChange={onChange}
+                    onValueChange={onChange}
                     onBlur={onBlur}
-                    isChecked={value}
+                    checked={value}
                   />
                 )}
               />
             </Skeleton>
-            <FormErrorMessage>{errors.isAdmin?.message}</FormErrorMessage>
-          </FormControl>
+            <Field.ErrorText>{errors.isAdmin?.message}</Field.ErrorText>
+          </Field.Root>
 
-          <FormControl>
-            <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-              <FormLabel>Created at</FormLabel>
+          <Field.Root>
+            <Skeleton width={'fit-content'} loading={!!isLoading}>
+              <Field.Label>Created at</Field.Label>
             </Skeleton>
-            <Skeleton isLoaded={!isLoading}>
+            <Skeleton loading={!!isLoading}>
               <Input
                 placeholder={new Date(user?.createdAt ?? 0).toDateString()}
                 disabled
               />
             </Skeleton>
-          </FormControl>
+          </Field.Root>
 
           <Box mt={4}>
             <HStack width="full">
-              <ButtonGroup isDisabled={!isDirty}>
-                <Skeleton width={'fit-content'} isLoaded={!isLoading}>
-                  <Button type="submit" isLoading={isSubmitting}>
+              <ButtonGroup>
+                <Skeleton width={'fit-content'} loading={!!isLoading}>
+                  <Button type="submit" loading={isSubmitting}>
                     Save Changes
                   </Button>
                 </Skeleton>
-                <Skeleton width={'fit-content'} isLoaded={!isLoading}>
+                <Skeleton width={'fit-content'} loading={!!isLoading}>
                   <Button variant="outline" onClick={onReset}>
                     Cancel
                   </Button>
                 </Skeleton>
               </ButtonGroup>
-              <Skeleton width={'fit-content'} isLoaded={!isLoading}>
+              <Skeleton width={'fit-content'} loading={!!isLoading}>
                 <Button variant="outline" onClick={handleDelete}>
                   Delete
                 </Button>

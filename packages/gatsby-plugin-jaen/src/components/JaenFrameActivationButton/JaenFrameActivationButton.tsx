@@ -1,4 +1,11 @@
-import {Button, Flex, HStack, Icon, StackDivider, Text} from '@chakra-ui/react'
+import {
+  Button,
+  Flex,
+  HStack,
+  Icon,
+  Text,
+  StackSeparator
+} from '@chakra-ui/react'
 import {FaEllipsisH} from '@react-icons/all-files/fa/FaEllipsisH'
 import {FaSignInAlt} from '@react-icons/all-files/fa/FaSignInAlt'
 
@@ -21,14 +28,18 @@ export const JaenFrameActivationButton: React.FC<
         bg="bg.surface"
         p="2"
         rounded="full"
-        divider={<StackDivider />}>
+        separator={<StackSeparator />}>
         <Link
           as={Button}
           to="/jaen"
           variant="ghost"
           rounded="full"
           size="sm"
-          leftIcon={<Icon as={FaSignInAlt} />}>
+          leftIcon={
+            <Icon asChild>
+              <FaSignInAlt />
+            </Icon>
+          }>
           Log in to edit
         </Link>
         <MenuButton
@@ -54,7 +65,9 @@ export const JaenFrameActivationButton: React.FC<
               </Flex>
             )
           }}>
-          <Icon as={FaEllipsisH} display="block" />
+          <Icon display="block" asChild>
+            <FaEllipsisH />
+          </Icon>
         </MenuButton>
       </HStack>
     </>

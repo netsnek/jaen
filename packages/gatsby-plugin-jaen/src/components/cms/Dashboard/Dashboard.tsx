@@ -1,15 +1,12 @@
 import {
   Card,
-  CardBody,
-  CardHeader,
   Heading,
   HStack,
   Icon,
-  ListItem as ChakraListItem,
   SimpleGrid,
   Stack,
   Text,
-  UnorderedList
+  List
 } from '@chakra-ui/react'
 import {FaBullhorn} from '@react-icons/all-files/fa/FaBullhorn'
 import {FaRocket} from '@react-icons/all-files/fa/FaRocket'
@@ -46,15 +43,15 @@ export const Dashboard: React.FC<DashboardProps> = props => {
             md: 2
           }}
           spacing="4">
-          <Card>
-            <CardHeader>
+          <Card.Root>
+            <Card.Header>
               <HStack>
                 <Icon as={FaBullhorn} boxSize={6} color="brand.500" /> What is
                 Jaen
                 <Text>What is Jaen CMS?</Text>
               </HStack>
-            </CardHeader>
-            <CardBody>
+            </Card.Header>
+            <Card.Body>
               <Text>
                 Jaen CMS is a friendly tool that helps you create and manage
                 websites easily, without any technical knowledge required. It
@@ -62,17 +59,17 @@ export const Dashboard: React.FC<DashboardProps> = props => {
                 website without worrying about the technical stuff. It's like
                 writing a document and seeing it on your website instantly!
               </Text>
-            </CardBody>
-          </Card>
-          <Card>
-            <CardHeader>
+            </Card.Body>
+          </Card.Root>
+          <Card.Root>
+            <Card.Header>
               <HStack>
                 <Icon as={FaRocket} boxSize={6} color="brand.500" />{' '}
                 <Text>Key Features</Text>
               </HStack>
-            </CardHeader>
-            <CardBody>
-              <UnorderedList styleType="disc" pl="1.5rem" spacing={3}>
+            </Card.Header>
+            <Card.Body>
+              <List.Root as="ul" listStyleType="disc" pl="1.5rem" gap={3}>
                 <ChakraListItem>
                   Easy to Use: Jaen CMS is designed with simplicity in mind. You
                   don't need to be a techie to use it. Just start creating!
@@ -95,9 +92,9 @@ export const Dashboard: React.FC<DashboardProps> = props => {
                   engines with built-in tools to optimize your content for
                   search results.
                 </ChakraListItem>
-              </UnorderedList>
-            </CardBody>
-          </Card>
+              </List.Root>
+            </Card.Body>
+          </Card.Root>
         </SimpleGrid>
       </Stack>
 

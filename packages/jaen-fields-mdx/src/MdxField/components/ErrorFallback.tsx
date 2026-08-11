@@ -1,10 +1,4 @@
-import {
-  Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
-  Button
-} from '@chakra-ui/react'
+import {Alert, Button} from '@chakra-ui/react'
 import React from 'react'
 
 export const ErrorFallback: React.FC<{
@@ -12,14 +6,14 @@ export const ErrorFallback: React.FC<{
   resetErrorBoundary: () => void
 }> = ({error, resetErrorBoundary}) => {
   return (
-    <Alert status="error">
-      <AlertIcon />
-      <AlertTitle>Something went wrong</AlertTitle>
-      <AlertDescription>
+    <Alert.Root status="error">
+      <Alert.Indicator />
+      <Alert.Title>Something went wrong</Alert.Title>
+      <Alert.Description>
         <pre>{error.message}</pre>
 
         <Button onClick={resetErrorBoundary}>Try again</Button>
-      </AlertDescription>
-    </Alert>
+      </Alert.Description>
+    </Alert.Root>
   )
 }

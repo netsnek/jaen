@@ -23,13 +23,13 @@ import {SenderTransport, resolve, useQuery} from '../../../client/index'
 import {SenderModal} from '../../../SenderModal'
 
 const SkeletonRow = () => (
-  <Tr>
+  <Table.Row>
     {[...Array(6)].map((_, index) => (
-      <Td key={index}>
+      <Table.Cell key={index}>
         <Skeleton height="6" />
-      </Td>
+      </Table.Cell>
     ))}
-  </Tr>
+  </Table.Row>
 )
 
 const Page: React.FC = () => {
@@ -106,15 +106,15 @@ const Page: React.FC = () => {
 
   return (
     <>
-      <Stack spacing="4">
+      <Stack gap="4">
         <Heading size="md">Email Templates</Heading>
 
-        <HStack spacing="4" justifyContent="space-between">
+        <HStack gap="4" justifyContent="space-between">
           <HStack>
             {defaultSender?.address ? (
               <Text>
                 Default sender: <strong>{defaultSender.address}</strong>{' '}
-                <Badge colorScheme={defaultSender.enabled ? 'green' : 'red'}>
+                <Badge colorPalette={defaultSender.enabled ? 'green' : 'red'}>
                   {defaultSender.transport}
                 </Badge>
               </Text>
@@ -176,26 +176,31 @@ const Page: React.FC = () => {
                 await data.$refetch(true)
               }}
             />
-            <Button
-              leftIcon={<Icon as={FaPlus} />}
-              onClick={handleAddTemplateClick}>
+            <Button onClick={handleAddTemplateClick}>
+              <Icon asChild>
+                <FaPlus />
+              </Icon>
               Add Template
             </Button>
           </HStack>
         </HStack>
 
-        <Table>
-          <Thead position="sticky" top={0} zIndex={1} borderColor="black">
-            <Tr my=".8rem">
-              <Th>Description</Th>
-              <Th>Subject</Th>
-              <Th>To</Th>
-              <Th>Reply-To</Th>
-              <Th>Updated at</Th>
-              <Th>Created at</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
+        <Table.Root>
+          <Table.Header
+            position="sticky"
+            top={0}
+            zIndex={1}
+            borderColor="black">
+            <Table.Row my=".8rem">
+              <Table.ColumnHeader>Description</Table.ColumnHeader>
+              <Table.ColumnHeader>Subject</Table.ColumnHeader>
+              <Table.ColumnHeader>To</Table.ColumnHeader>
+              <Table.ColumnHeader>Reply-To</Table.ColumnHeader>
+              <Table.ColumnHeader>Updated at</Table.ColumnHeader>
+              <Table.ColumnHeader>Created at</Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
             {data.$state.isLoading && (
               <>
                 <SkeletonRow />
@@ -206,30 +211,33 @@ const Page: React.FC = () => {
 
             {data.templates().nodes.map(template => {
               return (
-                <Tr
+                <Table.Row
                   key={template.id}
                   visibility={data.$state.isLoading ? 'hidden' : 'visible'}>
-                  <Td>
-                    <Link as={GatsbyLink} to={`./${template.id}`}>
-                      {template.description}
+                  <Table.Cell>
+                    <Link asChild>
+                      <GatsbyLink to={`./${template.id}`}>
+                        {template.description}
+                      </GatsbyLink>
                     </Link>
-                  </Td>
-                  <Td>{template.envelope?.subject}</Td>
-                  <Td>{template.envelope?.to?.join(', ')}</Td>
-                  <Td>{template.envelope?.replyTo}</Td>
-                  <Td>{template.updatedAt}</Td>
-                  <Td>{template.createdAt}</Td>
-                </Tr>
+                  </Table.Cell>
+                  <Table.Cell>{template.envelope?.subject}</Table.Cell>
+                  <Table.Cell>{template.envelope?.to?.join(', ')}</Table.Cell>
+                  <Table.Cell>{template.envelope?.replyTo}</Table.Cell>
+                  <Table.Cell>{template.updatedAt}</Table.Cell>
+                  <Table.Cell>{template.createdAt}</Table.Cell>
+                </Table.Row>
               )
             })}
 
             {data.templates().totalCount === 0 && (
-              <Tr visibility={data.$state.isLoading ? 'hidden' : 'visible'}>
-                <Td colSpan={6}>No templates found</Td>
-              </Tr>
+              <Table.Row
+                visibility={data.$state.isLoading ? 'hidden' : 'visible'}>
+                <Table.Cell colSpan={6}>No templates found</Table.Cell>
+              </Table.Row>
             )}
-          </Tbody>
-        </Table>
+          </Table.Body>
+        </Table.Root>
       </Stack>
     </>
   )

@@ -120,19 +120,19 @@ export const ImageField = connectField<ImageFieldMediaId, ImageFieldProps>(
           actions={[
             <Button
               variant="field-highlighter-tooltip"
-              leftIcon={<FaImage />}
               onClick={() => {
                 context.toggleModal({defaultSelected: mediaId})
               }}>
+              <FaImage />
               Image
             </Button>,
 
             <IconButton
               variant="field-highlighter-tooltip"
               aria-label="Remove"
-              icon={<FaTrashAlt />}
-              onClick={handleRemove}
-            />
+              onClick={handleRemove}>
+              <FaTrashAlt />
+            </IconButton>
           ]}
           as={ImageComponent}
           asProps={{

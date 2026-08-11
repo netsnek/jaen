@@ -29,7 +29,19 @@ export const tokens = defineTokens({
     // v3 stops at 12/14/16, so `size="2xl"` on a Button would emit `height: 15`
     // and render at the browser default. sizes.11 needs no override: v3 already
     // has it at the same 2.75rem.
-    15: {value: '3.75rem'}
+    15: {value: '3.75rem'},
+    /**
+     * v3 dropped the whole `container.*` namespace, and JaenPageLayout picks
+     * between container.md and container.xl on every CMS page. An unresolvable
+     * size is not an error in v3: `maxW` would receive the literal string
+     * 'container.xl' and the layout would go full-bleed. v2's four values.
+     */
+    container: {
+      sm: {value: '640px'},
+      md: {value: '768px'},
+      lg: {value: '1024px'},
+      xl: {value: '1280px'}
+    }
   },
   spacing: {
     // v3's scale steps 4 -> 5 with nothing between.

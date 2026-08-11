@@ -1,10 +1,4 @@
-import {
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalOverlay
-} from '@chakra-ui/react'
+import {Dialog, Portal} from '@chakra-ui/react'
 import {JaenPage, MediaNode, PageProvider, useMediaModal} from 'jaen'
 import {useEffect, useState} from 'react'
 
@@ -46,27 +40,37 @@ const MediaModal: React.FC<MediaSelectorProps> = props => {
   }, [context.isOpen])
 
   return (
-    <Modal isOpen={context.isOpen} onClose={context.toggleModal}>
-      <ModalOverlay />
-      <ModalContent
-        maxW="96rem"
-        containerProps={{
-          id: 'momo'
-        }}>
-        {/* <ModalHeader>Modal Title</ModalHeader> */}
-        <ModalCloseButton />
-        <ModalBody p="1">
-          <PageProvider jaenPage={jaenPage}>
-            <Media
-              isSelector={props.isSelector}
-              onSelect={props.onSelect}
-              defaultSelected={props.defaultSelected}
-              jaenPageId={props.jaenPageId}
-            />
-          </PageProvider>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+    <Dialog.Root
+      open={context.isOpen}
+      onOpenChange={e => {
+        if (!e.open) {
+          context.toggleModal()
+        }
+      }}>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content
+            maxW="96rem"
+            containerProps={{
+              id: 'momo'
+            }}>
+            {/* <ModalHeader>Modal Title</ModalHeader> */}
+            <Dialog.CloseTrigger />
+            <Dialog.Body p="1">
+              <PageProvider jaenPage={jaenPage}>
+                <Media
+                  isSelector={props.isSelector}
+                  onSelect={props.onSelect}
+                  defaultSelected={props.defaultSelected}
+                  jaenPageId={props.jaenPageId}
+                />
+              </PageProvider>
+            </Dialog.Body>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   )
 }
 

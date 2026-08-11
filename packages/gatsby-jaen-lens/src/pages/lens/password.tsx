@@ -1,4 +1,4 @@
-import {Heading, Progress, Stack, StackDivider, Text} from '@chakra-ui/react'
+import {Heading, Progress, Stack, Text, StackSeparator} from '@chakra-ui/react'
 import {navigate} from 'gatsby'
 import {
   AuthUserProvider,
@@ -46,14 +46,20 @@ const Page: React.FC<PageProps> = () => {
   }
 
   if (!user) {
-    return <Progress size="xs" isIndeterminate />
+    return (
+      <Progress.Root size="xs" indeterminate>
+        <Progress.Track>
+          <Progress.Range />
+        </Progress.Track>
+      </Progress.Root>
+    )
   }
 
   return (
     <Stack
-      divider={<StackDivider borderColor="border.emphasized" />}
+      separator={<StackSeparator borderColor="border.emphasized" />}
       id="momo"
-      spacing="4">
+      gap="4">
       <Stack>
         <Heading as="h2" size="sm">
           Set internal password
@@ -73,10 +79,12 @@ const Page: React.FC<PageProps> = () => {
         onPasswordUpdate={handlePasswordChange}
       />
 
-      <Text as="em" size="xs">
-        Note: This password is only valid for services connected to Lens
-        authentication. If you have any questions or issues, please reach out to
-        your administrator.
+      <Text size="xs" asChild>
+        <em>
+          Note: This password is only valid for services connected to Lens
+          authentication. If you have any questions or issues, please reach out
+          to your administrator.
+        </em>
       </Text>
     </Stack>
   )

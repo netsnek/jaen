@@ -26,10 +26,12 @@ export const TuneSelectorButton: React.FC<TuneSelectorButtonProps> = ({
     <Flex pos="relative">
       <IconButton
         variant="field-highlighter-tooltip"
-        icon={<Icon as={FaBars} />}
         onClick={toggleOpen}
-        {...iconButtonProps}
-      />
+        {...iconButtonProps}>
+        <Icon asChild>
+          <FaBars />
+        </Icon>
+      </IconButton>
       {isOpen && (
         <Box position="absolute" top="6" left="0" zIndex="popover" p="2">
           <TuneSelector

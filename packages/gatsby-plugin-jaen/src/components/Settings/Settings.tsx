@@ -4,10 +4,6 @@ import {
   Button,
   ButtonGroup,
   Card,
-  CardBody,
-  CardHeader,
-  FormControl,
-  FormLabel,
   Grid,
   GridItem,
   HStack,
@@ -15,15 +11,14 @@ import {
   IconButton,
   Input,
   List,
-  ListIcon,
-  ListItem,
-  Select,
+  NativeSelect,
   SimpleGrid,
   Spinner,
   Stack,
-  StackDivider,
   Text,
-  VStack
+  VStack,
+  Field,
+  StackSeparator
 } from '@chakra-ui/react'
 import {FaEdit} from '@react-icons/all-files/fa/FaEdit'
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
@@ -272,19 +267,17 @@ export const Settings: React.FC<SettingsProps> = props => {
       </GridItem>
       <GridItem>
         {activeTab === 'GENERAL' && (
-          <Stack spacing="8">
-            <Card>
-              <CardHeader fontWeight="bold" fontSize="lg">
+          <Stack gap="8">
+            <Card.Root>
+              <Card.Header fontWeight="bold" fontSize="lg">
                 Profile
-              </CardHeader>
-              <CardBody>
-                <Stack spacing="6">
-                  <HStack spacing="6">
+              </Card.Header>
+              <Card.Body>
+                <Stack gap="6">
+                  <HStack gap="6">
                     <HStack>
-                      <Avatar
+                      <Avatar.Root
                         size="xl"
-                        name={user?.human?.profile?.displayName}
-                        src={user?.human?.profile?.avatarUrl}
                         cursor="pointer"
                         onClick={
                           isProfileAvatarUpdating
@@ -309,49 +302,53 @@ export const Settings: React.FC<SettingsProps> = props => {
                                 }
                                 input.click()
                               }
-                        }
-                      />
+                        }>
+                        <Avatar.Fallback
+                          name={user?.human?.profile?.displayName}
+                        />
+                        <Avatar.Image src={user?.human?.profile?.avatarUrl} />
+                      </Avatar.Root>
 
                       {isProfileAvatarUpdating && (
                         <Spinner size="sm" color="brand.500" />
                       )}
                     </HStack>
-                    <Stack spacing="4">
-                      <FormControl id="userName">
-                        <FormLabel>Username</FormLabel>
+                    <Stack gap="4">
+                      <Field.Root id="userName">
+                        <Field.Label>Username</Field.Label>
                         <HStack>
                           <Input
-                            isDisabled
+                            disabled
                             maxW="xs"
                             autoComplete="off"
                             bg="gray.100"
                             value={user?.userName}
-                            onChange={e =>
+                            onValueChange={e =>
                               setUser({...user, userName: e.target.value})
                             }
                           />
                           <IconButton
                             size="lg"
                             aria-label="Edit userName"
-                            icon={<FaEdit />}
                             variant="ghost"
                             onClick={handleUsernameChange}
-                            isLoading={isUsernameChanging}
-                          />
+                            loading={isUsernameChanging}>
+                            <FaEdit />
+                          </IconButton>
                         </HStack>
-                      </FormControl>
+                      </Field.Root>
                     </Stack>
                   </HStack>
 
                   <form onSubmit={handleSubmit}>
-                    <Stack spacing="6">
-                      <SimpleGrid columns={{base: 1, md: 2}} spacing="6">
-                        <FormControl id="firstName">
-                          <FormLabel>First Name</FormLabel>
+                    <Stack gap="6">
+                      <SimpleGrid columns={{base: 1, md: 2}} gap="6">
+                        <Field.Root id="firstName">
+                          <Field.Label>First Name</Field.Label>
                           <Input
                             placeholder=""
                             value={user?.human?.profile?.firstName}
-                            onChange={e =>
+                            onValueChange={e =>
                               setUser({
                                 ...user,
                                 human: {
@@ -364,13 +361,13 @@ export const Settings: React.FC<SettingsProps> = props => {
                               })
                             }
                           />
-                        </FormControl>
-                        <FormControl id="lastName">
-                          <FormLabel>Last Name</FormLabel>
+                        </Field.Root>
+                        <Field.Root id="lastName">
+                          <Field.Label>Last Name</Field.Label>
                           <Input
                             placeholder=""
                             value={user?.human?.profile?.lastName}
-                            onChange={e =>
+                            onValueChange={e =>
                               setUser({
                                 ...user,
                                 human: {
@@ -383,14 +380,14 @@ export const Settings: React.FC<SettingsProps> = props => {
                               })
                             }
                           />
-                        </FormControl>
+                        </Field.Root>
 
-                        <FormControl id="nickName">
-                          <FormLabel>Nickname</FormLabel>
+                        <Field.Root id="nickName">
+                          <Field.Label>Nickname</Field.Label>
                           <Input
                             placeholder=""
                             value={user?.human?.profile?.nickName}
-                            onChange={e =>
+                            onValueChange={e =>
                               setUser({
                                 ...user,
                                 human: {
@@ -403,14 +400,14 @@ export const Settings: React.FC<SettingsProps> = props => {
                               })
                             }
                           />
-                        </FormControl>
+                        </Field.Root>
 
-                        <FormControl id="displayName">
-                          <FormLabel>Full Name</FormLabel>
+                        <Field.Root id="displayName">
+                          <Field.Label>Full Name</Field.Label>
                           <Input
                             placeholder=""
                             value={user?.human?.profile?.displayName}
-                            onChange={e =>
+                            onValueChange={e =>
                               setUser({
                                 ...user,
                                 human: {
@@ -423,105 +420,111 @@ export const Settings: React.FC<SettingsProps> = props => {
                               })
                             }
                           />
-                        </FormControl>
+                        </Field.Root>
 
-                        <FormControl id="gender">
-                          <FormLabel>Gender</FormLabel>
-                          <Select
-                            defaultValue={user?.human?.profile?.gender}
-                            onChange={e => {
-                              setUser({
-                                ...user,
-                                human: {
-                                  ...user.human,
-                                  profile: {
-                                    ...user.human.profile,
-                                    gender: e.target.value
+                        <Field.Root id="gender">
+                          <Field.Label>Gender</Field.Label>
+                          <NativeSelect.Root>
+                            <NativeSelect.Field
+                              defaultValue={user?.human?.profile?.gender}
+                              onValueChange={e => {
+                                setUser({
+                                  ...user,
+                                  human: {
+                                    ...user.human,
+                                    profile: {
+                                      ...user.human.profile,
+                                      gender: e.target.value
+                                    }
                                   }
-                                }
-                              })
-                            }}>
-                            {Object.entries(genderOptions).map(
-                              ([key, value]) => (
-                                <option key={key} value={key}>
-                                  {value}
-                                </option>
-                              )
-                            )}
-                          </Select>
-                        </FormControl>
+                                })
+                              }}>
+                              {Object.entries(genderOptions).map(
+                                ([key, value]) => (
+                                  <option key={key} value={key}>
+                                    {value}
+                                  </option>
+                                )
+                              )}
+                            </NativeSelect.Field>
+                            <NativeSelect.Indicator />
+                          </NativeSelect.Root>
+                        </Field.Root>
 
-                        <FormControl id="preferredLanguage">
-                          <FormLabel>Language</FormLabel>
-                          <Select
-                            defaultValue={
-                              user?.human?.profile?.preferredLanguage
-                            }
-                            onChange={e => {
-                              setUser({
-                                ...user,
-                                human: {
-                                  ...user.human,
-                                  profile: {
-                                    ...user.human.profile,
-                                    preferredLanguage: e.target.value
+                        <Field.Root id="preferredLanguage">
+                          <Field.Label>Language</Field.Label>
+                          <NativeSelect.Root>
+                            <NativeSelect.Field
+                              defaultValue={
+                                user?.human?.profile?.preferredLanguage
+                              }
+                              onValueChange={e => {
+                                setUser({
+                                  ...user,
+                                  human: {
+                                    ...user.human,
+                                    profile: {
+                                      ...user.human.profile,
+                                      preferredLanguage: e.target.value
+                                    }
                                   }
-                                }
-                              })
-                            }}>
-                            {Object.entries(localOptions).map(
-                              ([key, value]) => (
-                                <option key={key} value={key}>
-                                  {value}
-                                </option>
-                              )
-                            )}
-                          </Select>
-                        </FormControl>
+                                })
+                              }}>
+                              {Object.entries(localOptions).map(
+                                ([key, value]) => (
+                                  <option key={key} value={key}>
+                                    {value}
+                                  </option>
+                                )
+                              )}
+                            </NativeSelect.Field>
+                            <NativeSelect.Indicator />
+                          </NativeSelect.Root>
+                        </Field.Root>
                       </SimpleGrid>
 
                       <ButtonGroup>
-                        <Button isLoading={isProfileUpdating} type="submit">
+                        <Button loading={isProfileUpdating} type="submit">
                           Save
                         </Button>
                       </ButtonGroup>
                     </Stack>
                   </form>
                 </Stack>
-              </CardBody>
-            </Card>
+              </Card.Body>
+            </Card.Root>
 
-            <Card>
-              <CardHeader fontWeight="bold" fontSize="lg">
+            <Card.Root>
+              <Card.Header fontWeight="bold" fontSize="lg">
                 <HStack justifyContent="space-between">
                   <Text>Contact Information</Text>
                   <IconButton
                     size="lg"
                     aria-label="Refresh"
-                    icon={<MdRefresh />}
                     variant="ghost"
                     onClick={handleContactInformationRefresh}
-                    isLoading={isContactInformationRefreshing}
-                  />
+                    loading={isContactInformationRefreshing}>
+                    <MdRefresh />
+                  </IconButton>
                 </HStack>
-              </CardHeader>
-              <CardBody>
+              </Card.Header>
+              <Card.Body>
                 <Text fontSize="sm" color="gray.600">
                   The provided information is used to send important
                   information, like password reset e-mails to you.
                 </Text>
-                <Stack divider={<StackDivider />} spacing="6" my="4">
-                  <FormControl id="email">
+                <Stack separator={<StackSeparator />} gap="6" my="4">
+                  <Field.Root id="email">
                     <HStack justifyContent="space-between">
-                      <FormLabel>Email</FormLabel>
+                      <Field.Label>Email</Field.Label>
                       <IconButton
                         size="lg"
                         aria-label="Edit email"
-                        icon={<FaEdit />}
                         variant="ghost"
                         onClick={handleEmailChange}
-                        isLoading={isEmailChanging}
-                      />
+                        loading={isEmailChanging}>
+                        <FaEdit />
+                      </IconButton>
                     </HStack>
                     <Text mt="2">{user?.human?.email?.email}</Text>
 
@@ -541,41 +544,43 @@ export const Settings: React.FC<SettingsProps> = props => {
                       {!user?.human?.email?.isEmailVerified && (
                         <>
                           <Button
-                            variant="link"
+                            variant="plain"
                             color="fg.subtle"
                             fontWeight="normal"
                             onClick={handleEmailResendCode}
-                            isLoading={isEmailResendingCode}>
+                            loading={isEmailResendingCode}>
                             Resend Code
                           </Button>
                         </>
                       )}
                     </HStack>
-                  </FormControl>
+                  </Field.Root>
 
-                  <FormControl>
+                  <Field.Root>
                     {user?.human?.phone?.phone ? (
                       <>
                         <HStack justifyContent="space-between">
-                          <FormLabel>Phone number</FormLabel>
+                          <Field.Label>Phone number</Field.Label>
                           <HStack>
                             <IconButton
                               size="lg"
                               aria-label="Delete phone number"
-                              icon={<Icon as={FaTrash} color="red.500" />}
                               variant="ghost"
-                              colorScheme="red"
+                              colorPalette="red"
                               onClick={handlephoneDelete}
-                              isLoading={isPhoneDeleting}
-                            />
+                              loading={isPhoneDeleting}>
+                              <Icon color="red.500" asChild>
+                                <FaTrash />
+                              </Icon>
+                            </IconButton>
                             <IconButton
                               size="lg"
                               aria-label="Edit phone number"
-                              icon={<FaEdit />}
                               variant="ghost"
                               onClick={handlePhoneChange}
-                              isLoading={isPhoneChanging}
-                            />
+                              loading={isPhoneChanging}>
+                              <FaEdit />
+                            </IconButton>
                           </HStack>
                         </HStack>
                         <Text mt="2">{user.human.phone.phone}</Text>
@@ -596,20 +601,20 @@ export const Settings: React.FC<SettingsProps> = props => {
                           {!user.human.phone.isPhoneVerified && (
                             <>
                               <Button
-                                variant="link"
+                                variant="plain"
                                 color="fg.subtle"
                                 fontWeight="normal"
                                 onClick={handlephoneVerify}
-                                isLoading={isPhoneVerifying}>
+                                loading={isPhoneVerifying}>
                                 Verify
                               </Button>
 
                               <Button
-                                variant="link"
+                                variant="plain"
                                 color="fg.subtle"
                                 fontWeight="normal"
                                 onClick={handlephoneResendCode}
-                                isLoading={isPhoneResendingCode}>
+                                loading={isPhoneResendingCode}>
                                 Resend Code
                               </Button>
                             </>
@@ -619,139 +624,165 @@ export const Settings: React.FC<SettingsProps> = props => {
                     ) : (
                       <>
                         <HStack justifyContent="space-between">
-                          <FormLabel>Phone number</FormLabel>
+                          <Field.Label>Phone number</Field.Label>
                           <IconButton
                             size="lg"
                             aria-label="Add phone number"
-                            icon={<FaPlus />}
                             variant="ghost"
                             onClick={handlePhoneChange}
-                            isLoading={isPhoneChanging}
-                          />
+                            loading={isPhoneChanging}>
+                            <FaPlus />
+                          </IconButton>
                         </HStack>
                         <Text mt="2">No phone number provided</Text>
                       </>
                     )}
-                  </FormControl>
+                  </Field.Root>
                 </Stack>
-              </CardBody>
-            </Card>
+              </Card.Body>
+            </Card.Root>
           </Stack>
         )}
 
         {activeTab === 'PASSWD' && (
-          <Card>
-            <CardHeader fontWeight="bold" fontSize="lg">
+          <Card.Root>
+            <Card.Header fontWeight="bold" fontSize="lg">
               Password
-            </CardHeader>
+            </Card.Header>
 
-            <CardBody>
+            <Card.Body>
               {isChangingPassword ? (
-                <Stack spacing="6">
-                  <FormLabel>
+                <Stack gap="6">
+                  <Field.Label>
                     Enter the new password according to the policy below.
-                  </FormLabel>
-                  <FormControl>
-                    <FormLabel>Current Password</FormLabel>
+                  </Field.Label>
+                  <Field.Root>
+                    <Field.Label>Current Password</Field.Label>
                     <Input
                       maxW="md"
                       type="password"
                       placeholder="New password"
-                      onChange={e => setCurrentPassword(e.target.value)}
+                      onValueChange={e => setCurrentPassword(e.target.value)}
                     />
-                  </FormControl>
+                  </Field.Root>
 
-                  <List spacing={3}>
+                  <List.Root gap={3}>
                     {props.passwordPolicy.minLength && (
-                      <ListItem>
+                      <List.Item>
                         {password.length >= props.passwordPolicy.minLength ? (
-                          <ListIcon as={FaCheck} color="green.500" />
+                          <List.Indicator color="green.500" asChild>
+                            <FaCheck />
+                          </List.Indicator>
                         ) : (
-                          <ListIcon as={FaX} color="red.500" />
+                          <List.Indicator color="red.500" asChild>
+                            <FaX />
+                          </List.Indicator>
                         )}
                         Has to be at least {props.passwordPolicy.minLength}{' '}
                         characters long. ({password.length} /{' '}
                         {props.passwordPolicy.minLength})
-                      </ListItem>
+                      </List.Item>
                     )}
                     {props.passwordPolicy.hasSymbol && (
-                      <ListItem>
+                      <List.Item>
                         {/[\p{P}\p{S}]/u.test(password) ? (
-                          <ListIcon as={FaCheck} color="green.500" />
+                          <List.Indicator color="green.500" asChild>
+                            <FaCheck />
+                          </List.Indicator>
                         ) : (
-                          <ListIcon as={FaX} color="red.500" />
+                          <List.Indicator color="red.500" asChild>
+                            <FaX />
+                          </List.Indicator>
                         )}
                         Must include a symbol or punctuation mark.
-                      </ListItem>
+                      </List.Item>
                     )}
 
                     {props.passwordPolicy.hasNumber && (
-                      <ListItem>
+                      <List.Item>
                         {/\d/.test(password) ? (
-                          <ListIcon as={FaCheck} color="green.500" />
+                          <List.Indicator color="green.500" asChild>
+                            <FaCheck />
+                          </List.Indicator>
                         ) : (
-                          <ListIcon as={FaX} color="red.500" />
+                          <List.Indicator color="red.500" asChild>
+                            <FaX />
+                          </List.Indicator>
                         )}
                         Must include a number.
-                      </ListItem>
+                      </List.Item>
                     )}
 
                     {props.passwordPolicy.hasUppercase && (
-                      <ListItem>
+                      <List.Item>
                         {/[A-Z]/.test(password) ? (
-                          <ListIcon as={FaCheck} color="green.500" />
+                          <List.Indicator color="green.500" asChild>
+                            <FaCheck />
+                          </List.Indicator>
                         ) : (
-                          <ListIcon as={FaX} color="red.500" />
+                          <List.Indicator color="red.500" asChild>
+                            <FaX />
+                          </List.Indicator>
                         )}
                         Must include an uppercase letter.
-                      </ListItem>
+                      </List.Item>
                     )}
 
                     {props.passwordPolicy.hasLowercase && (
-                      <ListItem>
+                      <List.Item>
                         {/[a-z]/.test(password) ? (
-                          <ListIcon as={FaCheck} color="green.500" />
+                          <List.Indicator color="green.500" asChild>
+                            <FaCheck />
+                          </List.Indicator>
                         ) : (
-                          <ListIcon as={FaX} color="red.500" />
+                          <List.Indicator color="red.500" asChild>
+                            <FaX />
+                          </List.Indicator>
                         )}
                         Must include a lowercase letter.
-                      </ListItem>
+                      </List.Item>
                     )}
 
-                    <ListItem>
+                    <List.Item>
                       {password && password === passwordConfirmation ? (
-                        <ListIcon as={FaCheck} color="green.500" />
+                        <List.Indicator color="green.500" asChild>
+                          <FaCheck />
+                        </List.Indicator>
                       ) : (
-                        <ListIcon as={FaX} color="red.500" />
+                        <List.Indicator color="red.500" asChild>
+                          <FaX />
+                        </List.Indicator>
                       )}
                       Passwords match.
-                    </ListItem>
-                  </List>
+                    </List.Item>
+                  </List.Root>
 
                   <HStack>
-                    <FormControl>
-                      <FormLabel>New Password</FormLabel>
+                    <Field.Root>
+                      <Field.Label>New Password</Field.Label>
                       <Input
                         type="password"
                         placeholder="New password"
                         autoComplete="new-password"
-                        onChange={e => setPassword(e.target.value)}
+                        onValueChange={e => setPassword(e.target.value)}
                       />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>Confirm Password</FormLabel>
+                    </Field.Root>
+                    <Field.Root>
+                      <Field.Label>Confirm Password</Field.Label>
                       <Input
                         type="password"
                         placeholder="Confirm password"
                         autoComplete="new-password"
-                        onChange={e => setPasswordConfirmation(e.target.value)}
+                        onValueChange={e =>
+                          setPasswordConfirmation(e.target.value)
+                        }
                       />
-                    </FormControl>
+                    </Field.Root>
                   </HStack>
 
                   <ButtonGroup>
                     <Button
-                      isLoading={isPasswordChanging}
+                      loading={isPasswordChanging}
                       type="submit"
                       onClick={handlePasswordChange}>
                       Reset Current Password
@@ -762,25 +793,25 @@ export const Settings: React.FC<SettingsProps> = props => {
                   </ButtonGroup>
                 </Stack>
               ) : (
-                <FormControl>
+                <Field.Root>
                   <HStack justifyContent="space-between">
-                    <FormLabel>
+                    <Field.Label>
                       A secure password helps to protect the account
-                    </FormLabel>
+                    </Field.Label>
                     <IconButton
                       size="lg"
                       aria-label="Edit email"
-                      icon={<FaEdit />}
                       variant="ghost"
                       onClick={togglePasswordChange}
-                      isLoading={isPasswordChanging}
-                    />
+                      loading={isPasswordChanging}>
+                      <FaEdit />
+                    </IconButton>
                   </HStack>
                   <Text mt="2">*********</Text>
-                </FormControl>
+                </Field.Root>
               )}
-            </CardBody>
-          </Card>
+            </Card.Body>
+          </Card.Root>
         )}
       </GridItem>
     </Grid>

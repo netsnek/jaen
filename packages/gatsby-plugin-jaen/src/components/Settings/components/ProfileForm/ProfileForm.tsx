@@ -1,12 +1,4 @@
-import {
-  Button,
-  ButtonGroup,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  Stack
-} from '@chakra-ui/react'
+import {Button, ButtonGroup, Input, Stack, Field} from '@chakra-ui/react'
 import React from 'react'
 import {Controller, DeepPartial, useForm} from 'react-hook-form'
 
@@ -67,29 +59,29 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   return (
     <form onSubmit={onFormSubmit}>
       <FieldGroup title="Account">
-        <Stack width="full" spacing="8" maxW="2xl">
+        <Stack width="full" gap="8" maxW="2xl">
           <Stack>
-            <FormControl id="firstName" isInvalid={!!errors.details?.firstName}>
-              <FormLabel>First Name</FormLabel>
+            <Field.Root id="firstName" invalid={!!errors.details?.firstName}>
+              <Field.Label>First Name</Field.Label>
               <Input placeholder="" {...register('details.firstName', {})} />
-              <FormErrorMessage>
+              <Field.ErrorText>
                 {errors.details?.firstName && errors.details.firstName.message}
-              </FormErrorMessage>
-            </FormControl>
+              </Field.ErrorText>
+            </Field.Root>
 
-            <FormControl id="lastName" isInvalid={!!errors?.details?.lastName}>
-              <FormLabel>Last Name</FormLabel>
+            <Field.Root id="lastName" invalid={!!errors?.details?.lastName}>
+              <Field.Label>Last Name</Field.Label>
               <Input placeholder="" {...register('details.lastName', {})} />
-              <FormErrorMessage>
+              <Field.ErrorText>
                 {errors.details?.lastName && errors.details.lastName.message}
-              </FormErrorMessage>
-            </FormControl>
+              </Field.ErrorText>
+            </Field.Root>
           </Stack>
 
-          <FormControl id="username" isInvalid={!!errors.username} isDisabled>
-            <FormLabel>Username</FormLabel>
+          <Field.Root id="username" invalid={!!errors.username} disabled>
+            <Field.Label>Username</Field.Label>
             <Input
-              isDisabled
+              disabled
               maxW="xs"
               {...register('username', {
                 required: 'This field is required'
@@ -97,13 +89,13 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
               autoComplete="false"
               color="fg.muted"
             />
-            <FormErrorMessage>
+            <Field.ErrorText>
               {errors.username && errors.username.message}
-            </FormErrorMessage>
-          </FormControl>
+            </Field.ErrorText>
+          </Field.Root>
 
-          <FormControl id="image">
-            <FormLabel>Image</FormLabel>
+          <Field.Root id="image">
+            <Field.Label>Image</Field.Label>
 
             <Controller
               control={control}
@@ -130,10 +122,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 )
               }}
             />
-          </FormControl>
+          </Field.Root>
 
           <ButtonGroup>
-            <Button isLoading={isSubmitting} type="submit" variant="outline">
+            <Button loading={isSubmitting} type="submit" variant="outline">
               Update account
             </Button>
           </ButtonGroup>

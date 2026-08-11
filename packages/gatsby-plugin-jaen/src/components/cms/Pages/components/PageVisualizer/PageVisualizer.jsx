@@ -22,8 +22,18 @@ export const PageVisualizer = props => {
       borderRadius="lg">
       <Box boxSize="full" pos="relative">
         {isMounted ? (
-          <Graph tree={props.tree} selection={props.selection} onSelect={props.onSelect} />
-        ) : <Progress isIndeterminate />}
+          <Graph
+            tree={props.tree}
+            selection={props.selection}
+            onSelect={props.onSelect}
+          />
+        ) : (
+          <Progress.Root indeterminate>
+            <Progress.Track>
+              <Progress.Range />
+            </Progress.Track>
+          </Progress.Root>
+        )}
       </Box>
     </Box>
   )

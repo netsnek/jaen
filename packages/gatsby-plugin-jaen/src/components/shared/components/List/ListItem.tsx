@@ -21,7 +21,7 @@ export const ListItem: React.FC<ListItemProps> = props => {
   } = props
 
   return (
-    <Stack as="li" direction="row" spacing="4" {...stackProps}>
+    <Stack as="li" direction="row" gap="4" {...stackProps}>
       <Flex direction="column" alignItems="center" aria-hidden="true">
         <Circle
           bg={circleColor}
@@ -40,7 +40,7 @@ export const ListItem: React.FC<ListItemProps> = props => {
           />
         )}
       </Flex>
-      <Stack spacing="4" pt="1" flex="1">
+      <Stack gap="4" pt="1" flex="1">
         <Stack>
           <Text fontSize="md" fontWeight="semibold">
             {title}

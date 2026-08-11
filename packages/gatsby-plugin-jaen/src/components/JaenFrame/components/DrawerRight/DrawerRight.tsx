@@ -3,19 +3,14 @@ import {
   Avatar,
   AvatarBadge,
   Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
   HStack,
   Icon,
   IconButton,
   Spacer,
   Stack,
   Text,
-  useDisclosure
+  useDisclosure,
+  Portal
 } from '@chakra-ui/react'
 import {useRef} from 'react'
 import {FaMoon} from '@react-icons/all-files/fa/FaMoon'
@@ -43,7 +38,7 @@ export const DrawerRight: React.FC<DrawerRightProps> = ({
   user,
   isBadgeVisible
 }) => {
-  const {isOpen, onClose, onToggle} = useDisclosure()
+  const {open, onClose, onToggle} = useDisclosure()
 
   const initialFocusRef = useRef<HTMLButtonElement>(null)
 
@@ -53,78 +48,90 @@ export const DrawerRight: React.FC<DrawerRightProps> = ({
     <>
       {/* No fallback initials to compute: Chakra derives them from `name`,
           which is the same username the replaced code was splitting by hand. */}
-      <Avatar
+      <Avatar.Root
         as="button"
         aria-label="Open user menu"
         p="0"
         m="0"
         size="sm"
         cursor="pointer"
-        name={user.username}
-        src={user.avatarURL}
         onClick={onToggle}>
+        <Avatar.Fallback name={user.username} />
+        <Avatar.Image src={user.avatarURL} />
+        // TODO [BREAKING]: AvatarBadge removed. Migrate to Float + Circle
+        pattern.// See https://chakra-ui.com/docs/components/avatar#badge//
+        Original:{' '}
         <AvatarBadge
           boxSize="1.25em"
           bg="pink.500"
           visibility={isBadgeVisible ? 'visible' : 'hidden'}
         />
-      </Avatar>
-      <Drawer
-        placement="right"
+      </Avatar.Root>
+      <Drawer.Root
+        placement="end"
         size="xs"
-        isOpen={isOpen}
-        onClose={onClose}
-        initialFocusRef={initialFocusRef}>
-        <DrawerOverlay bg="rgba(0,0,0,0.1)" />
+        open={isOpen}
+        initialFocusEl={() => initialFocusRef.current}
+        onOpenChange={e => {
+          if (!e.open) {
+            onClose()
+          }
+        }}>
+        <Portal>
+          <Drawer.Backdrop bg="rgba(0,0,0,0.1)" />
 
-        <DrawerContent borderLeftRadius="xl" containerProps={{id: 'momo'}}>
-          <DrawerHeader p="4">
-            <HStack justifyContent="space-between">
-              <Stack>
-                <HStack>
-                  <Avatar size="sm" name={user.username} src={user.avatarURL} />
-                  <Stack spacing="0.5">
-                    <Text fontSize="sm" fontWeight="bold" lineHeight="none">
-                      {user.username}
-                    </Text>
-                    <Text fontSize="sm" color="fg.muted" lineHeight="none">
-                      {user.firstName} {user.lastName}
-                    </Text>
+          <Drawer.Positioner>
+            <Drawer.Content borderLeftRadius="xl" containerProps={{id: 'momo'}}>
+              <Drawer.Header p="4">
+                <HStack justifyContent="space-between">
+                  <Stack>
+                    <HStack>
+                      <Avatar.Root size="sm">
+                        <Avatar.Fallback name={user.username} />
+                        <Avatar.Image src={user.avatarURL} />
+                      </Avatar.Root>
+                      <Stack gap="0.5">
+                        <Text fontSize="sm" fontWeight="bold" lineHeight="none">
+                          {user.username}
+                        </Text>
+                        <Text fontSize="sm" color="fg.muted" lineHeight="none">
+                          {user.firstName} {user.lastName}
+                        </Text>
+                      </Stack>
+                    </HStack>
                   </Stack>
+
+                  <Drawer.CloseTrigger
+                    ref={initialFocusRef}
+                    pos="static"
+                    onClick={onClose}
+                  />
                 </HStack>
-              </Stack>
+              </Drawer.Header>
+              <Drawer.Body p="4" display="flex" flexDirection="column">
+                <NavigationGroups groups={navigationGroups} onClick={onClose} />
+                <Spacer />
+              </Drawer.Body>
 
-              <DrawerCloseButton
-                ref={initialFocusRef}
-                pos="static"
-                onClick={onClose}
-              />
-            </HStack>
-          </DrawerHeader>
-          <DrawerBody p="4" display="flex" flexDirection="column">
-            <NavigationGroups groups={navigationGroups} onClick={onClose} />
-            <Spacer />
-          </DrawerBody>
-
-          {/* The colour-mode switch. It went missing with the rewrite, which
-              is why dark mode has been unreachable ever since even though the
-              theme carries a _dark value for every semantic token. */}
-          <DrawerFooter>
-            <IconButton
-              size="sm"
-              variant="outline"
-              icon={
-                <Icon
-                  as={colorMode.colorMode === 'light' ? FaSun : FaMoon}
-                  color="brand.500"
-                />
-              }
-              onClick={colorMode.toggleColorMode}
-              aria-label="Toggle color mode"
-            />
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+              {/* The colour-mode switch. It went missing with the rewrite, which
+                  is why dark mode has been unreachable ever since even though the
+                  theme carries a _dark value for every semantic token. */}
+              <Drawer.Footer>
+                <IconButton
+                  size="sm"
+                  variant="outline"
+                  onClick={colorMode.toggleColorMode}
+                  aria-label="Toggle color mode">
+                  <Icon
+                    as={colorMode.colorMode === 'light' ? FaSun : FaMoon}
+                    color="brand.500"
+                  />
+                </IconButton>
+              </Drawer.Footer>
+            </Drawer.Content>
+          </Drawer.Positioner>
+        </Portal>
+      </Drawer.Root>
     </>
   )
 }

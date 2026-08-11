@@ -12,38 +12,27 @@ import {useIntl} from 'react-intl'
 
 import {
   Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Avatar,
   Badge,
   Box,
   Button,
   Card,
-  CardBody,
-  CardHeader,
   Checkbox,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
   HStack,
   Input,
   InputGroup,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   SimpleGrid,
   Skeleton,
   SkeletonCircle,
   SkeletonText,
   Stack,
   Text,
-  useDisclosure
+  useDisclosure,
+  Field,
+  Dialog,
+  Portal
 } from '@chakra-ui/react'
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
 import {useForm} from 'react-hook-form'
@@ -227,7 +216,7 @@ const AccountsPage: React.FC = () => {
   const emptyBorder = useColorModeValue('gray.200', 'gray.700')
 
   return (
-    <Stack spacing="6">
+    <Stack gap="6">
       <Flex justifyContent="space-between" alignItems="flex-start" wrap="wrap">
         <Box>
           <Heading size="lg">
@@ -245,10 +234,8 @@ const AccountsPage: React.FC = () => {
           </Text>
         </Box>
 
-        <Button
-          leftIcon={<FaPlus />}
-          variant="outline"
-          onClick={createModal.onOpen}>
+        <Button variant="outline" onClick={createModal.onOpen}>
+          <FaPlus />
           {intl.formatMessage({
             id: 'CmsAccountsActionsCreate',
             defaultMessage: 'New account'
@@ -263,45 +250,49 @@ const AccountsPage: React.FC = () => {
             defaultMessage: 'Search by name, email or login name'
           })}
           value={searchTerm}
-          onChange={event => {
+          onValueChange={event => {
             setSearchTerm(event.target.value)
           }}
         />
       </InputGroup>
 
       {error ? (
-        <Alert status="error">
-          <AlertIcon />
-          <AlertTitle>
+        <Alert.Root status="error">
+          <Alert.Indicator />
+          <Alert.Title>
             {intl.formatMessage({
               id: 'CmsAccountsErrorsLoadTitle',
               defaultMessage: 'Unable to load accounts'
             })}
-          </AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+          </Alert.Title>
+          <Alert.Description>{error}</Alert.Description>
+        </Alert.Root>
       ) : null}
 
-      <SimpleGrid columns={{base: 1, md: 2, xl: 3}} spacing={6}>
+      <SimpleGrid columns={{base: 1, md: 2, xl: 3}} gap={6}>
         {isLoading
           ? Array.from({length: 6}).map((_, index) => (
-              <Card key={index} variant="outline">
-                <CardHeader>
-                  <HStack spacing="4">
+              <Card.Root key={index} variant="outline">
+                <Card.Header>
+                  <HStack gap="4">
                     <SkeletonCircle size="12" />
                     <Skeleton height="20px" width="40%" />
                   </HStack>
-                </CardHeader>
-                <CardBody>
-                  <SkeletonText noOfLines={3} />
-                </CardBody>
-              </Card>
+                </Card.Header>
+                <Card.Body>
+                  <SkeletonText lineClamp={3} />
+                </Card.Body>
+              </Card.Root>
             ))
           : filteredUsers.map(user => (
-              <Card key={user.id} variant="outline" height="100%">
-                <CardHeader>
-                  <HStack spacing="4" alignItems="flex-start">
-                    <Avatar name={user.displayName ?? user.userName} />
+              <Card.Root key={user.id} variant="outline" height="100%">
+                <Card.Header>
+                  <HStack gap="4" alignItems="flex-start">
+                    <Avatar.Root>
+                      <Avatar.Fallback
+                        name={user.displayName ?? user.userName}
+                      />
+                    </Avatar.Root>
                     <Box flex="1">
                       <Heading size="sm">
                         {user.displayName ||
@@ -322,7 +313,7 @@ const AccountsPage: React.FC = () => {
                     </Box>
                     {user.state ? (
                       <Badge
-                        colorScheme={
+                        colorPalette={
                           user.state === 'USER_STATE_ACTIVE'
                             ? 'green'
                             : 'purple'
@@ -331,9 +322,9 @@ const AccountsPage: React.FC = () => {
                       </Badge>
                     ) : null}
                   </HStack>
-                </CardHeader>
-                <CardBody>
-                  <Stack spacing="4">
+                </Card.Header>
+                <Card.Body>
+                  <Stack gap="4">
                     <Box>
                       <Text fontSize="xs" color="fg.muted">
                         {intl.formatMessage({
@@ -363,19 +354,17 @@ const AccountsPage: React.FC = () => {
                         </Text>
                       )}
                     </Box>
-                    <Button
-                      as={GatsbyLink}
-                      to={`./${user.id}`}
-                      size="sm"
-                      variant="outline">
-                      {intl.formatMessage({
-                        id: 'CmsAccountsCardManage',
-                        defaultMessage: 'Manage account'
-                      })}
+                    <Button size="sm" variant="outline" asChild>
+                      <GatsbyLink to={`./${user.id}`}>
+                        {intl.formatMessage({
+                          id: 'CmsAccountsCardManage',
+                          defaultMessage: 'Manage account'
+                        })}
+                      </GatsbyLink>
                     </Button>
                   </Stack>
-                </CardBody>
-              </Card>
+                </Card.Body>
+              </Card.Root>
             ))}
       </SimpleGrid>
 
@@ -403,90 +392,111 @@ const AccountsPage: React.FC = () => {
         </Box>
       ) : null}
 
-      <Modal isOpen={createModal.isOpen} onClose={createModal.onClose}>
-        <ModalOverlay />
-        <ModalContent as="form" onSubmit={onCreate}>
-          <ModalHeader>
-            {intl.formatMessage({
-              id: 'CmsAccountsCreateTitle',
-              defaultMessage: 'Create a new account'
-            })}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack spacing="4">
-              <FormControl isRequired isInvalid={!!errors.username}>
-                <FormLabel>
+      <Dialog.Root
+        open={createModal.open}
+        onOpenChange={e => {
+          if (!e.open) {
+            createModal.onClose()
+          }
+        }}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content asChild>
+              <form onSubmit={onCreate}>
+                <Dialog.Header>
                   {intl.formatMessage({
-                    id: 'CmsAccountsCreateUsername',
-                    defaultMessage: 'Username'
+                    id: 'CmsAccountsCreateTitle',
+                    defaultMessage: 'Create a new account'
                   })}
-                </FormLabel>
-                <Input {...register('username', {required: true})} />
-              </FormControl>
-              <FormControl isRequired isInvalid={!!errors.email}>
-                <FormLabel>
-                  {intl.formatMessage({
-                    id: 'CmsAccountsCreateEmail',
-                    defaultMessage: 'Email'
-                  })}
-                </FormLabel>
-                <Input type="email" {...register('email', {required: true})} />
-              </FormControl>
-              <SimpleGrid columns={2} spacing="4">
-                <FormControl>
-                  <FormLabel>
+                </Dialog.Header>
+                <Dialog.CloseTrigger />
+                <Dialog.Body>
+                  <Stack gap="4">
+                    <Field.Root required invalid={!!errors.username}>
+                      <Field.Label>
+                        {intl.formatMessage({
+                          id: 'CmsAccountsCreateUsername',
+                          defaultMessage: 'Username'
+                        })}
+                      </Field.Label>
+                      <Input {...register('username', {required: true})} />
+                    </Field.Root>
+                    <Field.Root required invalid={!!errors.email}>
+                      <Field.Label>
+                        {intl.formatMessage({
+                          id: 'CmsAccountsCreateEmail',
+                          defaultMessage: 'Email'
+                        })}
+                      </Field.Label>
+                      <Input
+                        type="email"
+                        {...register('email', {required: true})}
+                      />
+                    </Field.Root>
+                    <SimpleGrid columns={2} gap="4">
+                      <Field.Root>
+                        <Field.Label>
+                          {intl.formatMessage({
+                            id: 'CmsAccountsCreateFirstName',
+                            defaultMessage: 'First name'
+                          })}
+                        </Field.Label>
+                        <Input {...register('firstName')} />
+                      </Field.Root>
+                      <Field.Root>
+                        <Field.Label>
+                          {intl.formatMessage({
+                            id: 'CmsAccountsCreateLastName',
+                            defaultMessage: 'Last name'
+                          })}
+                        </Field.Label>
+                        <Input {...register('lastName')} />
+                      </Field.Root>
+                    </SimpleGrid>
+                    <Field.Root>
+                      <Field.Label>
+                        {intl.formatMessage({
+                          id: 'CmsAccountsCreateInitialPassword',
+                          defaultMessage: 'Initial password (optional)'
+                        })}
+                      </Field.Label>
+                      <Input type="password" {...register('password')} />
+                    </Field.Root>
+                    <Checkbox.Root {...register('sendPasswordReset')}>
+                      <Checkbox.HiddenInput />
+                      <Checkbox.Control>
+                        <Checkbox.Indicator />
+                      </Checkbox.Control>
+                      <Checkbox.Label>
+                        {intl.formatMessage({
+                          id: 'CmsAccountsCreateSendReset',
+                          defaultMessage:
+                            'Send a password reset email when no password is set'
+                        })}
+                      </Checkbox.Label>
+                    </Checkbox.Root>
+                  </Stack>
+                </Dialog.Body>
+                <Dialog.Footer>
+                  <Button variant="ghost" mr={3} onClick={createModal.onClose}>
                     {intl.formatMessage({
-                      id: 'CmsAccountsCreateFirstName',
-                      defaultMessage: 'First name'
+                      id: 'CmsAccountsActionsCancel',
+                      defaultMessage: 'Cancel'
                     })}
-                  </FormLabel>
-                  <Input {...register('firstName')} />
-                </FormControl>
-                <FormControl>
-                  <FormLabel>
+                  </Button>
+                  <Button type="submit" loading={isSubmitting}>
                     {intl.formatMessage({
-                      id: 'CmsAccountsCreateLastName',
-                      defaultMessage: 'Last name'
+                      id: 'CmsAccountsActionsCreateSubmit',
+                      defaultMessage: 'Create account'
                     })}
-                  </FormLabel>
-                  <Input {...register('lastName')} />
-                </FormControl>
-              </SimpleGrid>
-              <FormControl>
-                <FormLabel>
-                  {intl.formatMessage({
-                    id: 'CmsAccountsCreateInitialPassword',
-                    defaultMessage: 'Initial password (optional)'
-                  })}
-                </FormLabel>
-                <Input type="password" {...register('password')} />
-              </FormControl>
-              <Checkbox {...register('sendPasswordReset')}>
-                {intl.formatMessage({
-                  id: 'CmsAccountsCreateSendReset',
-                  defaultMessage:
-                    'Send a password reset email when no password is set'
-                })}
-              </Checkbox>
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={createModal.onClose}>
-              {intl.formatMessage({
-                id: 'CmsAccountsActionsCancel',
-                defaultMessage: 'Cancel'
-              })}
-            </Button>
-            <Button type="submit" isLoading={isSubmitting}>
-              {intl.formatMessage({
-                id: 'CmsAccountsActionsCreateSubmit',
-                defaultMessage: 'Create account'
-              })}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                  </Button>
+                </Dialog.Footer>
+              </form>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </Stack>
   )
 }

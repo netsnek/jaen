@@ -2,24 +2,11 @@ import {useState} from 'react'
 import {Controller, useForm} from 'react-hook-form'
 import {
   Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Badge,
   Button,
   ButtonGroup,
-  Divider,
-  FormControl,
-  FormLabel,
   HStack,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Switch,
   Table,
   Tbody,
@@ -29,7 +16,11 @@ import {
   Thead,
   Tr,
   VStack,
-  useDisclosure
+  useDisclosure,
+  Separator,
+  Field,
+  Dialog,
+  Portal
 } from '@chakra-ui/react'
 
 export interface SenderSmtpFormData {
@@ -80,7 +71,7 @@ export function SenderModal({
   onVerify,
   onDelete
 }: SenderModalProps) {
-  const {isOpen, onOpen, onClose} = useDisclosure()
+  const {open, onOpen, onClose} = useDisclosure()
   const [error, setError] = useState<string | null>(null)
   const [busySenderId, setBusySenderId] = useState<string | null>(null)
   const {control, handleSubmit, reset, formState} = useForm<SenderFormData>({
@@ -136,212 +127,232 @@ export function SenderModal({
     <>
       <Button
         onClick={onOpen}
-        isLoading={formState.isSubmitting}
+        loading={formState.isSubmitting}
         variant="outline">
         Manage Senders
       </Button>
 
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Senders</ModalHeader>
-          <ModalCloseButton />
-          <form onSubmit={handleSubmit(onSubmitForm)}>
-            <ModalBody>
-              <VStack spacing={4} align="stretch">
-                {error && (
-                  <Alert status="error">
-                    <AlertIcon />
-                    <AlertTitle mr={2}>Error!</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
+      <Dialog.Root
+        open={isOpen}
+        size="xl"
+        onOpenChange={e => {
+          if (!e.open) {
+            onClose()
+          }
+        }}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>Senders</Dialog.Header>
+              <Dialog.CloseTrigger />
+              <form onSubmit={handleSubmit(onSubmitForm)}>
+                <Dialog.Body>
+                  <VStack gap={4} align="stretch">
+                    {error && (
+                      <Alert.Root status="error">
+                        <Alert.Indicator />
+                        <Alert.Title mr={2}>Error!</Alert.Title>
+                        <Alert.Description>{error}</Alert.Description>
+                      </Alert.Root>
+                    )}
 
-                {senders.length > 0 ? (
-                  <Table size="sm">
-                    <Thead>
-                      <Tr>
-                        <Th>Address</Th>
-                        <Th>Transport</Th>
-                        <Th></Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {senders.map(sender => (
-                        <Tr key={sender.id}>
-                          <Td>
-                            <HStack>
-                              <Text>{sender.address}</Text>
-                              {sender.isDefault && (
-                                <Badge colorScheme="green">default</Badge>
-                              )}
-                              {!sender.enabled && (
-                                <Badge colorScheme="red">disabled</Badge>
-                              )}
-                            </HStack>
-                          </Td>
-                          <Td>{sender.transport}</Td>
-                          <Td>
-                            <ButtonGroup
-                              size="xs"
-                              variant="outline"
-                              isDisabled={busySenderId === sender.id}>
-                              {!sender.isDefault && (
-                                <Button
-                                  onClick={() =>
-                                    runSenderAction(sender.id, onSetDefault)
-                                  }>
-                                  Make default
-                                </Button>
-                              )}
-                              <Button
-                                onClick={() =>
-                                  runSenderAction(sender.id, onVerify)
-                                }>
-                                Verify
-                              </Button>
-                              <Button
-                                colorScheme="red"
-                                onClick={() =>
-                                  runSenderAction(sender.id, onDelete)
-                                }>
-                                Delete
-                              </Button>
-                            </ButtonGroup>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                ) : (
-                  <Text color="gray.500">No senders configured yet.</Text>
-                )}
+                    {senders.length > 0 ? (
+                      <Table.Root size="sm">
+                        <Table.Header>
+                          <Table.Row>
+                            <Table.ColumnHeader>Address</Table.ColumnHeader>
+                            <Table.ColumnHeader>Transport</Table.ColumnHeader>
+                            <Table.ColumnHeader></Table.ColumnHeader>
+                          </Table.Row>
+                        </Table.Header>
+                        <Table.Body>
+                          {senders.map(sender => (
+                            <Table.Row key={sender.id}>
+                              <Table.Cell>
+                                <HStack>
+                                  <Text>{sender.address}</Text>
+                                  {sender.isDefault && (
+                                    <Badge colorPalette="green">default</Badge>
+                                  )}
+                                  {!sender.enabled && (
+                                    <Badge colorPalette="red">disabled</Badge>
+                                  )}
+                                </HStack>
+                              </Table.Cell>
+                              <Table.Cell>{sender.transport}</Table.Cell>
+                              <Table.Cell>
+                                <ButtonGroup size="xs" variant="outline">
+                                  {!sender.isDefault && (
+                                    <Button
+                                      onClick={() =>
+                                        runSenderAction(sender.id, onSetDefault)
+                                      }>
+                                      Make default
+                                    </Button>
+                                  )}
+                                  <Button
+                                    onClick={() =>
+                                      runSenderAction(sender.id, onVerify)
+                                    }
+                                    disabled={busySenderId === sender.id}>
+                                    Verify
+                                  </Button>
+                                  <Button
+                                    colorPalette="red"
+                                    onClick={() =>
+                                      runSenderAction(sender.id, onDelete)
+                                    }
+                                    disabled={busySenderId === sender.id}>
+                                    Delete
+                                  </Button>
+                                </ButtonGroup>
+                              </Table.Cell>
+                            </Table.Row>
+                          ))}
+                        </Table.Body>
+                      </Table.Root>
+                    ) : (
+                      <Text color="gray.500">No senders configured yet.</Text>
+                    )}
 
-                <Divider />
+                    <Separator />
 
-                <Text fontWeight="semibold">Add SMTP sender</Text>
+                    <Text fontWeight="semibold">Add SMTP sender</Text>
 
-                <Controller
-                  name="address"
-                  control={control}
-                  rules={{required: 'Address is required'}}
-                  render={({field, fieldState: {error}}) => (
-                    <FormControl isInvalid={!!error}>
-                      <FormLabel>Email Address</FormLabel>
-                      <Input {...field} placeholder="noreply@example.com" />
-                      {error && <Text color="red.500">{error.message}</Text>}
-                    </FormControl>
-                  )}
-                />
-                <Controller
-                  name="displayName"
-                  control={control}
-                  render={({field}) => (
-                    <FormControl>
-                      <FormLabel>Display Name</FormLabel>
-                      <Input {...field} />
-                    </FormControl>
-                  )}
-                />
-                <Controller
-                  name="smtp.host"
-                  control={control}
-                  rules={{required: 'SMTP Host is required'}}
-                  render={({field, fieldState: {error}}) => (
-                    <FormControl isInvalid={!!error}>
-                      <FormLabel>SMTP Host</FormLabel>
-                      <Input {...field} />
-                      {error && <Text color="red.500">{error.message}</Text>}
-                    </FormControl>
-                  )}
-                />
-                <Controller
-                  name="smtp.port"
-                  control={control}
-                  rules={{required: 'SMTP Port is required'}}
-                  render={({field, fieldState: {error}}) => (
-                    <FormControl isInvalid={!!error}>
-                      <FormLabel>SMTP Port</FormLabel>
-                      <Input {...field} type="number" />
-                      {error && <Text color="red.500">{error.message}</Text>}
-                    </FormControl>
-                  )}
-                />
-                <Controller
-                  name="smtp.secure"
-                  control={control}
-                  render={({field: {onChange, value, ref}}) => (
-                    <FormControl display="flex" alignItems="center">
-                      <FormLabel htmlFor="secure" mb="0">
-                        Secure
-                      </FormLabel>
-                      <Switch
-                        id="secure"
-                        onChange={onChange}
-                        isChecked={value}
-                        ref={ref}
-                      />
-                    </FormControl>
-                  )}
-                />
-                <Controller
-                  name="smtp.username"
-                  control={control}
-                  rules={{required: 'SMTP Username is required'}}
-                  render={({field, fieldState: {error}}) => (
-                    <FormControl isInvalid={!!error}>
-                      <FormLabel>SMTP Username</FormLabel>
-                      <Input {...field} />
-                      {error && <Text color="red.500">{error.message}</Text>}
-                    </FormControl>
-                  )}
-                />
-                <Controller
-                  name="smtp.password"
-                  control={control}
-                  rules={{required: 'SMTP Password is required'}}
-                  render={({field, fieldState: {error}}) => (
-                    <FormControl isInvalid={!!error}>
-                      <FormLabel>SMTP Password</FormLabel>
-                      <Input {...field} type="password" />
-                      {error && <Text color="red.500">{error.message}</Text>}
-                    </FormControl>
-                  )}
-                />
-                <Controller
-                  name="isDefault"
-                  control={control}
-                  render={({field: {onChange, value, ref}}) => (
-                    <FormControl display="flex" alignItems="center">
-                      <FormLabel htmlFor="isDefault" mb="0">
-                        Set as default sender
-                      </FormLabel>
-                      <Switch
-                        id="isDefault"
-                        onChange={onChange}
-                        isChecked={value}
-                        ref={ref}
-                      />
-                    </FormControl>
-                  )}
-                />
-              </VStack>
-            </ModalBody>
-            <ModalFooter>
-              <Button
-                colorScheme="blue"
-                mr={3}
-                type="submit"
-                isLoading={formState.isSubmitting}>
-                Create Sender
-              </Button>
-              <Button variant="ghost" onClick={onClose}>
-                Close
-              </Button>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+                    <Controller
+                      name="address"
+                      control={control}
+                      rules={{required: 'Address is required'}}
+                      render={({field, fieldState: {error}}) => (
+                        <Field.Root invalid={!!error}>
+                          <Field.Label>Email Address</Field.Label>
+                          <Input {...field} placeholder="noreply@example.com" />
+                          {error && (
+                            <Text color="red.500">{error.message}</Text>
+                          )}
+                        </Field.Root>
+                      )}
+                    />
+                    <Controller
+                      name="displayName"
+                      control={control}
+                      render={({field}) => (
+                        <Field.Root>
+                          <Field.Label>Display Name</Field.Label>
+                          <Input {...field} />
+                        </Field.Root>
+                      )}
+                    />
+                    <Controller
+                      name="smtp.host"
+                      control={control}
+                      rules={{required: 'SMTP Host is required'}}
+                      render={({field, fieldState: {error}}) => (
+                        <Field.Root invalid={!!error}>
+                          <Field.Label>SMTP Host</Field.Label>
+                          <Input {...field} />
+                          {error && (
+                            <Text color="red.500">{error.message}</Text>
+                          )}
+                        </Field.Root>
+                      )}
+                    />
+                    <Controller
+                      name="smtp.port"
+                      control={control}
+                      rules={{required: 'SMTP Port is required'}}
+                      render={({field, fieldState: {error}}) => (
+                        <Field.Root invalid={!!error}>
+                          <Field.Label>SMTP Port</Field.Label>
+                          <Input {...field} type="number" />
+                          {error && (
+                            <Text color="red.500">{error.message}</Text>
+                          )}
+                        </Field.Root>
+                      )}
+                    />
+                    <Controller
+                      name="smtp.secure"
+                      control={control}
+                      render={({field: {onChange, value, ref}}) => (
+                        <Field.Root display="flex" alignItems="center">
+                          <Field.Label htmlFor="secure" mb="0">
+                            Secure
+                          </Field.Label>
+                          <Switch
+                            id="secure"
+                            onValueChange={onChange}
+                            checked={value}
+                            ref={ref}
+                          />
+                        </Field.Root>
+                      )}
+                    />
+                    <Controller
+                      name="smtp.username"
+                      control={control}
+                      rules={{required: 'SMTP Username is required'}}
+                      render={({field, fieldState: {error}}) => (
+                        <Field.Root invalid={!!error}>
+                          <Field.Label>SMTP Username</Field.Label>
+                          <Input {...field} />
+                          {error && (
+                            <Text color="red.500">{error.message}</Text>
+                          )}
+                        </Field.Root>
+                      )}
+                    />
+                    <Controller
+                      name="smtp.password"
+                      control={control}
+                      rules={{required: 'SMTP Password is required'}}
+                      render={({field, fieldState: {error}}) => (
+                        <Field.Root invalid={!!error}>
+                          <Field.Label>SMTP Password</Field.Label>
+                          <Input {...field} type="password" />
+                          {error && (
+                            <Text color="red.500">{error.message}</Text>
+                          )}
+                        </Field.Root>
+                      )}
+                    />
+                    <Controller
+                      name="isDefault"
+                      control={control}
+                      render={({field: {onChange, value, ref}}) => (
+                        <Field.Root display="flex" alignItems="center">
+                          <Field.Label htmlFor="isDefault" mb="0">
+                            Set as default sender
+                          </Field.Label>
+                          <Switch
+                            id="isDefault"
+                            onValueChange={onChange}
+                            checked={value}
+                            ref={ref}
+                          />
+                        </Field.Root>
+                      )}
+                    />
+                  </VStack>
+                </Dialog.Body>
+                <Dialog.Footer>
+                  <Button
+                    colorPalette="blue"
+                    mr={3}
+                    type="submit"
+                    loading={formState.isSubmitting}>
+                    Create Sender
+                  </Button>
+                  <Button variant="ghost" onClick={onClose}>
+                    Close
+                  </Button>
+                </Dialog.Footer>
+              </form>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </>
   )
 }

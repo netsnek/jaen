@@ -2,17 +2,14 @@ import {
   Box,
   Button,
   ButtonGroup,
-  FormControl,
-  FormErrorMessage,
-  FormHelperText,
-  FormLabel,
   Heading,
   HStack,
   Input,
   Stack,
-  StackDivider,
   Textarea,
-  VStack
+  VStack,
+  Field,
+  StackSeparator
 } from '@chakra-ui/react'
 import React, {useEffect} from 'react'
 import {Controller, useForm} from 'react-hook-form'
@@ -156,28 +153,28 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
           void handleSubmit(onSubmit)(data)
         }}>
         <Stack
-          spacing="4"
-          divider={<StackDivider />}
+          gap="4"
+          separator={<StackSeparator />}
           px={{base: '4', md: '10'}}>
           <Heading size="sm">{headingLabel}</Heading>
 
           <FieldGroup title={siteInfoGroupTitle}>
-            <VStack width="full" spacing="6">
-              <FormControl isInvalid={!!errors?.siteMetadata?.title}>
-                <FormLabel>{siteTitleLabel}</FormLabel>
+            <VStack width="full" gap="6">
+              <Field.Root invalid={!!errors?.siteMetadata?.title}>
+                <Field.Label>{siteTitleLabel}</Field.Label>
                 <Input
                   placeholder={siteTitlePlaceholder}
                   {...register('siteMetadata.title', {
                     maxLength: {value: 100, message: siteTitleTooLong}
                   })}
                 />
-                <FormErrorMessage>
+                <Field.ErrorText>
                   {errors.siteMetadata?.title?.message}
-                </FormErrorMessage>
-              </FormControl>
+                </Field.ErrorText>
+              </Field.Root>
 
-              <FormControl isInvalid={!!errors?.siteMetadata?.siteUrl}>
-                <FormLabel>{siteUrlLabel}</FormLabel>
+              <Field.Root invalid={!!errors?.siteMetadata?.siteUrl}>
+                <Field.Label>{siteUrlLabel}</Field.Label>
                 <Input
                   placeholder={siteUrlPlaceholder}
                   {...register('siteMetadata.siteUrl', {
@@ -189,29 +186,29 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                     }
                   })}
                 />
-                <FormErrorMessage>
+                <Field.ErrorText>
                   {errors.siteMetadata?.siteUrl?.message}
-                </FormErrorMessage>
-              </FormControl>
+                </Field.ErrorText>
+              </Field.Root>
 
-              <FormControl isInvalid={!!errors?.siteMetadata?.description}>
-                <FormLabel>{siteDescriptionLabel}</FormLabel>
+              <Field.Root invalid={!!errors?.siteMetadata?.description}>
+                <Field.Label>{siteDescriptionLabel}</Field.Label>
                 <Textarea
                   rows={5}
                   placeholder={siteDescriptionPlaceholder}
                   {...register('siteMetadata.description')}
                 />
                 {!errors.siteMetadata?.description && (
-                  <FormHelperText>{siteDescriptionHelper}</FormHelperText>
+                  <Field.HelperText>{siteDescriptionHelper}</Field.HelperText>
                 )}
 
-                <FormErrorMessage>
+                <Field.ErrorText>
                   {errors.siteMetadata?.description?.message}
-                </FormErrorMessage>
-              </FormControl>
+                </Field.ErrorText>
+              </Field.Root>
 
-              <FormControl id="image">
-                <FormLabel>{siteImageLabel}</FormLabel>
+              <Field.Root id="image">
+                <Field.Label>{siteImageLabel}</Field.Label>
 
                 <Controller
                   control={control}
@@ -235,15 +232,14 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                     )
                   }}
                 />
-              </FormControl>
+              </Field.Root>
             </VStack>
           </FieldGroup>
 
           <FieldGroup title={organisationGroupTitle}>
-            <VStack width="full" spacing="6">
-              <FormControl
-                isInvalid={!!errors?.siteMetadata?.organization?.name}>
-                <FormLabel>{organisationNameLabel}</FormLabel>
+            <VStack width="full" gap="6">
+              <Field.Root invalid={!!errors?.siteMetadata?.organization?.name}>
+                <Field.Label>{organisationNameLabel}</Field.Label>
                 <Input
                   placeholder={organisationNamePlaceholder}
                   {...register('siteMetadata.organization.name', {
@@ -253,13 +249,12 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                     }
                   })}
                 />
-                <FormErrorMessage>
+                <Field.ErrorText>
                   {errors.siteMetadata?.organization?.name?.message}
-                </FormErrorMessage>
-              </FormControl>
-              <FormControl
-                isInvalid={!!errors?.siteMetadata?.organization?.url}>
-                <FormLabel>{organisationUrlLabel}</FormLabel>
+                </Field.ErrorText>
+              </Field.Root>
+              <Field.Root invalid={!!errors?.siteMetadata?.organization?.url}>
+                <Field.Label>{organisationUrlLabel}</Field.Label>
                 <Input
                   placeholder={organisationUrlPlaceholder}
                   {...register('siteMetadata.organization.url', {
@@ -271,12 +266,12 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                     }
                   })}
                 />
-                <FormErrorMessage>
+                <Field.ErrorText>
                   {errors.siteMetadata?.organization?.url?.message}
-                </FormErrorMessage>
-              </FormControl>
-              <FormControl id="image">
-                <FormLabel>{organisationLogoLabel}</FormLabel>
+                </Field.ErrorText>
+              </Field.Root>
+              <Field.Root id="image">
+                <Field.Label>{organisationLogoLabel}</Field.Label>
 
                 <Controller
                   control={control}
@@ -298,7 +293,7 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                     />
                   )}
                 />
-              </FormControl>
+              </Field.Root>
             </VStack>
           </FieldGroup>
 
@@ -306,7 +301,7 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
             <ButtonGroup>
               <Button
                 variant="outline"
-                isDisabled={!isDirty}
+                disabled={!isDirty}
                 onClick={() => {
                   reset(undefined, {
                     keepDirty: false
@@ -314,10 +309,7 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
                 }}>
                 {cancelLabel}
               </Button>
-              <Button
-                type="submit"
-                isLoading={isSubmitting}
-                isDisabled={!isDirty}>
+              <Button type="submit" loading={isSubmitting} disabled={!isDirty}>
                 {saveLabel}
               </Button>
             </ButtonGroup>

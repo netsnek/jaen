@@ -16,7 +16,7 @@ export const Footer: React.FC<FooterProps> = props => {
     <Box mt="24" borderTop="1px solid" borderColor="border.emphasized">
       <Container py="8" maxW="8xl">
         <Stack
-          spacing="8"
+          gap="8"
           flexDir={{
             base: 'column-reverse',
             md: 'row'
@@ -25,7 +25,7 @@ export const Footer: React.FC<FooterProps> = props => {
             <Logo />
           </Box>
 
-          <Wrap w="full" spacing={4} justify="center">
+          <Wrap w="full" gap={4} justify="center">
             {props.links.map((link, index) => {
               return (
                 <WrapItem key={index}>

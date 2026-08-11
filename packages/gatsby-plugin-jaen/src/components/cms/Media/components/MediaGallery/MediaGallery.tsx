@@ -271,55 +271,55 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
               <IconButton
                 aria-label="open sidebar"
                 fontSize="1.2em"
-                icon={<BsLayoutSidebarInset />}
                 variant="ghost"
-                onClick={onToggleSidebar}
-              />
+                onClick={onToggleSidebar}>
+                <BsLayoutSidebarInset />
+              </IconButton>
             )}
 
-            <Icon
-              as={FaMinus}
-              boxSize="2"
-              onClick={() => {
-                if (columnCount === 1) return
+            <Icon boxSize="2" asChild>
+              <FaMinus
+                onClick={() => {
+                  if (columnCount === 1) return
 
-                setColumnCount(columnCount - 1)
-              }}
-            />
-            <Slider
+                  setColumnCount(columnCount - 1)
+                }}
+              />
+            </Icon>
+            <Slider.Root
               w="12"
               aria-label="slider-image-size"
               value={columnCount}
               min={1}
               max={5}
-              onChange={value => {
+              onValueChange={value => {
                 setColumnCount(value)
               }}>
               <SliderTrack>
                 <SliderFilledTrack />
               </SliderTrack>
               <SliderThumb />
-            </Slider>
-            <Icon
-              as={FaPlus}
-              boxSize="2"
-              onClick={() => {
-                if (columnCount === 5) return
+            </Slider.Root>
+            <Icon boxSize="2" asChild>
+              <FaPlus
+                onClick={() => {
+                  if (columnCount === 5) return
 
-                setColumnCount(columnCount + 1)
-              }}
-            />
+                  setColumnCount(columnCount + 1)
+                }}
+              />
+            </Icon>
           </HStack>
 
           {!isSelector && pageFilter && (
-            <Tag size="md" variant="subtle">
+            <Tag.Root size="md" variant="subtle">
               {pageFilter}
-              <TagCloseButton
+              <Tag.CloseTrigger
                 onClick={() => {
                   removePageFilter()
                 }}
               />
-            </Tag>
+            </Tag.Root>
           )}
         </HStack>
 
@@ -327,14 +327,16 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
 
         <InputGroup maxW="md" size="sm">
           <InputLeftElement pointerEvents="none" h="full">
-            <Icon as={FaSearch} color="gray.300" />
+            <Icon color="gray.300" asChild>
+              <FaSearch />
+            </Icon>
           </InputLeftElement>
           <Input
             ref={searchRef}
             type="text"
             placeholder="Search media..."
             defaultValue={searchQuery}
-            onChange={handleSearchChange}
+            onValueChange={handleSearchChange}
           />
           {searchQuery.length > 0 && (
             <InputRightElement h="full" mr="1">
@@ -342,45 +344,46 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
                 aria-label="Clear search"
                 variant="ghost"
                 size="xs"
-                icon={<FaTimes />}
                 onClick={() => {
                   setSearchQuery('')
                   // clear search input
                   searchRef.current?.focus()
 
                   searchRef.current!.value = ''
-                }}
-              />
+                }}>
+                <FaTimes />
+              </IconButton>
             </InputRightElement>
           )}
         </InputGroup>
 
-        <ButtonGroup
-          variant="outline"
-          size="xs"
-          isDisabled={selectedMediaNode === null}>
+        <ButtonGroup variant="outline" size="xs">
           <IconButton
             aria-label="Customize selected image"
-            icon={<FaSlidersH />}
             onClick={handleEdit}
-          />
+            disabled={selectedMediaNode === null}>
+            <FaSlidersH />
+          </IconButton>
 
           <IconButton
             aria-label="Clone selected image"
-            icon={<FaClone />}
             onClick={handleClone}
-          />
+            disabled={selectedMediaNode === null}>
+            <FaClone />
+          </IconButton>
 
           <IconButton
             aria-label="Download selected image"
-            icon={<FaDownload />}
             onClick={handleDownload}
-          />
+            disabled={selectedMediaNode === null}>
+            <FaDownload />
+          </IconButton>
           <IconButton
             aria-label="Delete selected image"
-            icon={<FaTrash />}
             onClick={handleDelete}
-          />
+            disabled={selectedMediaNode === null}>
+            <FaTrash />
+          </IconButton>
         </ButtonGroup>
 
         <Box display={{base: 'block', md: 'none'}}>
@@ -390,30 +393,29 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
             aria-label={
               dropzone.isDragActive ? 'Drop to upload' : 'Upload images'
             }
-            icon={
-              <FaPlus
-                style={{
-                  transform: dropzone.isDragActive ? 'rotate(15deg)' : 'none'
-                }}
-              />
-            }
-            isLoading={isUploading}
-            onClick={dropzone.open}
-          />
+            loading={isUploading}
+            onClick={dropzone.open}>
+            <FaPlus
+              style={{
+                transform: dropzone.isDragActive ? 'rotate(15deg)' : 'none'
+              }}
+            />
+          </IconButton>
         </Box>
 
         <Box display={{base: 'none', md: 'block'}}>
           {dropzone.isDragActive ? (
-            <Button size="xs" leftIcon={<FaPlus />} colorScheme="orange">
+            <Button size="xs" colorPalette="orange">
+              <FaPlus />
               Drop to upload
             </Button>
           ) : (
             <Button
               variant="outline"
               size="xs"
-              leftIcon={<FaPlus />}
-              isLoading={isUploading}
+              loading={isUploading}
               onClick={dropzone.open}>
+              <FaPlus />
               Upload
             </Button>
           )}
@@ -421,14 +423,14 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
 
         <Button
           display={isSelector ? 'block' : 'none'}
-          leftIcon={<FaCheck />}
           size="xs"
-          isDisabled={selectedMediaNode === null}
+          disabled={selectedMediaNode === null}
           onClick={() => {
             if (isSelector && selectedMediaNode) {
               onSelect?.(selectedMediaNode?.id)
             }
           }}>
+          <FaCheck />
           Choose
         </Button>
       </HStack>

@@ -15,8 +15,8 @@ export const JaenLogout: React.FC<JaenLogoutProps> = props => {
   return (
     <Box id="momo" minH="100dvh" w="full">
       <Container maxW="lg" py={{base: '6', md: '12'}} px={{base: '0', sm: '8'}}>
-        <Stack spacing="8">
-          <Stack spacing="6">
+        <Stack gap="8">
+          <Stack gap="6">
             <HStack justify="center">
               <Link
                 as={Button}
@@ -35,7 +35,7 @@ export const JaenLogout: React.FC<JaenLogoutProps> = props => {
             bg="bg.surface"
             boxShadow={{base: 'none', sm: 'md'}}
             borderRadius={{base: 'none', sm: 'xl'}}>
-            <Stack spacing="12">
+            <Stack gap="12">
               <HStack justify="center" py="4">
                 <Box maxW="64" h="full">
                   <Logo />
@@ -45,7 +45,7 @@ export const JaenLogout: React.FC<JaenLogoutProps> = props => {
                 Are you sure you want to sign out?
               </Heading>
 
-              <Stack spacing="6">
+              <Stack gap="6">
                 <Button variant="outline" size="lg" onClick={props.onSignOut}>
                   Sign out
                 </Button>

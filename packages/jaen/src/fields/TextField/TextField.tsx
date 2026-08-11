@@ -1,4 +1,5 @@
-import {As, Button, Text, TextProps, Tooltip} from '@chakra-ui/react'
+import {As, Button, Text, TextProps} from '@chakra-ui/react'
+import {Tooltip} from '@/components/ui/tooltip'
 import DOMPurify from 'isomorphic-dompurify'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 
@@ -77,7 +78,7 @@ const containsFlowContent = (input: string) => {
 }
 
 export interface TextFieldProps extends Omit<TextProps, 'children'> {
-  as?: As
+  asChild?: boolean
   asAs?: As
   defaultValue?: string
   styleTunes?: TuneOption[]
@@ -330,7 +331,11 @@ export const TextField = connectField<string, TextFieldProps>(
           <Button
             variant="field-highlighter-tooltip-text"
             key={`jaen-highlight-tooltip-text-${jaenField.name}`}>
-            <Tooltip label={`ID: ${jaenField.id}`} placement="top-start">
+            <Tooltip
+              content={`ID: ${jaenField.id}`}
+              positioning={{
+                placement: 'top-start'
+              }}>
               <Text>Text</Text>
             </Tooltip>
           </Button>,

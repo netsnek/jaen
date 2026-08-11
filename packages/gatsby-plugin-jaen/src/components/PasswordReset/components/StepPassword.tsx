@@ -1,13 +1,6 @@
 import React from 'react'
 import {useForm, Controller} from 'react-hook-form'
-import {
-  Input,
-  Button,
-  FormControl,
-  FormLabel,
-  Stack,
-  FormErrorMessage
-} from '@chakra-ui/react'
+import {Input, Button, Stack, Field} from '@chakra-ui/react'
 
 interface FormData {
   password: string
@@ -34,11 +27,11 @@ const StepPassword: React.FC<StepEmailProps> = props => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing="5">
+      <Stack gap="5">
         <Input type="email" name="email" autoComplete="email" display="none" />
 
-        <FormControl id="password" isRequired isInvalid={!!errors.password}>
-          <FormLabel>Password</FormLabel>
+        <Field.Root id="password" required invalid={!!errors.password}>
+          <Field.Label>Password</Field.Label>
           <Controller
             control={control}
             name="password"
@@ -52,13 +45,13 @@ const StepPassword: React.FC<StepEmailProps> = props => {
               />
             )}
           />
-        </FormControl>
+        </Field.Root>
 
-        <FormControl
+        <Field.Root
           id="confirmPassword"
-          isRequired
-          isInvalid={!!errors.confirmPassword}>
-          <FormLabel>Confirm Password</FormLabel>
+          required
+          invalid={!!errors.confirmPassword}>
+          <Field.Label>Confirm Password</Field.Label>
           <Controller
             control={control}
             name="confirmPassword"
@@ -71,16 +64,16 @@ const StepPassword: React.FC<StepEmailProps> = props => {
             )}
           />
 
-          <FormErrorMessage>
+          <Field.ErrorText>
             {errors.confirmPassword && errors.confirmPassword.message}
-          </FormErrorMessage>
-        </FormControl>
+          </Field.ErrorText>
+        </Field.Root>
 
         <Button
           type="submit"
           variant="primary"
           size="lg"
-          isLoading={isSubmitting}>
+          loading={isSubmitting}>
           Send password reset mail
         </Button>
       </Stack>

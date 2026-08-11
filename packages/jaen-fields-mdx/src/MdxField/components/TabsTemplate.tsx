@@ -3,15 +3,13 @@ import {
   Box,
   Button,
   Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Spacer,
   Tab,
   TabList,
   TabPanel,
   TabPanels,
-  Tabs
+  Tabs,
+  Portal
 } from '@chakra-ui/react'
 import React, {useState} from 'react'
 
@@ -23,24 +21,37 @@ interface ComponentInfoProps {
 }
 
 export const ComponentInfo: React.FC<ComponentInfoProps> = ({items}) => (
-  <Menu>
-    <MenuButton
-      as={Button}
-      leftIcon={<AddIcon />}
-      size="sm"
-      variant="link"
-      mx="2">
-      Components
-    </MenuButton>
+  // Rebuilt by hand: the codemod turned every opening tag in this block into
+  // Menu.Root while leaving the closing tags correct, so the file no longer
+  // parsed. The closing tags are what told us what it meant.
+  //
+  // v2's `variant="link"` on the trigger button is v3's `plain`, and leftIcon
+  // becomes a child.
+  <Menu.Root>
+    <Menu.Trigger asChild>
+      <Button size="sm" variant="plain" mx="2">
+        <AddIcon />
+        Components
+      </Button>
+    </Menu.Trigger>
 
-    <MenuList>
-      {items.map(item => (
-        <MenuItem key={item.label} onClick={item.onClick}>
-          {item.label}
-        </MenuItem>
-      ))}
-    </MenuList>
-  </Menu>
+    <Portal>
+      <Menu.Positioner>
+        <Menu.Content>
+          {items.map(item => (
+            // value is the item's identity in v3, not a display string, so it
+            // has to be unique per item rather than the codemod's 'item-0'.
+            <Menu.Item
+              key={item.label}
+              value={item.label}
+              onSelect={item.onClick}>
+              {item.label}
+            </Menu.Item>
+          ))}
+        </Menu.Content>
+      </Menu.Positioner>
+    </Portal>
+  </Menu.Root>
 )
 
 export interface TabsProps {
@@ -73,12 +84,12 @@ const TabsTemplate: React.FC<TabsProps> = props => {
 
   return (
     <Box position="relative">
-      <Tabs
-        index={selectedTab}
-        onChange={handleTabChange}
+      <Tabs.Root
+        value={selectedTab}
+        onValueChange={handleTabChange}
         pos="relative"
         size="sm">
-        <TabList
+        <Tabs.List
           pos="sticky"
           top="0"
           zIndex="1"
@@ -88,7 +99,7 @@ const TabsTemplate: React.FC<TabsProps> = props => {
           ))}
           <Spacer />
           <ComponentInfo items={props.componentsInfo || []} />
-        </TabList>
+        </Tabs.List>
 
         <TabPanels>
           {props.tabs.map((tab, i) => (
@@ -97,7 +108,7 @@ const TabsTemplate: React.FC<TabsProps> = props => {
             </TabPanel>
           ))}
         </TabPanels>
-      </Tabs>
+      </Tabs.Root>
     </Box>
   )
 }

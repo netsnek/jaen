@@ -12,7 +12,7 @@ export interface HighlightTooltipProps extends Omit<BoxProps, 'children'> {
         ref: (node: HTMLDivElement) => void
         tabIndex?: number
       }) => React.ReactNode)
-  as?: As
+  asChild?: boolean
   asProps?: Record<string, unknown>
   asAs?: As
   actions: React.ReactNode[]

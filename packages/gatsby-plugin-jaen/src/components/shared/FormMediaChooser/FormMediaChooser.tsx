@@ -30,15 +30,10 @@ export const FormMediaChooser: React.FC<FormMediaChooserProps> = props => {
   }
 
   return (
-    <Stack direction="row" spacing="6" align="center" width="full">
+    <Stack direction="row" gap="6" align="center" width="full">
       <Box boxSize={36} minW="36" borderRadius="lg" bg="bg.subtle">
         {props.value ? (
-          <Image
-            borderRadius="lg"
-            boxSize="100%"
-            src={props.value}
-            fallback={<Skeleton borderRadius="lg" boxSize="100%" />}
-          />
+          <Image borderRadius="lg" boxSize="100%" src={props.value} />
         ) : (
           <Center boxSize="100%" borderRadius="lg">
             <Text color="muted" fontSize="sm">
@@ -48,12 +43,9 @@ export const FormMediaChooser: React.FC<FormMediaChooserProps> = props => {
         )}
       </Box>
       <Stack>
-        <HStack spacing="5">
-          <Button
-            isLoading={isLoading}
-            variant="outline"
-            leftIcon={<FaCloudUploadAlt />}
-            onClick={onChoose}>
+        <HStack gap="5">
+          <Button loading={isLoading} variant="outline" onClick={onChoose}>
+            <FaCloudUploadAlt />
             Choose media
           </Button>
           {props.value && (

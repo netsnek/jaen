@@ -7,49 +7,30 @@ import {useIntl} from 'react-intl'
 
 import {
   Alert,
-  AlertDescription,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  AlertIcon,
-  AlertTitle,
   Avatar,
   Badge,
   Box,
   Button,
   ButtonGroup,
   Card,
-  CardBody,
-  CardHeader,
   Checkbox,
   CheckboxGroup,
-  Divider,
   Flex,
-  FormControl,
-  FormLabel,
   Heading,
   HStack,
   Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   SimpleGrid,
   Skeleton,
   SkeletonCircle,
   SkeletonText,
   Stack,
   Stat,
-  StatLabel,
-  StatNumber,
   Text,
-  useDisclosure
+  useDisclosure,
+  Dialog,
+  Portal,
+  Separator,
+  Field
 } from '@chakra-ui/react'
 
 interface UserDetail {
@@ -474,36 +455,36 @@ const UserDetailsPage: React.FC<PageProps> = props => {
 
   if (isLoading) {
     return (
-      <Stack spacing="6">
-        <Card variant="outline">
-          <CardHeader>
-            <HStack spacing="4">
+      <Stack gap="6">
+        <Card.Root variant="outline">
+          <Card.Header>
+            <HStack gap="4">
               <SkeletonCircle size="20" />
               <Skeleton height="24px" width="30%" />
             </HStack>
-          </CardHeader>
-          <CardBody>
-            <SkeletonText noOfLines={4} />
-          </CardBody>
-        </Card>
-        <Card variant="outline">
-          <CardBody>
-            <SimpleGrid columns={{base: 1, md: 2}} spacing="4">
+          </Card.Header>
+          <Card.Body>
+            <SkeletonText lineClamp={4} />
+          </Card.Body>
+        </Card.Root>
+        <Card.Root variant="outline">
+          <Card.Body>
+            <SimpleGrid columns={{base: 1, md: 2}} gap="4">
               {Array.from({length: 6}).map((_, index) => (
                 <Skeleton key={index} height="40px" />
               ))}
             </SimpleGrid>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
       </Stack>
     )
   }
 
   if (error) {
     return (
-      <Stack spacing="4" alignItems="flex-start">
+      <Stack gap="4" alignItems="flex-start">
         <Button
-          variant="link"
+          variant="plain"
           onClick={() => {
             void navigate('../')
           }}>
@@ -512,16 +493,16 @@ const UserDetailsPage: React.FC<PageProps> = props => {
             defaultMessage: 'Back to accounts'
           })}
         </Button>
-        <Alert status="error">
-          <AlertIcon />
-          <AlertTitle>
+        <Alert.Root status="error">
+          <Alert.Indicator />
+          <Alert.Title>
             {intl.formatMessage({
               id: 'CmsAccountsErrorsDetailTitle',
               defaultMessage: 'Unable to load this account'
             })}
-          </AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+          </Alert.Title>
+          <Alert.Description>{error}</Alert.Description>
+        </Alert.Root>
       </Stack>
     )
   }
@@ -532,10 +513,10 @@ const UserDetailsPage: React.FC<PageProps> = props => {
   const isLocked = user.state === 'USER_STATE_LOCKED'
 
   return (
-    <Stack spacing="6">
+    <Stack gap="6">
       <Button
         alignSelf="flex-start"
-        variant="link"
+        variant="plain"
         onClick={() => {
           void navigate('../')
         }}>
@@ -545,13 +526,14 @@ const UserDetailsPage: React.FC<PageProps> = props => {
         })}
       </Button>
 
-      <Card variant="outline">
-        <CardHeader>
-          <HStack spacing="4" alignItems="flex-start">
-            <Avatar
-              size="lg"
-              name={user.profile.displayName ?? user.userName}
-            />
+      <Card.Root variant="outline">
+        <Card.Header>
+          <HStack gap="4" alignItems="flex-start">
+            <Avatar.Root size="lg">
+              <Avatar.Fallback
+                name={user.profile.displayName ?? user.userName}
+              />
+            </Avatar.Root>
             <Box flex="1">
               <Heading size="md">
                 {user.profile.displayName || user.userName}
@@ -565,51 +547,53 @@ const UserDetailsPage: React.FC<PageProps> = props => {
               </Text>
             </Box>
             {user.state ? (
-              <Badge colorScheme={isActive ? 'green' : 'purple'}>
+              <Badge colorPalette={isActive ? 'green' : 'purple'}>
                 {stateLabel(user.state)}
               </Badge>
             ) : null}
           </HStack>
-        </CardHeader>
-        <CardBody>
-          <Stack spacing="4">
-            <SimpleGrid columns={{base: 1, md: 3}} spacing="4">
-              <Stat>
-                <StatLabel>
+        </Card.Header>
+        <Card.Body>
+          <Stack gap="4">
+            <SimpleGrid columns={{base: 1, md: 3}} gap="4">
+              <Stat.Root>
+                <Stat.Label>
                   {intl.formatMessage({
                     id: 'CmsAccountsDetailUsername',
                     defaultMessage: 'Username'
                   })}
-                </StatLabel>
-                <StatNumber fontSize="md">{user.userName || '—'}</StatNumber>
-              </Stat>
-              <Stat>
-                <StatLabel>
+                </Stat.Label>
+                <Stat.ValueText fontSize="md">
+                  {user.userName || '—'}
+                </Stat.ValueText>
+              </Stat.Root>
+              <Stat.Root>
+                <Stat.Label>
                   {intl.formatMessage({
                     id: 'CmsAccountsDetailPreferredLogin',
                     defaultMessage: 'Preferred login'
                   })}
-                </StatLabel>
-                <StatNumber fontSize="md">
+                </Stat.Label>
+                <Stat.ValueText fontSize="md">
                   {user.preferredLoginName || '—'}
-                </StatNumber>
-              </Stat>
-              <Stat>
-                <StatLabel>
+                </Stat.ValueText>
+              </Stat.Root>
+              <Stat.Root>
+                <Stat.Label>
                   {intl.formatMessage({
                     id: 'CmsAccountsDetailState',
                     defaultMessage: 'Account state'
                   })}
-                </StatLabel>
-                <StatNumber fontSize="md">
+                </Stat.Label>
+                <Stat.ValueText fontSize="md">
                   {stateLabel(user.state) || '—'}
-                </StatNumber>
-              </Stat>
+                </Stat.ValueText>
+              </Stat.Root>
             </SimpleGrid>
 
-            <Divider />
+            <Separator />
 
-            <SimpleGrid columns={{base: 1, md: 3}} spacing="4">
+            <SimpleGrid columns={{base: 1, md: 3}} gap="4">
               <Box>
                 <Text fontSize="xs" color="fg.muted">
                   {intl.formatMessage({
@@ -639,105 +623,107 @@ const UserDetailsPage: React.FC<PageProps> = props => {
               </Box>
             </SimpleGrid>
           </Stack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
 
-      <Card variant="outline">
-        <CardHeader>
+      <Card.Root variant="outline">
+        <Card.Header>
           <Heading size="sm">
             {intl.formatMessage({
               id: 'CmsAccountsProfileTitle',
               defaultMessage: 'Profile'
             })}
           </Heading>
-        </CardHeader>
-        <CardBody>
-          <Stack as="form" onSubmit={onSubmit} spacing="4">
-            <SimpleGrid columns={{base: 1, md: 2}} spacing="4">
-              <FormControl>
-                <FormLabel>
-                  {intl.formatMessage({
-                    id: 'CmsAccountsProfileDisplayName',
-                    defaultMessage: 'Display name'
-                  })}
-                </FormLabel>
-                <Input {...register('displayName')} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>
-                  {intl.formatMessage({
-                    id: 'CmsAccountsProfileLanguage',
-                    defaultMessage: 'Preferred language'
-                  })}
-                </FormLabel>
-                <Input placeholder="de" {...register('preferredLanguage')} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>
-                  {intl.formatMessage({
-                    id: 'CmsAccountsProfileFirstName',
-                    defaultMessage: 'First name'
-                  })}
-                </FormLabel>
-                <Input {...register('firstName')} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>
-                  {intl.formatMessage({
-                    id: 'CmsAccountsProfileLastName',
-                    defaultMessage: 'Last name'
-                  })}
-                </FormLabel>
-                <Input {...register('lastName')} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>
-                  {intl.formatMessage({
-                    id: 'CmsAccountsProfileEmail',
-                    defaultMessage: 'Email'
-                  })}
-                </FormLabel>
-                <Input type="email" {...register('email')} />
-              </FormControl>
-              <FormControl>
-                <FormLabel>
-                  {intl.formatMessage({
-                    id: 'CmsAccountsProfilePhone',
-                    defaultMessage: 'Phone'
-                  })}
-                </FormLabel>
-                <Input {...register('phone')} />
-              </FormControl>
-            </SimpleGrid>
+        </Card.Header>
+        <Card.Body>
+          <Stack gap="4" asChild>
+            <form onSubmit={onSubmit}>
+              <SimpleGrid columns={{base: 1, md: 2}} gap="4">
+                <Field.Root>
+                  <Field.Label>
+                    {intl.formatMessage({
+                      id: 'CmsAccountsProfileDisplayName',
+                      defaultMessage: 'Display name'
+                    })}
+                  </Field.Label>
+                  <Input {...register('displayName')} />
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>
+                    {intl.formatMessage({
+                      id: 'CmsAccountsProfileLanguage',
+                      defaultMessage: 'Preferred language'
+                    })}
+                  </Field.Label>
+                  <Input placeholder="de" {...register('preferredLanguage')} />
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>
+                    {intl.formatMessage({
+                      id: 'CmsAccountsProfileFirstName',
+                      defaultMessage: 'First name'
+                    })}
+                  </Field.Label>
+                  <Input {...register('firstName')} />
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>
+                    {intl.formatMessage({
+                      id: 'CmsAccountsProfileLastName',
+                      defaultMessage: 'Last name'
+                    })}
+                  </Field.Label>
+                  <Input {...register('lastName')} />
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>
+                    {intl.formatMessage({
+                      id: 'CmsAccountsProfileEmail',
+                      defaultMessage: 'Email'
+                    })}
+                  </Field.Label>
+                  <Input type="email" {...register('email')} />
+                </Field.Root>
+                <Field.Root>
+                  <Field.Label>
+                    {intl.formatMessage({
+                      id: 'CmsAccountsProfilePhone',
+                      defaultMessage: 'Phone'
+                    })}
+                  </Field.Label>
+                  <Input {...register('phone')} />
+                </Field.Root>
+              </SimpleGrid>
 
-            <Flex justifyContent="flex-end" gap="2">
-              <Button
-                variant="ghost"
-                isDisabled={!isDirty || isSubmitting}
-                onClick={() => {
-                  reset()
-                }}>
-                {intl.formatMessage({
-                  id: 'CmsAccountsProfileReset',
-                  defaultMessage: 'Reset'
-                })}
-              </Button>
-              <Button
-                type="submit"
-                isLoading={isSubmitting}
-                isDisabled={!isDirty && !isSubmitting}>
-                {intl.formatMessage({
-                  id: 'CmsAccountsProfileSave',
-                  defaultMessage: 'Save changes'
-                })}
-              </Button>
-            </Flex>
+              <Flex justifyContent="flex-end" gap="2">
+                <Button
+                  variant="ghost"
+                  disabled={!isDirty || isSubmitting}
+                  onClick={() => {
+                    reset()
+                  }}>
+                  {intl.formatMessage({
+                    id: 'CmsAccountsProfileReset',
+                    defaultMessage: 'Reset'
+                  })}
+                </Button>
+                <Button
+                  type="submit"
+                  loading={isSubmitting}
+                  disabled={!isDirty && !isSubmitting}>
+                  {intl.formatMessage({
+                    id: 'CmsAccountsProfileSave',
+                    defaultMessage: 'Save changes'
+                  })}
+                </Button>
+              </Flex>
+            </form>
           </Stack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
 
-      <Card variant="outline">
-        <CardHeader>
+      <Card.Root variant="outline">
+        <Card.Header>
           <Flex justifyContent="space-between" alignItems="center">
             <Heading size="sm">
               {intl.formatMessage({
@@ -759,10 +745,10 @@ const UserDetailsPage: React.FC<PageProps> = props => {
               </Button>
             ) : null}
           </Flex>
-        </CardHeader>
-        <CardBody>
+        </Card.Header>
+        <Card.Body>
           {user.authorizations.length > 0 ? (
-            <Stack spacing="4" divider={<Divider />}>
+            <Stack gap="4" separator={<Separator />}>
               {user.authorizations.map(authorization => (
                 <Flex
                   key={authorization.id}
@@ -794,8 +780,8 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                       })}
                     </Button>
                     <Button
-                      colorScheme="red"
-                      isDisabled={isBusy}
+                      colorPalette="red"
+                      disabled={isBusy}
                       onClick={() => {
                         void runAction(
                           () =>
@@ -826,29 +812,29 @@ const UserDetailsPage: React.FC<PageProps> = props => {
               })}
             </Text>
           )}
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
 
-      <Card variant="outline">
-        <CardHeader>
+      <Card.Root variant="outline">
+        <Card.Header>
           <Heading size="sm">
             {intl.formatMessage({
               id: 'CmsAccountsActionsTitle',
               defaultMessage: 'Account actions'
             })}
           </Heading>
-        </CardHeader>
-        <CardBody>
-          <Stack spacing="4">
-            <ButtonGroup variant="outline" flexWrap="wrap" spacing="2">
-              <Button isDisabled={isBusy} onClick={passwordModal.onOpen}>
+        </Card.Header>
+        <Card.Body>
+          <Stack gap="4">
+            <ButtonGroup variant="outline" flexWrap="wrap" gap="2">
+              <Button disabled={isBusy} onClick={passwordModal.onOpen}>
                 {intl.formatMessage({
                   id: 'CmsAccountsActionsSetPassword',
                   defaultMessage: 'Set password'
                 })}
               </Button>
               <Button
-                isDisabled={isBusy}
+                disabled={isBusy}
                 onClick={() => {
                   void runAction(
                     () =>
@@ -868,7 +854,7 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                 })}
               </Button>
               <Button
-                isDisabled={isBusy}
+                disabled={isBusy}
                 onClick={() => {
                   void runAction(
                     () =>
@@ -889,10 +875,10 @@ const UserDetailsPage: React.FC<PageProps> = props => {
               </Button>
             </ButtonGroup>
 
-            <ButtonGroup variant="outline" flexWrap="wrap" spacing="2">
+            <ButtonGroup variant="outline" flexWrap="wrap" gap="2">
               {isActive ? (
                 <Button
-                  isDisabled={isBusy}
+                  disabled={isBusy}
                   onClick={() => {
                     void runAction(
                       () =>
@@ -913,7 +899,7 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                 </Button>
               ) : (
                 <Button
-                  isDisabled={isBusy}
+                  disabled={isBusy}
                   onClick={() => {
                     void runAction(
                       () =>
@@ -935,7 +921,7 @@ const UserDetailsPage: React.FC<PageProps> = props => {
               )}
               {isLocked ? (
                 <Button
-                  isDisabled={isBusy}
+                  disabled={isBusy}
                   onClick={() => {
                     void runAction(
                       () =>
@@ -956,7 +942,7 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                 </Button>
               ) : (
                 <Button
-                  isDisabled={isBusy}
+                  disabled={isBusy}
                   onClick={() => {
                     void runAction(
                       () =>
@@ -977,8 +963,8 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                 </Button>
               )}
               <Button
-                colorScheme="red"
-                isDisabled={isBusy}
+                colorPalette="red"
+                disabled={isBusy}
                 onClick={deleteDialog.onOpen}>
                 {intl.formatMessage({
                   id: 'CmsAccountsActionsDelete',
@@ -987,200 +973,241 @@ const UserDetailsPage: React.FC<PageProps> = props => {
               </Button>
             </ButtonGroup>
           </Stack>
-        </CardBody>
-      </Card>
+        </Card.Body>
+      </Card.Root>
 
-      <AlertDialog
-        isOpen={deleteDialog.isOpen}
-        leastDestructiveRef={deleteCancelRef}
-        onClose={deleteDialog.onClose}>
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              {intl.formatMessage({
-                id: 'CmsAccountsDeleteTitle',
-                defaultMessage: 'Delete account'
-              })}
-            </AlertDialogHeader>
-            <AlertDialogBody>
-              {intl.formatMessage(
-                {
-                  id: 'CmsAccountsDeletePrompt',
-                  defaultMessage:
-                    'Are you sure you want to delete {username}? This cannot be undone.'
-                },
-                {username: user.userName}
-              )}
-            </AlertDialogBody>
-            <AlertDialogFooter>
-              <Button ref={deleteCancelRef} onClick={deleteDialog.onClose}>
-                {intl.formatMessage({
-                  id: 'CmsAccountsActionsCancel',
-                  defaultMessage: 'Cancel'
-                })}
-              </Button>
-              <Button
-                colorScheme="red"
-                ml={3}
-                isLoading={isBusy}
-                onClick={() => {
-                  void onDelete()
-                }}>
-                {intl.formatMessage({
-                  id: 'CmsAccountsActionsDelete',
-                  defaultMessage: 'Delete account'
-                })}
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-
-      <Modal isOpen={passwordModal.isOpen} onClose={passwordModal.onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            {intl.formatMessage({
-              id: 'CmsAccountsPasswordTitle',
-              defaultMessage: 'Set a new password'
-            })}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack spacing="4">
-              <FormControl isRequired>
-                <FormLabel>
+      <Dialog.Root
+        open={deleteDialog.open}
+        initialFocusEl={() => deleteCancelRef.current}
+        role="alertdialog"
+        onOpenChange={e => {
+          if (!e.open) {
+            deleteDialog.onClose()
+          }
+        }}>
+        <Portal>
+          <Dialog.Backdrop>
+            <Dialog.Positioner>
+              <Dialog.Content>
+                <Dialog.Header>
                   {intl.formatMessage({
-                    id: 'CmsAccountsPasswordNew',
-                    defaultMessage: 'New password'
+                    id: 'CmsAccountsDeleteTitle',
+                    defaultMessage: 'Delete account'
                   })}
-                </FormLabel>
-                <Input
-                  type="password"
-                  value={newPassword}
-                  onChange={event => {
-                    setNewPassword(event.target.value)
-                  }}
-                />
-              </FormControl>
-              <Checkbox
-                isChecked={passwordChangeRequired}
-                onChange={event => {
-                  setPasswordChangeRequired(event.target.checked)
-                }}>
-                {intl.formatMessage({
-                  id: 'CmsAccountsPasswordChangeRequired',
-                  defaultMessage: 'Require a change on next sign-in'
-                })}
-              </Checkbox>
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={passwordModal.onClose}>
-              {intl.formatMessage({
-                id: 'CmsAccountsActionsCancel',
-                defaultMessage: 'Cancel'
-              })}
-            </Button>
-            <Button
-              isDisabled={!newPassword}
-              isLoading={isBusy}
-              onClick={() => {
-                void onSetPassword()
-              }}>
-              {intl.formatMessage({
-                id: 'CmsAccountsActionsSetPassword',
-                defaultMessage: 'Set password'
-              })}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      <Modal isOpen={roleModal.isOpen} onClose={roleModal.onClose}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>
-            {roleModalAuthorization
-              ? intl.formatMessage({
-                  id: 'CmsAccountsRolesEditTitle',
-                  defaultMessage: 'Edit granted roles'
-                })
-              : intl.formatMessage({
-                  id: 'CmsAccountsRolesGrantTitle',
-                  defaultMessage: 'Grant project roles'
-                })}
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack spacing="4">
-              {!roleModalAuthorization ? (
-                <FormControl>
-                  <FormLabel>
+                </Dialog.Header>
+                <Dialog.Body>
+                  {intl.formatMessage(
+                    {
+                      id: 'CmsAccountsDeletePrompt',
+                      defaultMessage:
+                        'Are you sure you want to delete {username}? This cannot be undone.'
+                    },
+                    {username: user.userName}
+                  )}
+                </Dialog.Body>
+                <Dialog.Footer>
+                  <Button ref={deleteCancelRef} onClick={deleteDialog.onClose}>
                     {intl.formatMessage({
-                      id: 'CmsAccountsRolesProject',
-                      defaultMessage: 'Project'
+                      id: 'CmsAccountsActionsCancel',
+                      defaultMessage: 'Cancel'
                     })}
-                  </FormLabel>
-                  <Input
-                    value={roleModalProjectId}
-                    onChange={event => {
-                      setRoleModalProjectId(event.target.value)
-                    }}
-                    onBlur={() => {
-                      void openRoleModal(null, roleModalProjectId)
-                    }}
-                  />
-                </FormControl>
-              ) : null}
+                  </Button>
+                  <Button
+                    colorPalette="red"
+                    ml={3}
+                    loading={isBusy}
+                    onClick={() => {
+                      void onDelete()
+                    }}>
+                    {intl.formatMessage({
+                      id: 'CmsAccountsActionsDelete',
+                      defaultMessage: 'Delete account'
+                    })}
+                  </Button>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Dialog.Backdrop>
+        </Portal>
+      </Dialog.Root>
 
-              {rolesLoading ? (
-                <SkeletonText noOfLines={3} />
-              ) : availableRoles.length > 0 ? (
-                <CheckboxGroup
-                  value={selectedRoleKeys}
-                  onChange={values => {
-                    setSelectedRoleKeys(values.map(String))
-                  }}>
-                  <Stack>
-                    {availableRoles.map(role => (
-                      <Checkbox key={role.key} value={role.key}>
-                        {role.displayName || role.key}
-                      </Checkbox>
-                    ))}
-                  </Stack>
-                </CheckboxGroup>
-              ) : (
-                <Text color="fg.muted">
+      <Dialog.Root
+        open={passwordModal.open}
+        onOpenChange={e => {
+          if (!e.open) {
+            passwordModal.onClose()
+          }
+        }}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                {intl.formatMessage({
+                  id: 'CmsAccountsPasswordTitle',
+                  defaultMessage: 'Set a new password'
+                })}
+              </Dialog.Header>
+              <Dialog.CloseTrigger />
+              <Dialog.Body>
+                <Stack gap="4">
+                  <Field.Root required>
+                    <Field.Label>
+                      {intl.formatMessage({
+                        id: 'CmsAccountsPasswordNew',
+                        defaultMessage: 'New password'
+                      })}
+                    </Field.Label>
+                    <Input
+                      type="password"
+                      value={newPassword}
+                      onValueChange={event => {
+                        setNewPassword(event.target.value)
+                      }}
+                    />
+                  </Field.Root>
+                  <Checkbox.Root
+                    onCheckedChange={event => {
+                      setPasswordChangeRequired(event.target.checked)
+                    }}
+                    checked={passwordChangeRequired}>
+                    <Checkbox.HiddenInput />
+                    <Checkbox.Control>
+                      <Checkbox.Indicator />
+                    </Checkbox.Control>
+                    <Checkbox.Label>
+                      {intl.formatMessage({
+                        id: 'CmsAccountsPasswordChangeRequired',
+                        defaultMessage: 'Require a change on next sign-in'
+                      })}
+                    </Checkbox.Label>
+                  </Checkbox.Root>
+                </Stack>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button variant="ghost" mr={3} onClick={passwordModal.onClose}>
                   {intl.formatMessage({
-                    id: 'CmsAccountsRolesNoneAvailable',
-                    defaultMessage: 'No roles available for this project.'
+                    id: 'CmsAccountsActionsCancel',
+                    defaultMessage: 'Cancel'
                   })}
-                </Text>
-              )}
-            </Stack>
-          </ModalBody>
-          <ModalFooter>
-            <Button variant="ghost" mr={3} onClick={roleModal.onClose}>
-              {intl.formatMessage({
-                id: 'CmsAccountsActionsCancel',
-                defaultMessage: 'Cancel'
-              })}
-            </Button>
-            <Button
-              isDisabled={selectedRoleKeys.length === 0}
-              isLoading={isBusy}
-              onClick={() => {
-                void onSaveRoles()
-              }}>
-              {intl.formatMessage({
-                id: 'CmsAccountsRolesSave',
-                defaultMessage: 'Save roles'
-              })}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+                </Button>
+                <Button
+                  disabled={!newPassword}
+                  loading={isBusy}
+                  onClick={() => {
+                    void onSetPassword()
+                  }}>
+                  {intl.formatMessage({
+                    id: 'CmsAccountsActionsSetPassword',
+                    defaultMessage: 'Set password'
+                  })}
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+
+      <Dialog.Root
+        open={roleModal.open}
+        onOpenChange={e => {
+          if (!e.open) {
+            roleModal.onClose()
+          }
+        }}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                {roleModalAuthorization
+                  ? intl.formatMessage({
+                      id: 'CmsAccountsRolesEditTitle',
+                      defaultMessage: 'Edit granted roles'
+                    })
+                  : intl.formatMessage({
+                      id: 'CmsAccountsRolesGrantTitle',
+                      defaultMessage: 'Grant project roles'
+                    })}
+              </Dialog.Header>
+              <Dialog.CloseTrigger />
+              <Dialog.Body>
+                <Stack gap="4">
+                  {!roleModalAuthorization ? (
+                    <Field.Root>
+                      <Field.Label>
+                        {intl.formatMessage({
+                          id: 'CmsAccountsRolesProject',
+                          defaultMessage: 'Project'
+                        })}
+                      </Field.Label>
+                      <Input
+                        value={roleModalProjectId}
+                        onValueChange={event => {
+                          setRoleModalProjectId(event.target.value)
+                        }}
+                        onBlur={() => {
+                          void openRoleModal(null, roleModalProjectId)
+                        }}
+                      />
+                    </Field.Root>
+                  ) : null}
+
+                  {rolesLoading ? (
+                    <SkeletonText lineClamp={3} />
+                  ) : availableRoles.length > 0 ? (
+                    <CheckboxGroup
+                      value={selectedRoleKeys}
+                      onValueChange={values => {
+                        setSelectedRoleKeys(values.map(String))
+                      }}>
+                      <Stack>
+                        {availableRoles.map(role => (
+                          <Checkbox.Root key={role.key} value={role.key}>
+                            <Checkbox.HiddenInput />
+                            <Checkbox.Control>
+                              <Checkbox.Indicator />
+                            </Checkbox.Control>
+                            <Checkbox.Label>
+                              {role.displayName || role.key}
+                            </Checkbox.Label>
+                          </Checkbox.Root>
+                        ))}
+                      </Stack>
+                    </CheckboxGroup>
+                  ) : (
+                    <Text color="fg.muted">
+                      {intl.formatMessage({
+                        id: 'CmsAccountsRolesNoneAvailable',
+                        defaultMessage: 'No roles available for this project.'
+                      })}
+                    </Text>
+                  )}
+                </Stack>
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button variant="ghost" mr={3} onClick={roleModal.onClose}>
+                  {intl.formatMessage({
+                    id: 'CmsAccountsActionsCancel',
+                    defaultMessage: 'Cancel'
+                  })}
+                </Button>
+                <Button
+                  disabled={selectedRoleKeys.length === 0}
+                  loading={isBusy}
+                  onClick={() => {
+                    void onSaveRoles()
+                  }}>
+                  {intl.formatMessage({
+                    id: 'CmsAccountsRolesSave',
+                    defaultMessage: 'Save roles'
+                  })}
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
     </Stack>
   )
 }

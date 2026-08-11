@@ -2,11 +2,10 @@ import {
   Button,
   Icon,
   List,
-  ListItem,
   Spinner,
   Stack,
-  StackDivider,
-  Text
+  Text,
+  StackSeparator
 } from '@chakra-ui/react'
 import {useLocation} from '@reach/router'
 
@@ -39,7 +38,7 @@ export const NavigationGroups: React.FC<NavigationGroupsProps> = ({
   const location = useLocation()
 
   return (
-    <Stack divider={<StackDivider borderColor="border.default" />}>
+    <Stack separator={<StackSeparator borderColor="border.default" />}>
       {Object.entries(groups).map(([groupKey, group]) => {
         return (
           <Stack key={groupKey}>
@@ -48,7 +47,7 @@ export const NavigationGroups: React.FC<NavigationGroupsProps> = ({
                 {group.label}
               </Text>
             )}
-            <List>
+            <List.Root>
               {Object.entries(group.items)
                 // `order` came in with the Tailwind version and the frame
                 // slice sets it on every item, so the groups would shuffle
@@ -58,7 +57,7 @@ export const NavigationGroups: React.FC<NavigationGroupsProps> = ({
                   const isActive = location.pathname === item.path
 
                   return (
-                    <ListItem key={itemKey}>
+                    <List.Item key={itemKey}>
                       <Link
                         as={Button}
                         to={item.path}
@@ -72,11 +71,12 @@ export const NavigationGroups: React.FC<NavigationGroupsProps> = ({
                             <Spinner mr="2" size="sm" />
                           ) : (
                             <Icon
-                              as={item.icon}
                               fontSize="lg"
                               mr="2"
                               color="brand.500"
-                            />
+                              asChild>
+                              <item.icon />
+                            </Icon>
                           )
                         }
                         variant="ghost"
@@ -92,10 +92,10 @@ export const NavigationGroups: React.FC<NavigationGroupsProps> = ({
                         }}>
                         {item.label}
                       </Link>
-                    </ListItem>
+                    </List.Item>
                   )
                 })}
-            </List>
+            </List.Root>
           </Stack>
         )
       })}

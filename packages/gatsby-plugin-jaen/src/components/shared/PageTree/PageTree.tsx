@@ -1,5 +1,13 @@
+/*
+ MIGRATION NOTE: The following Chakra UI hooks have been removed.
+ Please replace them with the suggested alternatives:
+
+//   - useTheme: Use Import from system or use useChakraContext
+
+ See: https://chakra-ui.com/docs/get-started/migration#hooks
+*/
 import {useColorModeValue} from 'jaen'
-import {Box, Text, useTheme, useToken} from '@chakra-ui/react'
+import {Box, Text, useToken} from '@chakra-ui/react'
 import {mode, transparentize} from '@chakra-ui/theme-tools'
 
 import {useEffect, useState} from 'react'
@@ -68,17 +76,16 @@ export const PageTree: React.FC<PageTreeProps> = ({
         <Box
           w="full"
           className="tree"
-          sx={{
+          css={{
             '--rct-bar-color': 'var(--chakra-colors-brand-500)',
+
             '--rct-color-drag-between-line-bg':
               'var(--chakra-colors-brand-500)',
 
             '--rct-item-height': '2rem',
             '--rct-color-focustree-item-hover-bg': hoverBg,
-
             '--rct-color-focustree-item-selected-bg': selectedBg,
             '--rct-color-focustree-item-active-bg': activeBg,
-
             '--rct-color-arrow': 'var(--chakra-colors-brand-500)'
           }}>
           <ul className="tree-root tree-node-list" {...props.containerProps}>

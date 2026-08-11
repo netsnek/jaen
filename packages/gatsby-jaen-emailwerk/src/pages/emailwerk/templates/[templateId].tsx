@@ -7,13 +7,7 @@ import {
   Button,
   ButtonGroup,
   Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
   Checkbox,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
   Heading,
   IconButton,
   Input,
@@ -21,8 +15,7 @@ import {
   InputLeftAddon,
   InputRightElement,
   Link,
-  ListItem,
-  Select,
+  NativeSelect,
   Skeleton,
   Stack,
   Table,
@@ -33,7 +26,8 @@ import {
   Th,
   Thead,
   Tr,
-  UnorderedList
+  Field,
+  List
 } from '@chakra-ui/react'
 import {Editor} from '@monaco-editor/react'
 import {Link as GatsbyLink, navigate} from 'gatsby'
@@ -373,110 +367,121 @@ const Page: React.FC<PageProps> = ({params}) => {
   }
 
   return (
-    <Stack spacing="4">
+    <Stack gap="4">
       <Heading size="md">Email Template</Heading>
 
-      <Skeleton isLoaded={!state.isLoading}>
+      <Skeleton loading={!!state.isLoading}>
         <InputGroup>
           <InputLeftAddon>Template ID</InputLeftAddon>
-          <Input type="text" defaultValue={templateId} isDisabled />
-          <InputRightElement
-            as={IconButton}
-            icon={<CopyIcon />}
-            variant="outline"
-            onClick={onCopy}></InputRightElement>
+          <Input type="text" defaultValue={templateId} disabled />
+          <InputRightElement icon={<CopyIcon />} variant="outline" asChild>
+            <IconButton onClick={onCopy} />
+          </InputRightElement>
         </InputGroup>
       </Skeleton>
 
       <form onSubmit={onSubmit}>
-        <Stack spacing="8">
-          <Stack spacing="4">
-            <Skeleton isLoaded={!state.isLoading}>
-              <FormControl
+        <Stack gap="8">
+          <Stack gap="4">
+            <Skeleton loading={!!state.isLoading}>
+              <Field.Root
                 id="description"
-                isRequired
-                isInvalid={!!errors.description}>
-                <FormLabel>Description</FormLabel>
+                required
+                invalid={!!errors.description}>
+                <Field.Label>Description</Field.Label>
                 <Input type="text" {...register('description')} />
-                <FormErrorMessage>
-                  {errors.description?.message}
-                </FormErrorMessage>
-              </FormControl>
+                <Field.ErrorText>{errors.description?.message}</Field.ErrorText>
+              </Field.Root>
             </Skeleton>
 
-            <Skeleton isLoaded={!state.isLoading}>
-              <FormControl id="parent">
-                <FormLabel>Parent</FormLabel>
-                <Select {...register('parentId')} placeholder="Kein Template">
-                  {parentTemplates.map(t => (
-                    <option key={t.id} value={t.id}>
-                      {t.description} ({t.id})
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-            </Skeleton>
-
-            <Skeleton isLoaded={!state.isLoading}>
-              <FormControl id="engine">
-                <FormLabel>Engine</FormLabel>
-                <Select {...register('engine')}>
-                  {Object.values(TemplateEngine).map(engine => (
-                    <option key={engine} value={engine}>
-                      {engine}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-            </Skeleton>
-
-            <Skeleton isLoaded={!state.isLoading}>
-              <FormControl id="verifyReplyTo">
-                <FormLabel>Verify Reply To</FormLabel>
-                <Checkbox {...register('verifyReplyTo')} />
-              </FormControl>
-            </Skeleton>
-
-            <Skeleton isLoaded={!state.isLoading}>
-              <FormControl id="linked">
-                <FormLabel>Linked</FormLabel>
-                {linkedTemplates.length ? (
-                  <UnorderedList>
-                    {linkedTemplates.map(t => (
-                      <ListItem key={t.id}>
-                        <Link as={GatsbyLink} to={`../${t.id}`}>
-                          {t.description} ({t.id})
-                        </Link>
-                      </ListItem>
+            <Skeleton loading={!!state.isLoading}>
+              <Field.Root id="parent">
+                <Field.Label>Parent</Field.Label>
+                <NativeSelect.Root>
+                  <NativeSelect.Field
+                    {...register('parentId')}
+                    placeholder="Kein Template">
+                    {parentTemplates.map(t => (
+                      <option key={t.id} value={t.id}>
+                        {t.description} ({t.id})
+                      </option>
                     ))}
-                  </UnorderedList>
+                  </NativeSelect.Field>
+                  <NativeSelect.Indicator />
+                </NativeSelect.Root>
+              </Field.Root>
+            </Skeleton>
+
+            <Skeleton loading={!!state.isLoading}>
+              <Field.Root id="engine">
+                <Field.Label>Engine</Field.Label>
+                <NativeSelect.Root>
+                  <NativeSelect.Field {...register('engine')}>
+                    {Object.values(TemplateEngine).map(engine => (
+                      <option key={engine} value={engine}>
+                        {engine}
+                      </option>
+                    ))}
+                  </NativeSelect.Field>
+                  <NativeSelect.Indicator />
+                </NativeSelect.Root>
+              </Field.Root>
+            </Skeleton>
+
+            <Skeleton loading={!!state.isLoading}>
+              <Field.Root id="verifyReplyTo">
+                <Field.Label>Verify Reply To</Field.Label>
+                <Checkbox.Root {...register('verifyReplyTo')}>
+                  <Checkbox.HiddenInput />
+                  <Checkbox.Control>
+                    <Checkbox.Indicator />
+                  </Checkbox.Control>
+                </Checkbox.Root>
+              </Field.Root>
+            </Skeleton>
+
+            <Skeleton loading={!!state.isLoading}>
+              <Field.Root id="linked">
+                <Field.Label>Linked</Field.Label>
+                {linkedTemplates.length ? (
+                  <List.Root as="ul">
+                    {linkedTemplates.map(t => (
+                      <List.Item key={t.id}>
+                        <Link asChild>
+                          <GatsbyLink to={`../${t.id}`}>
+                            {t.description}({t.id})
+                          </GatsbyLink>
+                        </Link>
+                      </List.Item>
+                    ))}
+                  </List.Root>
                 ) : (
                   <Text>No linked templates</Text>
                 )}
-              </FormControl>
+              </Field.Root>
             </Skeleton>
 
-            <Card>
-              <CardHeader>
+            <Card.Root>
+              <Card.Header>
                 <Heading size="sm">Envelope</Heading>
-              </CardHeader>
-              <CardBody>
-                <Stack spacing={4}>
-                  <FormControl id="subject">
-                    <FormLabel htmlFor="subject">Subject</FormLabel>
+              </Card.Header>
+              <Card.Body>
+                <Stack gap={4}>
+                  <Field.Root id="subject">
+                    <Field.Label htmlFor="subject">Subject</Field.Label>
                     <Input
                       type="text"
                       id="subject"
                       {...register('envelope.subject')}
                     />
-                  </FormControl>
+                  </Field.Root>
 
-                  <Card>
-                    <CardHeader>To</CardHeader>
-                    <CardBody>
+                  <Card.Root>
+                    <Card.Header>To</Card.Header>
+                    <Card.Body>
                       <Stack>
                         {envelopeToField.fields.map((_, index) => (
-                          <FormControl key={index} id={`envelope.to.${index}`}>
+                          <Field.Root key={index} id={`envelope.to.${index}`}>
                             <InputGroup>
                               <Input
                                 type="text"
@@ -486,46 +491,46 @@ const Page: React.FC<PageProps> = ({params}) => {
                               <InputRightElement>
                                 <IconButton
                                   aria-label="delete to field"
-                                  icon={<DeleteIcon />}
                                   onClick={() => envelopeToField.remove(index)}
-                                  variant="ghost"
-                                />
+                                  variant="ghost">
+                                  <DeleteIcon />
+                                </IconButton>
                               </InputRightElement>
                             </InputGroup>
-                          </FormControl>
+                          </Field.Root>
                         ))}
                       </Stack>
-                    </CardBody>
-                    <CardFooter>
+                    </Card.Body>
+                    <Card.Footer>
                       <Button
                         onClick={() => envelopeToField.append({email: ''})}>
                         Add To
                       </Button>
-                    </CardFooter>
-                  </Card>
+                    </Card.Footer>
+                  </Card.Root>
 
-                  <FormControl id="replyTo">
-                    <FormLabel htmlFor="replyTo">Reply To</FormLabel>
+                  <Field.Root id="replyTo">
+                    <Field.Label htmlFor="replyTo">Reply To</Field.Label>
                     <Input
                       type="text"
                       id="replyTo"
                       placeholder="Enter email address"
                       {...register('envelope.replyTo')}
                     />
-                  </FormControl>
+                  </Field.Root>
                 </Stack>
-              </CardBody>
-            </Card>
+              </Card.Body>
+            </Card.Root>
 
-            <Card>
-              <CardHeader>
+            <Card.Root>
+              <Card.Header>
                 <Heading size="sm">Content</Heading>
-              </CardHeader>
-              <CardBody>
+              </Card.Header>
+              <Card.Body>
                 <Stack>
                   <Stack>
-                    <Skeleton isLoaded={!state.isLoading}>
-                      <FormControl id="content">
+                    <Skeleton loading={!!state.isLoading}>
+                      <Field.Root id="content">
                         <Controller
                           control={control}
                           name="content"
@@ -539,13 +544,13 @@ const Page: React.FC<PageProps> = ({params}) => {
                             />
                           )}
                         />
-                      </FormControl>
+                      </Field.Root>
                     </Skeleton>
                   </Stack>
 
                   <Stack>
                     <Heading size="sm">Preview</Heading>
-                    <Skeleton isLoaded={!state.isLoading}>
+                    <Skeleton loading={!!state.isLoading}>
                       <Box
                         dangerouslySetInnerHTML={{__html: templateContent}}
                       />
@@ -565,79 +570,91 @@ const Page: React.FC<PageProps> = ({params}) => {
                     )}
                   </Stack>
                 </Stack>
-              </CardBody>
-            </Card>
+              </Card.Body>
+            </Card.Root>
 
-            <Card>
-              <CardHeader>
+            <Card.Root>
+              <Card.Header>
                 <Heading size="sm">Variables</Heading>
-              </CardHeader>
-              <CardBody>
-                <Stack spacing={4}>
-                  <Table variant="striped" colorScheme="gray">
-                    <Thead>
-                      <Tr>
-                        <Th>Name</Th>
-                        <Th>Type</Th>
-                        <Th>Description</Th>
-                        <Th>Default Value</Th>
-                        <Th>Required</Th>
-                        <Th>Constant</Th>
-                        <Th></Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
+              </Card.Header>
+              <Card.Body>
+                <Stack gap={4}>
+                  <Table.Root variant="striped" colorPalette="gray">
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.ColumnHeader>Name</Table.ColumnHeader>
+                        <Table.ColumnHeader>Type</Table.ColumnHeader>
+                        <Table.ColumnHeader>Description</Table.ColumnHeader>
+                        <Table.ColumnHeader>Default Value</Table.ColumnHeader>
+                        <Table.ColumnHeader>Required</Table.ColumnHeader>
+                        <Table.ColumnHeader>Constant</Table.ColumnHeader>
+                        <Table.ColumnHeader></Table.ColumnHeader>
+                      </Table.Row>
+                    </Table.Header>
+                    <Table.Body>
                       {variablesField.fields.map((field, index) => (
-                        <Tr key={index}>
-                          <Td>
+                        <Table.Row key={index}>
+                          <Table.Cell>
                             <Input
                               type="text"
                               defaultValue={field.name}
                               {...register(`variables.${index}.name`)}
                             />
-                          </Td>
-                          <Td>
-                            <Select {...register(`variables.${index}.type`)}>
-                              {Object.values(VariableType).map(type => (
-                                <option key={type} value={type}>
-                                  {type}
-                                </option>
-                              ))}
-                            </Select>
-                          </Td>
-                          <Td>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <NativeSelect.Root>
+                              <NativeSelect.Field
+                                {...register(`variables.${index}.type`)}>
+                                {Object.values(VariableType).map(type => (
+                                  <option key={type} value={type}>
+                                    {type}
+                                  </option>
+                                ))}
+                              </NativeSelect.Field>
+                              <NativeSelect.Indicator />
+                            </NativeSelect.Root>
+                          </Table.Cell>
+                          <Table.Cell>
                             <Textarea
                               minH="10"
                               {...register(`variables.${index}.description`)}
                             />
-                          </Td>
-                          <Td>
+                          </Table.Cell>
+                          <Table.Cell>
                             <Input
                               type="text"
                               {...register(`variables.${index}.defaultValue`)}
                             />
-                          </Td>
-                          <Td>
-                            <Checkbox
-                              {...register(`variables.${index}.isRequired`)}
-                            />
-                          </Td>
-                          <Td>
-                            <Checkbox
-                              {...register(`variables.${index}.isConstant`)}
-                            />
-                          </Td>
-                          <Td>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Checkbox.Root
+                              {...register(`variables.${index}.isRequired`)}>
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control>
+                                <Checkbox.Indicator />
+                              </Checkbox.Control>
+                            </Checkbox.Root>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Checkbox.Root
+                              {...register(`variables.${index}.isConstant`)}>
+                              <Checkbox.HiddenInput />
+                              <Checkbox.Control>
+                                <Checkbox.Indicator />
+                              </Checkbox.Control>
+                            </Checkbox.Root>
+                          </Table.Cell>
+                          <Table.Cell>
                             <Button
-                              colorScheme="red"
+                              colorPalette="red"
                               onClick={() => variablesField.remove(index)}>
                               Remove
                             </Button>
-                          </Td>
-                        </Tr>
+                          </Table.Cell>
+                        </Table.Row>
                       ))}
-                    </Tbody>
-                  </Table>
+                    </Table.Body>
+                  </Table.Root>
 
                   <Button
                     onClick={() =>
@@ -649,34 +666,37 @@ const Page: React.FC<PageProps> = ({params}) => {
                     Add Variable
                   </Button>
                 </Stack>
-              </CardBody>
-            </Card>
+              </Card.Body>
+            </Card.Root>
           </Stack>
 
-          <ButtonGroup justifyContent="end" isDisabled={state.isLoading}>
+          <ButtonGroup justifyContent="end">
             <Button
               type="button"
               variant="outline"
-              colorScheme="red"
-              isDisabled={state.isLoading || isSubmitting}
-              onClick={handleDeleteClick}>
+              colorPalette="red"
+              disabled={state.isLoading || isSubmitting}
+              onClick={handleDeleteClick}
+              disabled={state.isLoading}>
               Delete
             </Button>
 
             <Button
               type="button"
               variant="outline"
-              isDisabled={state.isLoading || isSubmitting || !isDirty}
+              disabled={state.isLoading || isSubmitting || !isDirty}
               onClick={async () => {
                 await fetchData()
-              }}>
+              }}
+              disabled={state.isLoading}>
               Cancel
             </Button>
 
             <Button
               type="submit"
-              isLoading={state.isLoading || isSubmitting}
-              isDisabled={state.isLoading || isSubmitting}>
+              loading={state.isLoading || isSubmitting}
+              disabled={state.isLoading || isSubmitting}
+              disabled={state.isLoading}>
               Save
             </Button>
           </ButtonGroup>

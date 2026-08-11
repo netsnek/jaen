@@ -53,10 +53,12 @@ export const SectionBlockSelectorButton: React.FC<
       <IconButton
         variant="field-highlighter-tooltip"
         ml={0.5}
-        icon={<Icon as={FaPlus} />}
         aria-label="Add"
-        onClick={toggleOpen}
-      />
+        onClick={toggleOpen}>
+        <Icon asChild>
+          <FaPlus />
+        </Icon>
+      </IconButton>
       {isOpen && (
         <Box position="absolute" top="6" left="0" zIndex="popover" p="2">
           <SectionBlockSelector

@@ -1,5 +1,5 @@
 import {ChevronLeftIcon, ChevronRightIcon, EditIcon} from './icons'
-import {Select} from '@chakra-ui/react'
+import {NativeSelect} from '@chakra-ui/react'
 import {ComponentMeta, Story} from '@storybook/react'
 import React from 'react'
 import {HighlightTooltip} from './HighlightTooltip.js'
@@ -68,11 +68,14 @@ SectionField.args = {
         cursor="pointer"
       />
 
-      <Select pos="relative" size="xs">
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-      </Select>
+      <NativeSelect.Root>
+        <NativeSelect.Field pos="relative" size="xs">
+          <option>1</option>
+          <option>2</option>
+          <option>3</option>
+        </NativeSelect.Field>
+        <NativeSelect.Indicator />
+      </NativeSelect.Root>
 
       <ChevronRightIcon
         onClick={() => {

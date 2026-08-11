@@ -3,15 +3,13 @@ import {useForm, Controller} from 'react-hook-form'
 import {
   Input,
   Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
   Center,
   HStack,
   PinInput,
   PinInputField,
   VStack,
-  Stack
+  Stack,
+  Field
 } from '@chakra-ui/react'
 
 interface FormData {
@@ -48,11 +46,13 @@ const StepOTP: React.FC<StepEmailProps> = props => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing="5">
-        <FormControl id="otp" isRequired isInvalid={!!errors.otp}>
+      <Stack gap="5">
+        <Field.Root id="otp" required invalid={!!errors.otp}>
           {/* <FormLabel></FormLabel> */}
           <VStack>
-            <FormLabel>Enter the 6-digit code sent to your email.</FormLabel>
+            <Field.Label>
+              Enter the 6-digit code sent to your email.
+            </Field.Label>
 
             <Center>
               <HStack>
@@ -62,21 +62,25 @@ const StepOTP: React.FC<StepEmailProps> = props => {
                   name="otp"
                   render={({field}) => {
                     return (
-                      <PinInput
+                      <PinInput.Root
                         autoFocus
                         otp
                         size="lg"
-                        onChange={value => {
+                        onValueChange={value => {
                           field.onChange(value)
                         }}
-                        value={field.value}>
-                        <PinInputField />
-                        <PinInputField />
-                        <PinInputField />
-                        <PinInputField />
-                        <PinInputField />
-                        <PinInputField />
-                      </PinInput>
+                        value={field.value.split('')}>
+                        <PinInput.HiddenInput />
+
+                        <PinInput.Control>
+                          <PinInput.Input index={0} />
+                          <PinInput.Input index={1} />
+                          <PinInput.Input index={2} />
+                          <PinInput.Input index={3} />
+                          <PinInput.Input index={4} />
+                          <PinInput.Input index={5} />
+                        </PinInput.Control>
+                      </PinInput.Root>
                     )
                   }}
                 />
@@ -84,17 +88,15 @@ const StepOTP: React.FC<StepEmailProps> = props => {
             </Center>
           </VStack>
 
-          <FormErrorMessage>
-            {errors.otp && errors.otp.message}
-          </FormErrorMessage>
-        </FormControl>
+          <Field.ErrorText>{errors.otp && errors.otp.message}</Field.ErrorText>
+        </Field.Root>
 
         <Button
           type="submit"
           variant="primary"
           size="lg"
-          isLoading={isSubmitting}
-          isDisabled={otp.length !== 6}>
+          loading={isSubmitting}
+          disabled={otp.length !== 6}>
           Reset password
         </Button>
       </Stack>

@@ -1,4 +1,4 @@
-import {Alert, AlertIcon, Box, Center} from '@chakra-ui/react'
+import {Alert, Box, Center} from '@chakra-ui/react'
 import React, {useEffect, useMemo} from 'react'
 import {AuthProvider} from 'react-oidc-context'
 import {PageProps} from '../types'
@@ -204,10 +204,10 @@ export const withAuthSecurity = <
           return (
             <Center height="100vh">
               <Box textAlign="center">
-                <Alert status="error" mb={4}>
-                  <AlertIcon />
+                <Alert.Root status="error" mb={4}>
+                  <Alert.Indicator />
                   You don't have the required roles to view this page
-                </Alert>
+                </Alert.Root>
               </Box>
             </Center>
           )
@@ -221,10 +221,10 @@ export const withAuthSecurity = <
       return (
         <Center height="100vh">
           <Box textAlign="center">
-            <Alert status="error" mb={4}>
-              <AlertIcon />
+            <Alert.Root status="error" mb={4}>
+              <Alert.Indicator />
               You need to be logged in to view this page
-            </Alert>
+            </Alert.Root>
           </Box>
         </Center>
       )

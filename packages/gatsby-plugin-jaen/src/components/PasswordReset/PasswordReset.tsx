@@ -1,8 +1,5 @@
 import {
   Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Box,
   Button,
   CloseButton,
@@ -67,15 +64,15 @@ export const PasswordReset: React.FC<PasswordResetProps> = props => {
   return (
     <Box id="momo" minH="100dvh">
       <Container maxW="lg" py={{base: '6', md: '12'}} px={{base: '0', sm: '8'}}>
-        <Stack spacing="8">
-          <Stack spacing="6">
+        <Stack gap="8">
+          <Stack gap="6">
             <HStack justify="center">
               {(formStep === FormStep.PASSWORD ||
                 formStep === FormStep.OTP) && (
                 <Button
                   variant="outline"
-                  leftIcon={<FaArrowLeft />}
                   onClick={() => setFormStep(FormStep.EMAIL)}>
+                  <FaArrowLeft />
                   Try another email
                 </Button>
               )}
@@ -92,7 +89,7 @@ export const PasswordReset: React.FC<PasswordResetProps> = props => {
               )}
             </HStack>
 
-            <Stack spacing={{base: '2', md: '3'}} textAlign="center">
+            <Stack gap={{base: '2', md: '3'}} textAlign="center">
               <>
                 <Heading size={{base: 'xs', md: 'sm'}}>
                   {formStep === FormStep.EMAIL && 'Reset your password'}
@@ -124,11 +121,11 @@ export const PasswordReset: React.FC<PasswordResetProps> = props => {
           </Stack>
 
           {alert && (
-            <Alert status={alert.status}>
-              <AlertIcon />
+            <Alert.Root status={alert.status}>
+              <Alert.Indicator />
               <Box w="full">
-                <AlertTitle>{alert.message}</AlertTitle>
-                <AlertDescription>{alert.description}</AlertDescription>
+                <Alert.Title>{alert.message}</Alert.Title>
+                <Alert.Description>{alert.description}</Alert.Description>
               </Box>
               <CloseButton
                 alignSelf="flex-start"
@@ -137,7 +134,7 @@ export const PasswordReset: React.FC<PasswordResetProps> = props => {
                 top={-1}
                 onClick={resetAlert}
               />
-            </Alert>
+            </Alert.Root>
           )}
 
           <Box

@@ -10,7 +10,7 @@ export const FieldGroup = (props: FieldGroupProps) => {
   return (
     <Stack
       direction={{base: 'column', md: 'row'}}
-      spacing="6"
+      gap="6"
       py="4"
       {...flexProps}>
       <Box minW="3xs">

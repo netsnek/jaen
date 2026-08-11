@@ -1,14 +1,5 @@
 import React from 'react'
-import {
-  FormControl,
-  FormLabel,
-  Input,
-  Stack,
-  Text,
-  Button,
-  ButtonGroup,
-  FormErrorMessage
-} from '@chakra-ui/react'
+import {Input, Stack, Text, Button, ButtonGroup, Field} from '@chakra-ui/react'
 import {useForm, Controller} from 'react-hook-form'
 
 import {FieldGroup} from '../../../../components/shared/FieldGroup'
@@ -39,7 +30,7 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({onSubmit}) => {
   return (
     <form onSubmit={onFormSubmit}>
       <FieldGroup title="Password">
-        <Stack width="full" spacing="6" maxW="2xl">
+        <Stack width="full" gap="6" maxW="2xl">
           <Input
             type="email"
             name="email"
@@ -47,8 +38,8 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({onSubmit}) => {
             display="none"
           />
 
-          <FormControl id="password">
-            <FormLabel>Password</FormLabel>
+          <Field.Root id="password">
+            <Field.Label>Password</Field.Label>
             <Controller
               control={control}
               name="password"
@@ -62,12 +53,10 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({onSubmit}) => {
                 />
               )}
             />
-          </FormControl>
+          </Field.Root>
 
-          <FormControl
-            id="confirmPassword"
-            isInvalid={!!errors.confirmPassword}>
-            <FormLabel>Confirm Password</FormLabel>
+          <Field.Root id="confirmPassword" invalid={!!errors.confirmPassword}>
+            <Field.Label>Confirm Password</Field.Label>
             <Controller
               control={control}
               name="confirmPassword"
@@ -86,10 +75,10 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({onSubmit}) => {
               )}
             />
 
-            <FormErrorMessage>
+            <Field.ErrorText>
               {errors.confirmPassword && errors.confirmPassword.message}
-            </FormErrorMessage>
-          </FormControl>
+            </Field.ErrorText>
+          </Field.Root>
 
           {
             // update password or forgot password link
@@ -101,7 +90,7 @@ export const PasswordForm: React.FC<PasswordFormProps> = ({onSubmit}) => {
             </Text>
 
             <ButtonGroup>
-              <Button isLoading={isSubmitting} type="submit" variant="outline">
+              <Button loading={isSubmitting} type="submit" variant="outline">
                 Update password
               </Button>
             </ButtonGroup>

@@ -53,7 +53,7 @@ export const FormImageChooser: React.FC<FormImageChooserProps> = props => {
   })
 
   return (
-    <Stack direction="row" spacing="6" align="center" width="full">
+    <Stack direction="row" gap="6" align="center" width="full">
       <Box
         boxSize={36}
         minW="36"
@@ -68,7 +68,6 @@ export const FormImageChooser: React.FC<FormImageChooserProps> = props => {
             src={
               selectedImage ? URL.createObjectURL(selectedImage) : props.value
             }
-            fallback={<Skeleton borderRadius="lg" boxSize="100%" />}
           />
         ) : (
           <Center boxSize="100%" borderRadius="lg">
@@ -80,12 +79,9 @@ export const FormImageChooser: React.FC<FormImageChooserProps> = props => {
         <input {...getInputProps()} />
       </Box>
       <Stack>
-        <HStack spacing="5">
-          <Button
-            isLoading={isLoading}
-            variant="outline"
-            leftIcon={<FaCloudUploadAlt />}
-            onClick={open}>
+        <HStack gap="5">
+          <Button loading={isLoading} variant="outline" onClick={open}>
+            <FaCloudUploadAlt />
             Choose media
           </Button>
           {selectedImage && (

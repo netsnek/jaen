@@ -5,11 +5,8 @@ import {
   ButtonProps,
   Icon,
   Menu,
-  MenuButton as ChakraMenuButton,
-  MenuDivider,
-  MenuItem as ChakraMenuItem,
-  MenuList,
-  MenuProps
+  MenuProps,
+  Portal
 } from '@chakra-ui/react'
 import {FaCaretDown} from '@react-icons/all-files/fa/FaCaretDown'
 import {Link} from '../Link/Link'
@@ -41,13 +38,17 @@ export const MenuButton: React.FC<MenuButtonProps> = ({
           as={Link}
           variant="ghost"
           icon={
-            value.icon ? <Icon as={value.icon} color="brand.500" /> : undefined
+            value.icon ? (
+              <Icon color="brand.500" asChild>
+                <value.icon />
+              </Icon>
+            ) : undefined
           }
           onClick={value.onClick}
           to={value.path || '#'}>
           {value.label}
         </ChakraMenuItem>
-        {value.divider && <MenuDivider borderColor="border.emphasized" />}
+        {value.divider && <Menu.Separator borderColor="border.emphasized" />}
       </Box>
     )
   })
@@ -55,17 +56,30 @@ export const MenuButton: React.FC<MenuButtonProps> = ({
   if (rendredItems.length === 0) return null
 
   return (
-    <Menu placement={menuPlacement} isLazy>
+    <Menu.Root
+      lazyMount
+      unmountOnExit
+      positioning={{
+        placement: menuPlacement
+      }}>
       <ChakraMenuButton
         as={Button}
-        rightIcon={<Icon as={FaCaretDown} />}
+        rightIcon={
+          <Icon asChild>
+            <FaCaretDown />
+          </Icon>
+        }
         size="sm"
         variant="outline"
         {...buttonProps}
       />
-      <MenuList>
-        {renderItems ? renderItems(rendredItems) : rendredItems}
-      </MenuList>
-    </Menu>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content>
+            {renderItems ? renderItems(rendredItems) : rendredItems}
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   )
 }

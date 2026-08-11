@@ -6,14 +6,14 @@ import {
   HStack,
   Icon,
   Stack,
-  StackDivider,
   Table,
   Tbody,
   Td,
   Text,
   Th,
   Thead,
-  Tr
+  Tr,
+  StackSeparator
 } from '@chakra-ui/react'
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
 import {FaGripVertical} from '@react-icons/all-files/fa/FaGripVertical'
@@ -81,9 +81,9 @@ export const Pages: React.FC<PagesProps> = props => {
   }
 
   return (
-    <Stack id="momo" flexDir="column" spacing="14">
-      <Stack spacing="4" divider={<StackDivider />}>
-        <Stack spacing="4">
+    <Stack id="momo" flexDir="column" gap="14">
+      <Stack gap="4" separator={<StackSeparator />}>
+        <Stack gap="4">
           <PageBreadcrumb tree={props.tree} activePageId={props.pageId} />
 
           <PageContentForm mode="edit" {...props.form} />
@@ -96,7 +96,7 @@ export const Pages: React.FC<PagesProps> = props => {
         />
       </Stack>
 
-      <Stack spacing="4" divider={<StackDivider />}>
+      <Stack gap="4" separator={<StackSeparator />}>
         <HStack justifyContent="space-between">
           <Heading as="h2" size="sm">
             <FormattedMessage
@@ -108,14 +108,16 @@ export const Pages: React.FC<PagesProps> = props => {
           <ButtonGroup>
             <Button
               onClick={() => setCanReorder(!canReorder)}
-              variant="outline"
-              leftIcon={
-                canReorder ? (
-                  <Icon as={FaGripVertical} transform="rotate(45deg)" />
-                ) : (
-                  <Icon as={FaGripVertical} />
-                )
-              }>
+              variant="outline">
+              {canReorder ? (
+                <Icon transform="rotate(45deg)" asChild>
+                  <FaGripVertical />
+                </Icon>
+              ) : (
+                <Icon asChild>
+                  <FaGripVertical />
+                </Icon>
+              )}
               {canReorder
                 ? intl.formatMessage({
                     id: 'CmsPagesTableReorderDisable',
@@ -141,34 +143,36 @@ export const Pages: React.FC<PagesProps> = props => {
           </ButtonGroup>
         </HStack>
 
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>
+        <Table.Root>
+          <Table.Header>
+            <Table.Row>
+              <Table.ColumnHeader>
                 <FormattedMessage
                   id="CmsPagesTableColumnsTitle"
                   defaultMessage="Title"
                 />
-              </Th>
-              <Th>
+              </Table.ColumnHeader>
+              <Table.ColumnHeader>
                 <FormattedMessage
                   id="CmsPagesTableColumnsDescription"
                   defaultMessage="Description"
                 />
-              </Th>
-              <Th>
+              </Table.ColumnHeader>
+              <Table.ColumnHeader>
                 <FormattedMessage
                   id="CmsPagesTableColumnsDate"
                   defaultMessage="Date"
                 />
-              </Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
+              </Table.ColumnHeader>
+              <Table.ColumnHeader></Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
           <DragDropContext onDragEnd={handleDragEnd}>
             <Droppable droppableId="child-pages">
               {provided => (
-                <Tbody ref={provided.innerRef} {...provided.droppableProps}>
+                <Table.Body
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}>
                   {props.children.map((page, index) => (
                     <Draggable
                       isDragDisabled={
@@ -178,17 +182,17 @@ export const Pages: React.FC<PagesProps> = props => {
                       draggableId={page.id}
                       index={index}>
                       {(provided, snapshot) => (
-                        <Tr
+                        <Table.Row
                           ref={provided.innerRef}
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}
                           bg={snapshot.isDragging ? 'bg.subtle' : 'transparent'}
                           display={snapshot.isDragging ? 'table' : 'table-row'}>
-                          <Td>
+                          <Table.Cell>
                             <Link to={`#${btoa(page.id)}`}>{page.title}</Link>
-                          </Td>
-                          <Td>{page.description}</Td>
-                          <Td whiteSpace="break-spaces">
+                          </Table.Cell>
+                          <Table.Cell>{page.description}</Table.Cell>
+                          <Table.Cell whiteSpace="break-spaces">
                             {page.createdAt || page.modifiedAt
                               ? page.modifiedAt &&
                                 page.modifiedAt !== page.createdAt
@@ -227,21 +231,23 @@ export const Pages: React.FC<PagesProps> = props => {
                                   id: 'CmsPagesTableDateEmpty',
                                   defaultMessage: '-'
                                 })}
-                          </Td>
-                          <Td w="8">
+                          </Table.Cell>
+                          <Table.Cell w="8">
                             {canReorder && (
-                              <Icon as={FaGripVertical} color="fg.subtle" />
+                              <Icon color="fg.subtle" asChild>
+                                <FaGripVertical />
+                              </Icon>
                             )}
-                          </Td>
-                        </Tr>
+                          </Table.Cell>
+                        </Table.Row>
                       )}
                     </Draggable>
                   ))}
                   {provided.placeholder}
 
                   {props.children.length === 0 && (
-                    <Tr>
-                      <Td colSpan={4}>
+                    <Table.Row>
+                      <Table.Cell colSpan={4}>
                         <HStack>
                           <Text>
                             <FormattedMessage
@@ -256,17 +262,17 @@ export const Pages: React.FC<PagesProps> = props => {
                             />
                           </Link>
                         </HStack>
-                      </Td>
-                    </Tr>
+                      </Table.Cell>
+                    </Table.Row>
                   )}
-                </Tbody>
+                </Table.Body>
               )}
             </Droppable>
           </DragDropContext>
-        </Table>
+        </Table.Root>
       </Stack>
 
-      <Stack spacing="4" divider={<StackDivider />}>
+      <Stack gap="4" separator={<StackSeparator />}>
         <Heading as="h2" size="sm">
           <FormattedMessage
             id="CmsPagesTableDangerZoneHeading"

@@ -1,5 +1,5 @@
 import {useColorModeValue} from 'jaen'
-import {Button, HStack, List, ListItem, Stack, Text} from '@chakra-ui/react'
+import {Button, HStack, List, Stack, Text} from '@chakra-ui/react'
 import {FC} from 'react'
 import {IconType} from '@react-icons/all-files'
 
@@ -22,16 +22,16 @@ export const DangerZone: FC<DangerZoneProps> = ({actions}) => {
   const borderColor = useColorModeValue('red.500', 'red.200')
 
   return (
-    <List
-      spacing="4"
+    <List.Root
+      gap="4"
       p="4"
       border="2px"
       borderRadius="md"
       borderColor={borderColor}>
       {actions.map((action, index) => (
-        <ListItem key={index}>
+        <List.Item key={index}>
           <HStack justifyContent="space-between">
-            <Stack spacing="1">
+            <Stack gap="1">
               <Text fontWeight="bold">{action.title}</Text>
               <Text fontSize="sm">{action.description}</Text>
             </Stack>
@@ -45,9 +45,9 @@ export const DangerZone: FC<DangerZoneProps> = ({actions}) => {
               {action.buttonText}
             </Link>
           </HStack>
-        </ListItem>
+        </List.Item>
       ))}
-    </List>
+    </List.Root>
   )
 }
 

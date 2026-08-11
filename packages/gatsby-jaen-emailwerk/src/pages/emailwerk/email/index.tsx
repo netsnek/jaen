@@ -32,32 +32,18 @@ import {
   Box,
   Button,
   Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
   Heading,
   Text,
-  FormControl,
-  FormLabel,
-  FormHelperText,
-  FormErrorMessage,
   Input,
   Checkbox,
   HStack,
   IconButton,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Select,
+  NativeSelect,
   Spinner,
   Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription
+  Field,
+  Dialog,
+  Portal
 } from '@chakra-ui/react'
 
 // GQty client (template listing)
@@ -379,404 +365,443 @@ const EmailSendFormComponent: React.FC = () => {
   }
 
   return (
-    <Box as="form" onSubmit={form.handleSubmit(onSubmit)}>
-      <Card variant="outline">
-        <CardHeader>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center">
-            <Box>
-              <Heading size="sm">Send Email</Heading>
+    <Box asChild>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <Card.Root variant="outline">
+          <Card.Header>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center">
+              <Box>
+                <Heading size="sm">Send Email</Heading>
+              </Box>
+              <Button variant="outline" onClick={() => setIsPreviewOpen(true)}>
+                Preview
+              </Button>
             </Box>
-            <Button variant="outline" onClick={() => setIsPreviewOpen(true)}>
-              Preview
-            </Button>
-          </Box>
-        </CardHeader>
+          </Card.Header>
 
-        <CardBody>
-          {/* Email Template Select */}
-          <FormControl mb={5} isInvalid={!!form.formState.errors.templateId}>
-            <FormLabel>Email Template</FormLabel>
-            {isLoadingEmailTemplates ? (
-              <HStack>
-                <Spinner size="sm" />
-                <Text>Loading templates...</Text>
-              </HStack>
-            ) : fetchTemplatesError ? (
-              <Alert status="error">
-                <AlertIcon />
-                <AlertTitle mr={2}>Error!</AlertTitle>
-                <AlertDescription>{fetchTemplatesError}</AlertDescription>
-              </Alert>
-            ) : Object.keys(emailTemplates).length === 0 ? (
-              <Alert status="warning">
-                <AlertIcon />
-                <AlertTitle mr={2}>No Templates Found!</AlertTitle>
-                <AlertDescription>
-                  There are no email templates available. Please create one
-                  first.
-                </AlertDescription>
-              </Alert>
-            ) : (
-              <Select
-                placeholder="Select an email template"
-                {...form.register('templateId', {
-                  required: 'Template is required',
-                  onChange: e => {
-                    form.setValue('templateId', e.target.value)
-                    if (editor) {
-                      // and if the previous template message default value is equal to form.watch('message')
-                      // then set the editor content to the new template message default value
-                      if (
-                        form.watch('message') == '' ||
-                        form.watch('message') == '<p></p>'
-                      ) {
-                        editor.commands.setContent(
-                          emailTemplates[e.target.value]?.variables.find(
-                            variable => variable.name === 'message'
-                          )?.defaultValue || ''
-                        )
+          <Card.Body>
+            {/* Email Template Select */}
+            <Field.Root mb={5} invalid={!!form.formState.errors.templateId}>
+              <Field.Label>Email Template</Field.Label>
+              {isLoadingEmailTemplates ? (
+                <HStack>
+                  <Spinner size="sm" />
+                  <Text>Loading templates...</Text>
+                </HStack>
+              ) : fetchTemplatesError ? (
+                <Alert.Root status="error">
+                  <Alert.Indicator />
+                  <Alert.Title mr={2}>Error!</Alert.Title>
+                  <Alert.Description>{fetchTemplatesError}</Alert.Description>
+                </Alert.Root>
+              ) : Object.keys(emailTemplates).length === 0 ? (
+                <Alert.Root status="warning">
+                  <Alert.Indicator />
+                  <Alert.Title mr={2}>No Templates Found!</Alert.Title>
+                  <Alert.Description>
+                    There are no email templates available. Please create one
+                    first.
+                  </Alert.Description>
+                </Alert.Root>
+              ) : (
+                <NativeSelect.Root>
+                  <NativeSelect.Field
+                    placeholder="Select an email template"
+                    {...form.register('templateId', {
+                      required: 'Template is required',
+                      onChange: e => {
+                        form.setValue('templateId', e.target.value)
+                        if (editor) {
+                          // and if the previous template message default value is equal to form.watch('message')
+                          // then set the editor content to the new template message default value
+                          if (
+                            form.watch('message') == '' ||
+                            form.watch('message') == '<p></p>'
+                          ) {
+                            editor.commands.setContent(
+                              emailTemplates[e.target.value]?.variables.find(
+                                variable => variable.name === 'message'
+                              )?.defaultValue || ''
+                            )
+                          }
+                          form.setValue(
+                            'subject',
+                            emailTemplates[e.target.value]?.envelope?.subject ||
+                              ''
+                          )
+                        }
                       }
-                      form.setValue(
-                        'subject',
-                        emailTemplates[e.target.value]?.envelope?.subject || ''
+                    })}>
+                    {Object.values(emailTemplates).map(
+                      (template: EmailTemplate) => (
+                        <option key={template.id} value={template.id}>
+                          {template.description || 'Unnamed Template'}
+                        </option>
                       )
-                    }
-                  }
-                })}>
-                {Object.values(emailTemplates).map(
-                  (template: EmailTemplate) => (
-                    <option key={template.id} value={template.id}>
-                      {template.description || 'Unnamed Template'}
-                    </option>
-                  )
-                )}
-              </Select>
-            )}
-            <FormHelperText>The template for the email.</FormHelperText>
-            <FormErrorMessage>
-              {form.formState.errors.templateId &&
-                form.formState.errors.templateId.message}
-            </FormErrorMessage>
-          </FormControl>
+                    )}
+                  </NativeSelect.Field>
+                  <NativeSelect.Indicator />
+                </NativeSelect.Root>
+              )}
+              <Field.HelperText>The template for the email.</Field.HelperText>
+              <Field.ErrorText>
+                {form.formState.errors.templateId &&
+                  form.formState.errors.templateId.message}
+              </Field.ErrorText>
+            </Field.Root>
 
-          {/* To */}
-          <FormControl mb={5} isInvalid={!!form.formState.errors.to}>
-            <FormLabel>To</FormLabel>
-            <Input
-              placeholder="jane.doe@snek.at"
-              bg="white !important"
-              {...form.register('to')}
-            />
-            <FormHelperText>
-              The recipient(s) of the email. Add multiple recipients separated
-              by a comma.
-            </FormHelperText>
-            <FormErrorMessage>
-              {form.formState.errors.to && form.formState.errors.to.message}
-            </FormErrorMessage>
-          </FormControl>
+            {/* To */}
+            <Field.Root mb={5} invalid={!!form.formState.errors.to}>
+              <Field.Label>To</Field.Label>
+              <Input
+                placeholder="jane.doe@snek.at"
+                bg="white !important"
+                {...form.register('to')}
+              />
+              <Field.HelperText>
+                The recipient(s) of the email. Add multiple recipients separated
+                by a comma.
+              </Field.HelperText>
+              <Field.ErrorText>
+                {form.formState.errors.to && form.formState.errors.to.message}
+              </Field.ErrorText>
+            </Field.Root>
 
-          {/* Subject */}
-          <FormControl mb={5} isInvalid={!!form.formState.errors.subject}>
-            <FormLabel>Subject</FormLabel>
-            <Input
-              placeholder="Hi there"
-              bg="white !important"
-              {...form.register('subject')}
-            />
-            <FormHelperText>The subject of the email.</FormHelperText>
-            <FormErrorMessage>
-              {form.formState.errors.subject &&
-                form.formState.errors.subject.message}
-            </FormErrorMessage>
-          </FormControl>
+            {/* Subject */}
+            <Field.Root mb={5} invalid={!!form.formState.errors.subject}>
+              <Field.Label>Subject</Field.Label>
+              <Input
+                placeholder="Hi there"
+                bg="white !important"
+                {...form.register('subject')}
+              />
+              <Field.HelperText>The subject of the email.</Field.HelperText>
+              <Field.ErrorText>
+                {form.formState.errors.subject &&
+                  form.formState.errors.subject.message}
+              </Field.ErrorText>
+            </Field.Root>
 
-          {/* Message + Tiptap Toolbar */}
-          <FormControl
-            mb={5}
-            isInvalid={!!form.formState.errors.message}
-            sx={{
-              '.tiptap p.is-empty::before': {
-                color: '#adb5bd',
-                content: 'attr(data-placeholder)',
-                float: 'left',
-                height: '0',
-                pointerEvents: 'none'
-              }
-            }}>
-            <FormLabel>Message</FormLabel>
-            {editor && (
-              <HStack mb={2} spacing={1}>
-                <IconButton
-                  size="sm"
-                  aria-label="Bold"
-                  icon={<Bold size="16" />}
-                  variant={editor.isActive('bold') ? 'solid' : 'outline'}
-                  isDisabled={!editor.can().chain().focus().toggleBold().run()}
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Italic"
-                  icon={<Italic size="16" />}
-                  variant={editor.isActive('italic') ? 'solid' : 'outline'}
-                  isDisabled={
-                    !editor.can().chain().focus().toggleItalic().run()
-                  }
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Underline"
-                  icon={<UnderlineIcon size="16" />}
-                  variant={editor.isActive('underline') ? 'solid' : 'outline'}
-                  isDisabled={
-                    !editor.can().chain().focus().toggleUnderline().run()
-                  }
-                  onClick={() => editor.chain().focus().toggleUnderline().run()}
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Heading1"
-                  icon={<Heading1 size="16" />}
-                  variant={
-                    editor.isActive('heading', {level: 1}) ? 'solid' : 'outline'
-                  }
-                  isDisabled={
-                    !editor
-                      .can()
-                      .chain()
-                      .focus()
-                      .toggleHeading({level: 1})
-                      .run()
-                  }
-                  onClick={() =>
-                    editor.chain().focus().toggleHeading({level: 1}).run()
-                  }
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Heading2"
-                  icon={<Heading2 size="16" />}
-                  variant={
-                    editor.isActive('heading', {level: 2}) ? 'solid' : 'outline'
-                  }
-                  isDisabled={
-                    !editor
-                      .can()
-                      .chain()
-                      .focus()
-                      .toggleHeading({level: 2})
-                      .run()
-                  }
-                  onClick={() =>
-                    editor.chain().focus().toggleHeading({level: 2}).run()
-                  }
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Heading3"
-                  icon={<Heading3 size="16" />}
-                  variant={
-                    editor.isActive('heading', {level: 3}) ? 'solid' : 'outline'
-                  }
-                  isDisabled={
-                    !editor
-                      .can()
-                      .chain()
-                      .focus()
-                      .toggleHeading({level: 3})
-                      .run()
-                  }
-                  onClick={() =>
-                    editor.chain().focus().toggleHeading({level: 3}).run()
-                  }
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Bullet List"
-                  icon={<List size="16" />}
-                  variant={editor.isActive('bulletList') ? 'solid' : 'outline'}
-                  isDisabled={
-                    !editor.can().chain().focus().toggleBulletList().run()
-                  }
-                  onClick={() =>
-                    editor.chain().focus().toggleBulletList().run()
-                  }
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Ordered List"
-                  icon={<ListOrdered size="16" />}
-                  variant={editor.isActive('orderedList') ? 'solid' : 'outline'}
-                  isDisabled={
-                    !editor.can().chain().focus().toggleOrderedList().run()
-                  }
-                  onClick={() =>
-                    editor.chain().focus().toggleOrderedList().run()
-                  }
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Quote"
-                  icon={<Quote size="16" />}
-                  variant={editor.isActive('blockquote') ? 'solid' : 'outline'}
-                  isDisabled={
-                    !editor.can().chain().focus().toggleBlockquote().run()
-                  }
-                  onClick={() =>
-                    editor.chain().focus().toggleBlockquote().run()
-                  }
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Set Link"
-                  icon={<LinkIcon size="16" />}
-                  variant={editor.isActive('link') ? 'solid' : 'outline'}
-                  isDisabled={
-                    !editor.can().chain().focus().setLink({href: ''}).run()
-                  }
-                  onClick={() => {
-                    const url = prompt('Enter the URL')
-                    if (url) {
-                      editor.chain().focus().setLink({href: url}).run()
-                    }
-                  }}
-                />
-                <IconButton
-                  size="sm"
-                  aria-label="Unset Link"
-                  icon={<Unlink size="16" />}
-                  variant="outline"
-                  isDisabled={!editor.can().chain().focus().unsetLink().run()}
-                  onClick={() => editor.chain().focus().unsetLink().run()}
-                />
-              </HStack>
-            )}
-            <Box
-              // Increased min height, slim border
-              minH="24rem"
-              border="1px"
-              borderColor="gray.300"
-              rounded="md"
-              p={2}
-              // What the `prose` and `focus:outline-none` utilities did before,
-              // stated here instead. tiptap emits plain HTML with no classes of
-              // its own, so the block elements need to be given their shape
-              // back or the message reads as one undifferentiated paragraph.
-              sx={{
-                '.jaen-mdx-editor': {outline: 'none'},
-                h1: {fontSize: '2xl', fontWeight: 'bold', mt: 4, mb: 2},
-                h2: {fontSize: 'xl', fontWeight: 'bold', mt: 4, mb: 2},
-                h3: {fontSize: 'lg', fontWeight: 'semibold', mt: 3, mb: 2},
-                p: {mb: 2},
-                'ul, ol': {pl: 6, mb: 2},
-                ul: {listStyleType: 'disc'},
-                ol: {listStyleType: 'decimal'},
-                blockquote: {
-                  borderLeft: '3px solid',
-                  borderColor: 'gray.300',
-                  pl: 3,
-                  color: 'fg.muted',
-                  my: 2
-                },
-                a: {color: 'brand.500', textDecoration: 'underline'}
+            {/* Message + Tiptap Toolbar */}
+            <Field.Root
+              mb={5}
+              invalid={!!form.formState.errors.message}
+              css={{
+                '& .tiptap p.is-empty::before': {
+                  color: '#adb5bd',
+                  content: 'attr(data-placeholder)',
+                  float: 'left',
+                  height: '0',
+                  pointerEvents: 'none'
+                }
               }}>
-              <EditorContent editor={editor} />
-            </Box>
-            <FormHelperText>The message of the email.</FormHelperText>
-            <FormErrorMessage>
-              {form.formState.errors.message &&
-                form.formState.errors.message.message}
-            </FormErrorMessage>
-          </FormControl>
+              <Field.Label>Message</Field.Label>
+              {editor && (
+                <HStack mb={2} gap={1}>
+                  <IconButton
+                    size="sm"
+                    aria-label="Bold"
+                    variant={editor.isActive('bold') ? 'solid' : 'outline'}
+                    disabled={!editor.can().chain().focus().toggleBold().run()}
+                    onClick={() => editor.chain().focus().toggleBold().run()}>
+                    <Bold size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Italic"
+                    variant={editor.isActive('italic') ? 'solid' : 'outline'}
+                    disabled={
+                      !editor.can().chain().focus().toggleItalic().run()
+                    }
+                    onClick={() => editor.chain().focus().toggleItalic().run()}>
+                    <Italic size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Underline"
+                    variant={editor.isActive('underline') ? 'solid' : 'outline'}
+                    disabled={
+                      !editor.can().chain().focus().toggleUnderline().run()
+                    }
+                    onClick={() =>
+                      editor.chain().focus().toggleUnderline().run()
+                    }>
+                    <UnderlineIcon size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Heading1"
+                    variant={
+                      editor.isActive('heading', {level: 1})
+                        ? 'solid'
+                        : 'outline'
+                    }
+                    disabled={
+                      !editor
+                        .can()
+                        .chain()
+                        .focus()
+                        .toggleHeading({level: 1})
+                        .run()
+                    }
+                    onClick={() =>
+                      editor.chain().focus().toggleHeading({level: 1}).run()
+                    }>
+                    <Heading1 size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Heading2"
+                    variant={
+                      editor.isActive('heading', {level: 2})
+                        ? 'solid'
+                        : 'outline'
+                    }
+                    disabled={
+                      !editor
+                        .can()
+                        .chain()
+                        .focus()
+                        .toggleHeading({level: 2})
+                        .run()
+                    }
+                    onClick={() =>
+                      editor.chain().focus().toggleHeading({level: 2}).run()
+                    }>
+                    <Heading2 size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Heading3"
+                    variant={
+                      editor.isActive('heading', {level: 3})
+                        ? 'solid'
+                        : 'outline'
+                    }
+                    disabled={
+                      !editor
+                        .can()
+                        .chain()
+                        .focus()
+                        .toggleHeading({level: 3})
+                        .run()
+                    }
+                    onClick={() =>
+                      editor.chain().focus().toggleHeading({level: 3}).run()
+                    }>
+                    <Heading3 size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Bullet List"
+                    variant={
+                      editor.isActive('bulletList') ? 'solid' : 'outline'
+                    }
+                    disabled={
+                      !editor.can().chain().focus().toggleBulletList().run()
+                    }
+                    onClick={() =>
+                      editor.chain().focus().toggleBulletList().run()
+                    }>
+                    <List size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Ordered List"
+                    variant={
+                      editor.isActive('orderedList') ? 'solid' : 'outline'
+                    }
+                    disabled={
+                      !editor.can().chain().focus().toggleOrderedList().run()
+                    }
+                    onClick={() =>
+                      editor.chain().focus().toggleOrderedList().run()
+                    }>
+                    <ListOrdered size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Quote"
+                    variant={
+                      editor.isActive('blockquote') ? 'solid' : 'outline'
+                    }
+                    disabled={
+                      !editor.can().chain().focus().toggleBlockquote().run()
+                    }
+                    onClick={() =>
+                      editor.chain().focus().toggleBlockquote().run()
+                    }>
+                    <Quote size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Set Link"
+                    variant={editor.isActive('link') ? 'solid' : 'outline'}
+                    disabled={
+                      !editor.can().chain().focus().setLink({href: ''}).run()
+                    }
+                    onClick={() => {
+                      const url = prompt('Enter the URL')
+                      if (url) {
+                        editor.chain().focus().setLink({href: url}).run()
+                      }
+                    }}>
+                    <LinkIcon size="16" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    aria-label="Unset Link"
+                    variant="outline"
+                    disabled={!editor.can().chain().focus().unsetLink().run()}
+                    onClick={() => editor.chain().focus().unsetLink().run()}>
+                    <Unlink size="16" />
+                  </IconButton>
+                </HStack>
+              )}
+              <Box
+                // Increased min height, slim border
+                minH="24rem"
+                border="1px"
+                borderColor="gray.300"
+                rounded="md"
+                p={2}
+                // What the `prose` and `focus:outline-none` utilities did before,
+                // stated here instead. tiptap emits plain HTML with no classes of
+                // its own, so the block elements need to be given their shape
+                // back or the message reads as one undifferentiated paragraph.
+                css={{
+                  '& .jaen-mdx-editor': {outline: 'none'},
+                  '& h1': {fontSize: '2xl', fontWeight: 'bold', mt: 4, mb: 2},
+                  '& h2': {fontSize: 'xl', fontWeight: 'bold', mt: 4, mb: 2},
+                  '& h3': {
+                    fontSize: 'lg',
+                    fontWeight: 'semibold',
+                    mt: 3,
+                    mb: 2
+                  },
+                  '& p': {mb: 2},
+                  '& ul, ol': {pl: 6, mb: 2},
+                  '& ul': {listStyleType: 'disc'},
+                  '& ol': {listStyleType: 'decimal'},
 
-          {/* BCC DISABLED */}
-          <FormControl
-            mb={5}
-            isInvalid={!!form.formState.errors.bcc}
-            display="none">
-            <FormLabel>BCC</FormLabel>
-            <Input
-              placeholder="john.doe@snek.at"
-              bg="white"
-              {...form.register('bcc')}
-            />
-            <FormHelperText>
-              Additional hidden recipient(s) of the email. Add multiple
-              recipients separated by a comma.
-            </FormHelperText>
-            <FormErrorMessage>
-              {form.formState.errors.bcc && form.formState.errors.bcc.message}
-            </FormErrorMessage>
-          </FormControl>
+                  '& blockquote': {
+                    borderLeft: '3px solid',
+                    borderColor: 'gray.300',
+                    pl: 3,
+                    color: 'fg.muted',
+                    my: 2
+                  },
 
-          {/* sendEmailOnSubmitConsent */}
-          <FormControl
-            display="flex"
-            alignItems="center"
-            mb={5}
-            isInvalid={!!form.formState.errors.sendEmailOnSubmitConsent}>
-            <Checkbox
-              mr={2}
-              {...form.register('sendEmailOnSubmitConsent')}
-              isChecked={form.watch('sendEmailOnSubmitConsent')}
-            />
-            <FormLabel mb={0}>
-              By checking this box, you agree that clicking the "Send" button
-              will send an email.
-            </FormLabel>
-            <FormErrorMessage>
-              {form.formState.errors.sendEmailOnSubmitConsent &&
-                form.formState.errors.sendEmailOnSubmitConsent.message}
-            </FormErrorMessage>
-          </FormControl>
-        </CardBody>
+                  '& a': {color: 'brand.500', textDecoration: 'underline'}
+                }}>
+                <EditorContent editor={editor} />
+              </Box>
+              <Field.HelperText>The message of the email.</Field.HelperText>
+              <Field.ErrorText>
+                {form.formState.errors.message &&
+                  form.formState.errors.message.message}
+              </Field.ErrorText>
+            </Field.Root>
 
-        <CardFooter>
-          {/* Use Chakra theme color brand.500 */}
-          <Button type="submit" colorScheme="brand">
-            Send
-          </Button>
-        </CardFooter>
-      </Card>
+            {/* BCC DISABLED */}
+            <Field.Root
+              mb={5}
+              invalid={!!form.formState.errors.bcc}
+              display="none">
+              <Field.Label>BCC</Field.Label>
+              <Input
+                placeholder="john.doe@snek.at"
+                bg="white"
+                {...form.register('bcc')}
+              />
+              <Field.HelperText>
+                Additional hidden recipient(s) of the email. Add multiple
+                recipients separated by a comma.
+              </Field.HelperText>
+              <Field.ErrorText>
+                {form.formState.errors.bcc && form.formState.errors.bcc.message}
+              </Field.ErrorText>
+            </Field.Root>
 
-      {/* Preview Modal */}
-      <Modal
-        isOpen={isPreviewOpen}
-        onClose={() => setIsPreviewOpen(false)}
-        size="2xl">
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Email Preview</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            {/* Display selected template name */}
-            <Heading size="sm" mb={2}>
-              {selectedTemplate?.description || 'No Template Selected'}
-            </Heading>
-            {/* Display email subject */}
-            <Heading size="md" mb={2}>
-              {form.watch('subject') || 'No Subject'}
-            </Heading>
-            {/* Render the processed message with variables replaced */}
-            <Box
-              dangerouslySetInnerHTML={{__html: templateContent}}
-              border="1px solid"
-              borderColor="gray.100"
-              p={4}
-              rounded="md"
-              minH="12rem" // Adjusted for better visibility
-            />
-          </ModalBody>
-          <ModalFooter>
-            <Button onClick={() => setIsPreviewOpen(false)}>Close</Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
+            {/* sendEmailOnSubmitConsent */}
+            <Field.Root
+              display="flex"
+              alignItems="center"
+              mb={5}
+              invalid={!!form.formState.errors.sendEmailOnSubmitConsent}>
+              <Checkbox.Root
+                mr={2}
+                {...form.register('sendEmailOnSubmitConsent')}
+                checked={form.watch('sendEmailOnSubmitConsent')}>
+                <Checkbox.HiddenInput />
+                <Checkbox.Control>
+                  <Checkbox.Indicator />
+                </Checkbox.Control>
+              </Checkbox.Root>
+              <Field.Label mb={0}>
+                By checking this box, you agree that clicking the "Send" button
+                will send an email.
+              </Field.Label>
+              <Field.ErrorText>
+                {form.formState.errors.sendEmailOnSubmitConsent &&
+                  form.formState.errors.sendEmailOnSubmitConsent.message}
+              </Field.ErrorText>
+            </Field.Root>
+          </Card.Body>
+
+          <Card.Footer>
+            {/* Use Chakra theme color brand.500 */}
+            <Button type="submit" colorPalette="brand">
+              Send
+            </Button>
+          </Card.Footer>
+        </Card.Root>
+
+        {/* Preview Modal */}
+        <Dialog.Root
+          open={isPreviewOpen}
+          size="xl"
+          onOpenChange={e => {
+            if (!e.open) {
+              setIsPreviewOpen(false)
+            }
+          }}>
+          <Portal>
+            <Dialog.Backdrop />
+            <Dialog.Positioner>
+              <Dialog.Content>
+                <Dialog.Header>Email Preview</Dialog.Header>
+                <Dialog.CloseTrigger />
+                <Dialog.Body>
+                  {/* Display selected template name */}
+                  <Heading size="sm" mb={2}>
+                    {selectedTemplate?.description || 'No Template Selected'}
+                  </Heading>
+                  {/* Display email subject */}
+                  <Heading size="md" mb={2}>
+                    {form.watch('subject') || 'No Subject'}
+                  </Heading>
+                  {/* Render the processed message with variables replaced */}
+                  <Box
+                    dangerouslySetInnerHTML={{__html: templateContent}}
+                    border="1px solid"
+                    borderColor="gray.100"
+                    p={4}
+                    rounded="md"
+                    minH="12rem" // Adjusted for better visibility
+                  />
+                </Dialog.Body>
+                <Dialog.Footer>
+                  <Button onClick={() => setIsPreviewOpen(false)}>Close</Button>
+                </Dialog.Footer>
+              </Dialog.Content>
+            </Dialog.Positioner>
+          </Portal>
+        </Dialog.Root>
+      </form>
     </Box>
   )
 }

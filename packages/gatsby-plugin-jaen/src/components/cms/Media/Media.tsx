@@ -140,10 +140,10 @@ export const Media: React.FC<MediaProps> = ({
           <IconButton
             aria-label="close sidebar"
             fontSize="1.2em"
-            icon={<BsLayoutSidebarInset />}
             variant="ghost"
-            onClick={toggleSidebar}
-          />
+            onClick={toggleSidebar}>
+            <BsLayoutSidebarInset />
+          </IconButton>
         </HStack>
         <Stack px="4" py="1" ml="2">
           <Stack>

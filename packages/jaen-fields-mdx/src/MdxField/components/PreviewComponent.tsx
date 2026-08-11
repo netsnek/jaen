@@ -57,8 +57,8 @@ const processContent = ({
           const el = (
             <Stack
               w="full"
-              sx={{
-                'mjx-container': {
+              css={{
+                '& mjx-container': {
                   display: 'inline-block !important',
                   verticalAlign: 'text-bottom !important'
                 }

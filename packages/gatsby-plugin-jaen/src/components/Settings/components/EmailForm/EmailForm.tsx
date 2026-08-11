@@ -2,15 +2,13 @@ import {
   Button,
   ButtonGroup,
   Card,
-  CardBody,
   HStack,
   IconButton,
   Input,
-  ListItem,
   Stack,
-  StackDivider,
   Text,
-  UnorderedList
+  List,
+  StackSeparator
 } from '@chakra-ui/react'
 import React from 'react'
 import {useForm} from 'react-hook-form'
@@ -62,10 +60,10 @@ export const EmailForm: React.FC<EmailFormProps> = ({
 
   return (
     <FieldGroup title="Emails">
-      <Stack spacing="6">
-        <Card maxW="full">
-          <CardBody>
-            <Stack divider={<StackDivider />} spacing="4">
+      <Stack gap="6">
+        <Card.Root maxW="full">
+          <Card.Body>
+            <Stack separator={<StackSeparator />} gap="4">
               {defaultValues?.emails
                 .sort((a, b) => Number(b.isPrimary) - Number(a.isPrimary))
                 .map(email => {
@@ -94,21 +92,21 @@ export const EmailForm: React.FC<EmailFormProps> = ({
                           variant="ghost"
                           color="red.500"
                           visibility={email.isPrimary ? 'hidden' : 'visible'}
-                          icon={<FaTrash />}
-                          onClick={() => onRemove(email.id)}
-                        />
+                          onClick={() => onRemove(email.id)}>
+                          <FaTrash />
+                        </IconButton>
                       </HStack>
 
-                      <UnorderedList>
+                      <List.Root as="ul">
                         {email.isPrimary && (
-                          <ListItem fontSize="sm" color="muted">
+                          <List.Item fontSize="sm" color="muted">
                             Primary email addresses are used for account-related
                             communications (e.g. password resets).
-                          </ListItem>
+                          </List.Item>
                         )}
 
                         {!email.isVerified && (
-                          <ListItem fontSize="sm" color="muted">
+                          <List.Item fontSize="sm" color="muted">
                             <HStack>
                               <Text>Unverified</Text>
                               <Link
@@ -118,22 +116,22 @@ export const EmailForm: React.FC<EmailFormProps> = ({
                                 Resend verification email
                               </Link>
                             </HStack>
-                          </ListItem>
+                          </List.Item>
                         )}
-                      </UnorderedList>
+                      </List.Root>
                     </Stack>
                   )
                 })}
             </Stack>
-          </CardBody>
-        </Card>
+          </Card.Body>
+        </Card.Root>
 
-        <Stack spacing="4">
+        <Stack gap="4">
           <Text fontSize="sm" color="muted">
             Add an email address to your account.
           </Text>
           <form onSubmit={onFormSubmit}>
-            <Stack direction="row" spacing="4">
+            <Stack direction="row" gap="4">
               <Input
                 maxW="xs"
                 {...register('emailAddress', {
@@ -149,7 +147,7 @@ export const EmailForm: React.FC<EmailFormProps> = ({
               <ButtonGroup>
                 <Button
                   type="submit"
-                  isLoading={isSubmitting}
+                  loading={isSubmitting}
                   loadingText="Adding..."
                   variant="outline">
                   Add

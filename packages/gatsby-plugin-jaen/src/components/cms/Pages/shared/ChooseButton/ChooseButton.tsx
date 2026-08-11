@@ -81,7 +81,7 @@ export const ChooseButton: React.FC<ChooseButtonProps> = ({
                 mx="2"
                 placeholder="Search..."
                 value={searchQuery}
-                onChange={e => {
+                onValueChange={e => {
                   setSearchQuery(e.target.value)
                 }}
               />

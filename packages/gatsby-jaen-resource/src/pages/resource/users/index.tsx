@@ -8,22 +8,12 @@ import {
   Button,
   ButtonGroup,
   Flex,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
   HStack,
   Heading,
   IconButton,
   Input,
   InputGroup,
   InputRightElement,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Skeleton,
   Stack,
   Table,
@@ -36,7 +26,10 @@ import {
   useDisclosure,
   Icon,
   SkeletonCircle,
-  Avatar
+  Avatar,
+  Field,
+  Dialog,
+  Portal
 } from '@chakra-ui/react'
 import {graphql, Link as GatsbyLink} from 'gatsby'
 import React from 'react'
@@ -55,149 +48,170 @@ const Page: React.FC = () => {
   const {users, isLoading} = useUsers()
   return (
     <>
-      <Stack spacing="4">
+      <Stack gap="4">
         <Heading size="md">User ({users.length})</Heading>
 
-        <HStack spacing="4" justifyContent="end">
+        <HStack gap="4" justifyContent="end">
           <AddUserControl />
         </HStack>
 
-        <Table>
-          <Thead position="sticky" top={0} zIndex={1} borderColor="black">
-            <Tr my=".8rem">
-              <Th></Th>
-              <Th>E-Mail Address</Th>
-              <Th>Username</Th>
-              <Th>First Name</Th>
-              <Th>Last Name</Th>
-              <Th>Created at</Th>
-              <Th>Active</Th>
-              <Th>Admin</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
+        <Table.Root>
+          <Table.Header
+            position="sticky"
+            top={0}
+            zIndex={1}
+            borderColor="black">
+            <Table.Row my=".8rem">
+              <Table.ColumnHeader></Table.ColumnHeader>
+              <Table.ColumnHeader>E-Mail Address</Table.ColumnHeader>
+              <Table.ColumnHeader>Username</Table.ColumnHeader>
+              <Table.ColumnHeader>First Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Last Name</Table.ColumnHeader>
+              <Table.ColumnHeader>Created at</Table.ColumnHeader>
+              <Table.ColumnHeader>Active</Table.ColumnHeader>
+              <Table.ColumnHeader>Admin</Table.ColumnHeader>
+              <Table.ColumnHeader></Table.ColumnHeader>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
             {isLoading &&
               // map with 5 rows to show loading
               [...Array(3)].map((_, index) => (
-                <Tr key={index}>
-                  <Td>
+                <Table.Row key={index}>
+                  <Table.Cell>
                     <SkeletonCircle size="10" isLoaded={!isLoading} />
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Skeleton
                       w={'fit-content'}
                       h={'fit-content'}
-                      isLoaded={!isLoading}>
+                      loading={!!isLoading}>
                       <Text fontSize="sm">john.doe@snek.at</Text>
                     </Skeleton>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Skeleton
                       w={'fit-content'}
                       h={'fit-content'}
-                      isLoaded={!isLoading}>
+                      loading={!!isLoading}>
                       <Text fontSize="sm">john.doe</Text>
                     </Skeleton>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Skeleton
                       w={'fit-content'}
                       h={'fit-content'}
-                      isLoaded={!isLoading}>
+                      loading={!!isLoading}>
                       <Text fontSize="sm">John</Text>
                     </Skeleton>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Skeleton
                       w={'fit-content'}
                       h={'fit-content'}
-                      isLoaded={!isLoading}>
+                      loading={!!isLoading}>
                       <Text fontSize="sm">Doe</Text>
                     </Skeleton>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Skeleton
                       w={'fit-content'}
                       h={'fit-content'}
-                      isLoaded={!isLoading}>
+                      loading={!!isLoading}>
                       <Text fontSize="sm">Tue Jun 27 2023</Text>
                     </Skeleton>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Skeleton
                       w={'fit-content'}
                       h={'fit-content'}
-                      isLoaded={!isLoading}>
-                      <Icon as={FaCheckCircle} />
+                      loading={!!isLoading}>
+                      <Icon asChild>
+                        <FaCheckCircle />
+                      </Icon>
                     </Skeleton>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Skeleton
                       w={'fit-content'}
                       h={'fit-content'}
-                      isLoaded={!isLoading}>
-                      <Icon as={FaCheckCircle} />
+                      loading={!!isLoading}>
+                      <Icon asChild>
+                        <FaCheckCircle />
+                      </Icon>
                     </Skeleton>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Skeleton
                       w={'fit-content'}
                       h={'fit-content'}
-                      isLoaded={!isLoading}>
-                      <IconButton
-                        as={GatsbyLink}
-                        aria-label="Edit"
-                        icon={<Icon as={FaEdit} />}
-                        to={`/cms/user/`}
-                      />
+                      loading={!!isLoading}>
+                      <IconButton aria-label="Edit" asChild>
+                        <GatsbyLink to={`/cms/user/`}>
+                          <Icon asChild>
+                            <FaEdit />
+                          </Icon>
+                        </GatsbyLink>
+                      </IconButton>
                     </Skeleton>
-                  </Td>
-                </Tr>
+                  </Table.Cell>
+                </Table.Row>
               ))}
 
             {users
               .map(user => (
-                <Tr key={user.id}>
-                  <Td>
-                    <Avatar
-                      size="sm"
-                      name={user.username}
-                      src={user.details?.avatarURL}
-                    />
-                  </Td>
-                  <Td>
+                <Table.Row key={user.id}>
+                  <Table.Cell>
+                    <Avatar.Root size="sm">
+                      <Avatar.Fallback name={user.username} />
+                      <Avatar.Image src={user.details?.avatarURL} />
+                    </Avatar.Root>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Text fontSize="sm">{user.primaryEmailAddress}</Text>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Text fontSize="sm">{user.username}</Text>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Text fontSize="sm">{user.details?.firstName}</Text>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Text fontSize="sm">{user.details?.lastName}</Text>
-                  </Td>
-                  <Td>
+                  </Table.Cell>
+                  <Table.Cell>
                     <Text fontSize="sm">
                       {new Date(user.createdAt).toDateString()}
                     </Text>
-                  </Td>
-                  <Td>{user.isActive ? <Icon as={FaCheckCircle} /> : null}</Td>
-                  <Td>{user.isAdmin ? <Icon as={FaCheckCircle} /> : null}</Td>
-                  <Td textAlign={'right'}>
-                    <IconButton
-                      as={GatsbyLink}
-                      aria-label="Edit"
-                      icon={<Icon as={FaEdit} />}
-                      to={user.id}
-                    />
-                  </Td>
-                </Tr>
+                  </Table.Cell>
+                  <Table.Cell>
+                    {user.isActive ? (
+                      <Icon asChild>
+                        <FaCheckCircle />
+                      </Icon>
+                    ) : null}
+                  </Table.Cell>
+                  <Table.Cell>
+                    {user.isAdmin ? (
+                      <Icon asChild>
+                        <FaCheckCircle />
+                      </Icon>
+                    ) : null}
+                  </Table.Cell>
+                  <Table.Cell textAlign={'right'}>
+                    <IconButton aria-label="Edit" asChild>
+                      <GatsbyLink to={user.id}>
+                        <Icon asChild>
+                          <FaEdit />
+                        </Icon>
+                      </GatsbyLink>
+                    </IconButton>
+                  </Table.Cell>
+                </Table.Row>
               ))
               .reverse()}
-          </Tbody>
-        </Table>
+          </Table.Body>
+        </Table.Root>
       </Stack>
     </>
   )
@@ -228,7 +242,7 @@ const PasswordInput = React.forwardRef<HTMLInputElement, any>(
 )
 
 const AddUserControl = () => {
-  const {isOpen, onOpen, onClose} = useDisclosure()
+  const {open, onOpen, onClose} = useDisclosure()
 
   //const navigate = useNavigate()
 
@@ -260,96 +274,120 @@ const AddUserControl = () => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={handleClose} initialFocusRef={initialRef}>
-        <ModalOverlay />
-        <ModalContent>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <ModalHeader>Add a user</ModalHeader>
-            <ModalCloseButton onClick={handleClose} />
-            <ModalBody pb={6}>
-              <FormControl isInvalid={!!errors.emailAddress}>
-                <FormLabel>E-Mail</FormLabel>
-                <Input
-                  placeholder="max.mustermann@snek.at"
-                  type="email"
-                  {...register('emailAddress', {
-                    required: 'This is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                      message: 'Invalid email address'
-                    }
-                  })}
-                />
-                <FormErrorMessage>
-                  {errors.emailAddress?.message}
-                </FormErrorMessage>
-              </FormControl>
-
-              <FormControl isInvalid={!!errors.username}>
-                <FormLabel>Username</FormLabel>
-                <Input
-                  placeholder="max.mustermann"
-                  {...register('username', {
-                    required: 'This is required'
-                  })}
-                />
-                <FormErrorMessage>{errors.username?.message}</FormErrorMessage>
-              </FormControl>
-
-              <Stack direction={'row'}>
-                <Flex>
-                  <FormControl mt={4} isInvalid={!!errors.details?.firstName}>
-                    <FormLabel>Firstname</FormLabel>
+      <Dialog.Root
+        open={isOpen}
+        initialFocusEl={() => initialRef.current}
+        onOpenChange={e => {
+          if (!e.open) {
+            handleClose()
+          }
+        }}>
+        <Portal>
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <Dialog.Header>Add a user</Dialog.Header>
+                <Dialog.CloseTrigger onClick={handleClose} />
+                <Dialog.Body pb={6}>
+                  <Field.Root invalid={!!errors.emailAddress}>
+                    <Field.Label>E-Mail</Field.Label>
                     <Input
-                      placeholder="Max"
-                      {...register('details.firstName')}
+                      placeholder="max.mustermann@snek.at"
+                      type="email"
+                      {...register('emailAddress', {
+                        required: 'This is required',
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                          message: 'Invalid email address'
+                        }
+                      })}
                     />
-                    <FormErrorMessage>
-                      {errors.details?.firstName?.message}
-                    </FormErrorMessage>
-                  </FormControl>
-                </Flex>
+                    <Field.ErrorText>
+                      {errors.emailAddress?.message}
+                    </Field.ErrorText>
+                  </Field.Root>
 
-                <Flex>
-                  <FormControl mt={4} isInvalid={!!errors.details?.lastName}>
-                    <FormLabel>Lastname</FormLabel>
+                  <Field.Root invalid={!!errors.username}>
+                    <Field.Label>Username</Field.Label>
                     <Input
-                      placeholder="Mustermann"
-                      {...register('details.lastName')}
+                      placeholder="max.mustermann"
+                      {...register('username', {
+                        required: 'This is required'
+                      })}
                     />
-                    <FormErrorMessage>
-                      {errors.details?.lastName?.message}
-                    </FormErrorMessage>
-                  </FormControl>
-                </Flex>
-              </Stack>
+                    <Field.ErrorText>
+                      {errors.username?.message}
+                    </Field.ErrorText>
+                  </Field.Root>
 
-              <FormControl mt={4} isInvalid={!!errors.password}>
-                <FormLabel>Password</FormLabel>
-                <PasswordInput
-                  {...register('password', {
-                    required: 'This is required'
-                  })}
-                />
-                <FormErrorMessage>{errors.password?.message}</FormErrorMessage>
-              </FormControl>
-            </ModalBody>
+                  <Stack direction={'row'}>
+                    <Flex>
+                      <Field.Root mt={4} invalid={!!errors.details?.firstName}>
+                        <Field.Label>Firstname</Field.Label>
+                        <Input
+                          placeholder="Max"
+                          {...register('details.firstName')}
+                        />
+                        <Field.ErrorText>
+                          {errors.details?.firstName?.message}
+                        </Field.ErrorText>
+                      </Field.Root>
+                    </Flex>
 
-            <ModalFooter>
-              <ButtonGroup isDisabled={!isDirty}>
-                <Button type="submit" isLoading={isSubmitting}>
-                  Create
-                </Button>
-                <Button variant="outline" onClick={handleClose}>
-                  Cancel
-                </Button>
-              </ButtonGroup>
-            </ModalFooter>
-          </form>
-        </ModalContent>
-      </Modal>
+                    <Flex>
+                      <Field.Root mt={4} invalid={!!errors.details?.lastName}>
+                        <Field.Label>Lastname</Field.Label>
+                        <Input
+                          placeholder="Mustermann"
+                          {...register('details.lastName')}
+                        />
+                        <Field.ErrorText>
+                          {errors.details?.lastName?.message}
+                        </Field.ErrorText>
+                      </Field.Root>
+                    </Flex>
+                  </Stack>
 
-      <Button leftIcon={<Icon as={FaPlus} />} onClick={onOpen}>
+                  <Field.Root mt={4} invalid={!!errors.password}>
+                    <Field.Label>Password</Field.Label>
+                    <PasswordInput
+                      {...register('password', {
+                        required: 'This is required'
+                      })}
+                    />
+                    <Field.ErrorText>
+                      {errors.password?.message}
+                    </Field.ErrorText>
+                  </Field.Root>
+                </Dialog.Body>
+
+                <Dialog.Footer>
+                  <ButtonGroup>
+                    <Button
+                      type="submit"
+                      loading={isSubmitting}
+                      disabled={!isDirty}>
+                      Create
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={handleClose}
+                      disabled={!isDirty}>
+                      Cancel
+                    </Button>
+                  </ButtonGroup>
+                </Dialog.Footer>
+              </form>
+            </Dialog.Content>
+          </Dialog.Positioner>
+        </Portal>
+      </Dialog.Root>
+
+      <Button onClick={onOpen}>
+        <Icon asChild>
+          <FaPlus />
+        </Icon>
         Add User
       </Button>
     </>

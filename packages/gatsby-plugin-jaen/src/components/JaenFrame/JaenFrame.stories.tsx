@@ -48,9 +48,11 @@ const CMSView: React.FC = () => {
     return (
       <Button
         size="sm"
-        leftIcon={<Icon as={FaEdit} color="brand.500" />}
-        colorScheme={isEditing ? 'orange' : undefined}
+        colorPalette={isEditing ? 'orange' : undefined}
         onClick={toggleEditing}>
+        <Icon color="brand.500" asChild>
+          <FaEdit />
+        </Icon>
         {isEditing ? 'Stop editing' : 'Edit'}
       </Button>
     )
@@ -62,8 +64,16 @@ const CMSView: React.FC = () => {
         <MenuButton
           variant="outline"
           size="sm"
-          leftIcon={<Icon as={FaSitemap} color="brand.500" />}
-          rightIcon={<Icon as={FaCaretDown} />}
+          leftIcon={
+            <Icon color="brand.500" asChild>
+              <FaSitemap />
+            </Icon>
+          }
+          rightIcon={
+            <Icon asChild>
+              <FaCaretDown />
+            </Icon>
+          }
           renderItems={() => {
             return <>PageTree</>
           }}>

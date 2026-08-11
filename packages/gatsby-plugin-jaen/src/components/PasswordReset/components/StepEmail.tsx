@@ -1,14 +1,6 @@
 import React from 'react'
 import {useForm, Controller} from 'react-hook-form'
-import {
-  Input,
-  Button,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Stack,
-  Text
-} from '@chakra-ui/react'
+import {Input, Button, Stack, Text, Field} from '@chakra-ui/react'
 
 interface FormData {
   emailAddress: string
@@ -31,15 +23,12 @@ const StepEmail: React.FC<StepEmailProps> = props => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing="5">
-        <FormControl
-          id="emailAddress"
-          isRequired
-          isInvalid={!!errors.emailAddress}>
-          <FormLabel>
+      <Stack gap="5">
+        <Field.Root id="emailAddress" required invalid={!!errors.emailAddress}>
+          <Field.Label>
             Enter your user account's verified email address and we will send
             initiate the password reset process.
-          </FormLabel>
+          </Field.Label>
           <Input
             autoFocus
             {...register('emailAddress', {
@@ -48,15 +37,15 @@ const StepEmail: React.FC<StepEmailProps> = props => {
             type="email"
             placeholder="Enter your email address"
           />
-          <FormErrorMessage>
+          <Field.ErrorText>
             {errors.emailAddress && errors.emailAddress.message}
-          </FormErrorMessage>
-        </FormControl>
+          </Field.ErrorText>
+        </Field.Root>
         <Button
           type="submit"
           variant="primary"
           size="lg"
-          isLoading={isSubmitting}>
+          loading={isSubmitting}>
           Continue
         </Button>
       </Stack>

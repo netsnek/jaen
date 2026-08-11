@@ -150,13 +150,13 @@ export const Editor: React.FC<EditorProps> = props => {
         tabs={[
           {
             label: (
-              <HStack spacing={2}>
+              <HStack gap={2}>
                 <ViewIcon />
                 <Box>Preview</Box>
                 {stats.fatal ? (
-                  <Badge colorScheme="red">Error</Badge>
+                  <Badge colorPalette="red">Error</Badge>
                 ) : stats.warn ? (
-                  <Badge colorScheme="yellow">Warning</Badge>
+                  <Badge colorPalette="yellow">Warning</Badge>
                 ) : null}
               </HStack>
             ),
@@ -170,7 +170,7 @@ export const Editor: React.FC<EditorProps> = props => {
           },
           {
             label: (
-              <HStack spacing={2}>
+              <HStack gap={2}>
                 <EditIcon />
                 <Box>Editor</Box>
               </HStack>

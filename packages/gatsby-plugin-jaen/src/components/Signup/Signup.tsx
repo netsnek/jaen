@@ -1,24 +1,19 @@
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import {
   Alert,
-  AlertDescription,
-  AlertIcon,
-  AlertTitle,
   Box,
   Button,
   Checkbox,
   CloseButton,
   Container,
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
   Heading,
   HStack,
   Input,
   Modal,
   ModalContent,
   Stack,
-  Text
+  Text,
+  Field
 } from '@chakra-ui/react'
 import {useState} from 'react'
 import {SubmitHandler, useForm} from 'react-hook-form'
@@ -85,8 +80,8 @@ export const Signup: React.FC<SignupProps> = props => {
   const content = (
     <Box id="momo" minH="100dvh">
       <Container maxW="lg" py={{base: '6', md: '12'}} px={{base: '0', sm: '8'}}>
-        <Stack spacing="8">
-          <Stack spacing="6">
+        <Stack gap="8">
+          <Stack gap="6">
             <HStack justify="center">
               <Link
                 as={Button}
@@ -98,7 +93,7 @@ export const Signup: React.FC<SignupProps> = props => {
               </Link>
             </HStack>
 
-            <Stack spacing={{base: '2', md: '3'}} textAlign="center">
+            <Stack gap={{base: '2', md: '3'}} textAlign="center">
               <Heading size={{base: 'xs', md: 'sm'}}>
                 Create your account
               </Heading>
@@ -112,11 +107,11 @@ export const Signup: React.FC<SignupProps> = props => {
           </Stack>
 
           {alert && (
-            <Alert status={alert.status}>
-              <AlertIcon />
+            <Alert.Root status={alert.status}>
+              <Alert.Indicator />
               <Box w="full">
-                <AlertTitle>{alert.message}</AlertTitle>
-                <AlertDescription>{alert.description}</AlertDescription>
+                <Alert.Title>{alert.message}</Alert.Title>
+                <Alert.Description>{alert.description}</Alert.Description>
               </Box>
               <CloseButton
                 alignSelf="flex-start"
@@ -125,7 +120,7 @@ export const Signup: React.FC<SignupProps> = props => {
                 top={-1}
                 onClick={resetAlert}
               />
-            </Alert>
+            </Alert.Root>
           )}
 
           <form onSubmit={handleSubmit(onSubmit) as any}>
@@ -135,24 +130,24 @@ export const Signup: React.FC<SignupProps> = props => {
               bg="bg.surface"
               boxShadow={{base: 'none', sm: 'md'}}
               borderRadius={{base: 'none', sm: 'xl'}}>
-              <Stack spacing="6">
+              <Stack gap="6">
                 <HStack justify="center" py="4">
                   <Box maxW="64" h="full">
                     <Logo />
                   </Box>
                 </HStack>
-                <Stack spacing="5">
+                <Stack gap="5">
                   <Stack
-                    spacing="4"
+                    gap="4"
                     direction={{
                       base: 'column',
                       md: 'row'
                     }}>
-                    <FormControl
+                    <Field.Root
                       id="login_form_first_name"
-                      isRequired
-                      isInvalid={!!errors.firstName}>
-                      <FormLabel htmlFor="firstName">First name</FormLabel>
+                      required
+                      invalid={!!errors.firstName}>
+                      <Field.Label htmlFor="firstName">First name</Field.Label>
                       <Input
                         autoFocus
                         id="firstName"
@@ -160,52 +155,52 @@ export const Signup: React.FC<SignupProps> = props => {
                           required: true
                         })}
                       />
-                      <FormErrorMessage>
+                      <Field.ErrorText>
                         {errors.firstName && 'First name is required'}
-                      </FormErrorMessage>
-                    </FormControl>
-                    <FormControl
+                      </Field.ErrorText>
+                    </Field.Root>
+                    <Field.Root
                       id="login_form_last_name"
-                      isRequired
-                      isInvalid={!!errors.lastName}>
-                      <FormLabel htmlFor="lastName">Last name</FormLabel>
+                      required
+                      invalid={!!errors.lastName}>
+                      <Field.Label htmlFor="lastName">Last name</Field.Label>
                       <Input
                         id="lastName"
                         {...register('lastName', {
                           required: true
                         })}
                       />
-                      <FormErrorMessage>
+                      <Field.ErrorText>
                         {errors.lastName && 'Last name is required'}
-                      </FormErrorMessage>
-                    </FormControl>
+                      </Field.ErrorText>
+                    </Field.Root>
                   </Stack>
 
-                  <FormControl
+                  <Field.Root
                     id="login_form_email"
-                    isRequired
-                    isInvalid={!!errors.email}>
-                    <FormLabel htmlFor="email">Email</FormLabel>
+                    required
+                    invalid={!!errors.email}>
+                    <Field.Label htmlFor="email">Email</Field.Label>
                     <Input
                       id="email"
                       {...register('email', {
                         required: true
                       })}
                     />
-                    <FormErrorMessage>
+                    <Field.ErrorText>
                       {errors.email && 'Email is required'}
-                    </FormErrorMessage>
-                  </FormControl>
+                    </Field.ErrorText>
+                  </Field.Root>
 
-                  <FormControl>
-                    <FormLabel htmlFor="username">Username</FormLabel>
+                  <Field.Root>
+                    <Field.Label htmlFor="username">Username</Field.Label>
                     <Input
                       id="username"
                       {...register('username', {
                         required: true
                       })}
                     />
-                  </FormControl>
+                  </Field.Root>
 
                   <PasswordField
                     {...register('password', {required: true})}
@@ -214,12 +209,12 @@ export const Signup: React.FC<SignupProps> = props => {
                   />
                 </Stack>
 
-                <Stack spacing="6">
+                <Stack gap="6">
                   <Button
                     type="submit"
                     variant="primary"
                     size="lg"
-                    isLoading={isSubmitting}>
+                    loading={isSubmitting}>
                     Sign up
                   </Button>
                   {/* <HStack>

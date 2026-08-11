@@ -1,14 +1,11 @@
 import {
   Button,
   ButtonGroup,
-  FormControl, // Added FormHelperText
-  FormLabel,
   HStack,
   Input,
   List,
-  ListIcon,
-  ListItem,
-  Stack
+  Stack,
+  Field
 } from '@chakra-ui/react'
 import {FaCheck} from '@react-icons/all-files/fa/FaCheck'
 import {FaX} from '@react-icons/all-files/fa6/FaX'
@@ -39,110 +36,134 @@ export const PasswordUpdateForm: React.FC<PasswordUpdateFormProps> = props => {
   }
 
   return (
-    <Stack spacing="6">
-      <FormLabel>
+    <Stack gap="6">
+      <Field.Label>
         Enter the new password according to the policy below.
-      </FormLabel>
-      <FormControl>
-        <FormLabel>Current Password</FormLabel>
+      </Field.Label>
+      <Field.Root>
+        <Field.Label>Current Password</Field.Label>
         <Input
           maxW="md"
           type="password"
           placeholder="New password"
-          onChange={e => setCurrentPassword(e.target.value)}
+          onValueChange={e => setCurrentPassword(e.target.value)}
         />
-      </FormControl>
+      </Field.Root>
 
-      <List spacing={3}>
+      <List.Root gap={3}>
         {props.passwordPolicy.minLength && (
-          <ListItem>
+          <List.Item>
             {password.length >= props.passwordPolicy.minLength ? (
-              <ListIcon as={FaCheck} color="green.500" />
+              <List.Indicator color="green.500" asChild>
+                <FaCheck />
+              </List.Indicator>
             ) : (
-              <ListIcon as={FaX} color="red.500" />
+              <List.Indicator color="red.500" asChild>
+                <FaX />
+              </List.Indicator>
             )}
             Has to be at least {props.passwordPolicy.minLength} characters long.
             ({password.length} / {props.passwordPolicy.minLength})
-          </ListItem>
+          </List.Item>
         )}
         {props.passwordPolicy.hasSymbol && (
-          <ListItem>
+          <List.Item>
             {/[\p{P}\p{S}]/u.test(password) ? (
-              <ListIcon as={FaCheck} color="green.500" />
+              <List.Indicator color="green.500" asChild>
+                <FaCheck />
+              </List.Indicator>
             ) : (
-              <ListIcon as={FaX} color="red.500" />
+              <List.Indicator color="red.500" asChild>
+                <FaX />
+              </List.Indicator>
             )}
             Must include a symbol or punctuation mark.
-          </ListItem>
+          </List.Item>
         )}
 
         {props.passwordPolicy.hasNumber && (
-          <ListItem>
+          <List.Item>
             {/\d/.test(password) ? (
-              <ListIcon as={FaCheck} color="green.500" />
+              <List.Indicator color="green.500" asChild>
+                <FaCheck />
+              </List.Indicator>
             ) : (
-              <ListIcon as={FaX} color="red.500" />
+              <List.Indicator color="red.500" asChild>
+                <FaX />
+              </List.Indicator>
             )}
             Must include a number.
-          </ListItem>
+          </List.Item>
         )}
 
         {props.passwordPolicy.hasUppercase && (
-          <ListItem>
+          <List.Item>
             {/[A-Z]/.test(password) ? (
-              <ListIcon as={FaCheck} color="green.500" />
+              <List.Indicator color="green.500" asChild>
+                <FaCheck />
+              </List.Indicator>
             ) : (
-              <ListIcon as={FaX} color="red.500" />
+              <List.Indicator color="red.500" asChild>
+                <FaX />
+              </List.Indicator>
             )}
             Must include an uppercase letter.
-          </ListItem>
+          </List.Item>
         )}
 
         {props.passwordPolicy.hasLowercase && (
-          <ListItem>
+          <List.Item>
             {/[a-z]/.test(password) ? (
-              <ListIcon as={FaCheck} color="green.500" />
+              <List.Indicator color="green.500" asChild>
+                <FaCheck />
+              </List.Indicator>
             ) : (
-              <ListIcon as={FaX} color="red.500" />
+              <List.Indicator color="red.500" asChild>
+                <FaX />
+              </List.Indicator>
             )}
             Must include a lowercase letter.
-          </ListItem>
+          </List.Item>
         )}
 
-        <ListItem>
+        <List.Item>
           {password && password === passwordConfirmation ? (
-            <ListIcon as={FaCheck} color="green.500" />
+            <List.Indicator color="green.500" asChild>
+              <FaCheck />
+            </List.Indicator>
           ) : (
-            <ListIcon as={FaX} color="red.500" />
+            <List.Indicator color="red.500" asChild>
+              <FaX />
+            </List.Indicator>
           )}
           Passwords match.
-        </ListItem>
-      </List>
+        </List.Item>
+      </List.Root>
 
       <HStack>
-        <FormControl>
-          <FormLabel>New Password</FormLabel>
+        <Field.Root>
+          <Field.Label>New Password</Field.Label>
           <Input
             type="password"
             placeholder="New password"
             autoComplete="new-password"
-            onChange={e => setPassword(e.target.value)}
+            onValueChange={e => setPassword(e.target.value)}
           />
-        </FormControl>
-        <FormControl>
-          <FormLabel>Confirm Password</FormLabel>
+        </Field.Root>
+        <Field.Root>
+          <Field.Label>Confirm Password</Field.Label>
           <Input
             type="password"
             placeholder="Confirm password"
             autoComplete="new-password"
-            onChange={e => setPasswordConfirmation(e.target.value)}
+            onValueChange={e => setPasswordConfirmation(e.target.value)}
           />
-        </FormControl>
+        </Field.Root>
       </HStack>
 
       <ButtonGroup>
         <Button
-          isLoading={isPasswordChanging}
+          loading={isPasswordChanging}
           type="submit"
           onClick={handlePasswordChange}>
           Reset Current Password

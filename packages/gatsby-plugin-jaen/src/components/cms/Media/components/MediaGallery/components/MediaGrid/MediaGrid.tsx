@@ -39,7 +39,7 @@ export const MediaGrid: React.FC<MediaGridProps> = ({
         onSelect?.(null)
       }}
       columns={[1, 2, columnCount, columnCount + 1]}
-      spacing={2}
+      gap={2}
       p="1">
       {mediaNodes.map((node, index) => (
         <MemoedMediaItem

@@ -4,16 +4,12 @@ import {
   CreateToastFnReturn,
   Icon,
   Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Select,
+  NativeSelect,
   Stack,
   Text,
-  useToast
+  useToast,
+  Dialog,
+  Portal
 } from '@chakra-ui/react'
 import {
   createContext,
@@ -119,53 +115,57 @@ export const NotificationsProvider = ({children}: {children: ReactNode}) => {
 
             return (
               <>
-                <ModalHeader>
+                <Dialog.Header>
                   <Stack direction="row" alignItems="center">
                     {args.icon && (
                       <Icon
-                        as={args.icon}
                         bg="brand.100"
                         color="brand.500"
                         borderRadius="full"
                         boxSize="10"
                         p="2"
-                      />
+                        asChild>
+                        <args.icon />
+                      </Icon>
                     )}
                     <Text>{args.title}</Text>
                   </Stack>
-                </ModalHeader>
-                <ModalBody mt="0" mb={2}>
-                  <Stack spacing={5}>
+                </Dialog.Header>
+                <Dialog.Body mt="0" mb={2}>
+                  <Stack gap={5}>
                     <Text>{args.message}</Text>
                     {type === ModalType.Prompt && (
                       <>
                         {args.options ? (
-                          <Select
-                            ref={input as React.RefObject<HTMLSelectElement>}
-                            placeholder={args.placeholder}
-                            defaultValue={defaultValue}
-                            onChange={e => setInputValue(e.target.value)}
-                            value={inputValue}>
-                            {args.options.map(option => (
-                              <option key={option.id} value={option.id}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </Select>
+                          <NativeSelect.Root>
+                            <NativeSelect.Field
+                              ref={input as React.RefObject<HTMLSelectElement>}
+                              placeholder={args.placeholder}
+                              defaultValue={defaultValue}
+                              onValueChange={e => setInputValue(e.target.value)}
+                              value={inputValue}>
+                              {args.options.map(option => (
+                                <option key={option.id} value={option.id}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </NativeSelect.Field>
+                            <NativeSelect.Indicator />
+                          </NativeSelect.Root>
                         ) : (
                           <Input
                             ref={input as React.RefObject<HTMLInputElement>}
                             placeholder={args.placeholder}
                             defaultValue={defaultValue}
-                            onChange={e => setInputValue(e.target.value)}
+                            onValueChange={e => setInputValue(e.target.value)}
                             value={inputValue}
                           />
                         )}
                       </>
                     )}
                   </Stack>
-                </ModalBody>
-                <ModalFooter bg="bg.subtle" py="3">
+                </Dialog.Body>
+                <Dialog.Footer bg="bg.subtle" py="3">
                   {type !== ModalType.Alert && (
                     <Button mr={3} variant="outline" onClick={handleCancel}>
                       {args.cancelText || 'Cancel'}
@@ -174,28 +174,38 @@ export const NotificationsProvider = ({children}: {children: ReactNode}) => {
                   <Button
                     onClick={handleOK}
                     ref={ok}
-                    isDisabled={type === ModalType.Prompt && inputValue === ''}>
+                    disabled={type === ModalType.Prompt && inputValue === ''}>
                     {args.confirmText || 'OK'}
                   </Button>
-                </ModalFooter>
+                </Dialog.Footer>
               </>
             )
           }
 
           setModal(
-            <Modal
-              isOpen={true}
-              onClose={handleClose}
-              initialFocusRef={type === ModalType.Prompt ? input : ok}>
-              <ModalOverlay />
-              <ModalContent
-                containerProps={{
-                  id: 'momo'
-                }}
-                overflow="hidden">
-                <Content />
-              </ModalContent>
-            </Modal>
+            <Dialog.Root
+              open={true}
+              initialFocusEl={() =>
+                (type === ModalType.Prompt ? input : ok).current
+              }
+              onOpenChange={e => {
+                if (!e.open) {
+                  handleClose()
+                }
+              }}>
+              <Portal>
+                <Dialog.Backdrop />
+                <Dialog.Positioner>
+                  <Dialog.Content
+                    containerProps={{
+                      id: 'momo'
+                    }}
+                    overflow="hidden">
+                    <Content />
+                  </Dialog.Content>
+                </Dialog.Positioner>
+              </Portal>
+            </Dialog.Root>
           )
         }),
     [children]
