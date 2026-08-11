@@ -190,7 +190,7 @@ export const NotificationsProvider = ({children}: {children: ReactNode}) => {
               <ModalOverlay />
               <ModalContent
                 containerProps={{
-                  id: 'coco'
+                  id: 'momo'
                 }}
                 overflow="hidden">
                 <Content />

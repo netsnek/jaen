@@ -52,7 +52,7 @@ const Page: React.FC<PageProps> = () => {
   return (
     <Stack
       divider={<StackDivider borderColor="border.emphasized" />}
-      id="coco"
+      id="momo"
       spacing="4">
       <Stack>
         <Heading as="h2" size="sm">

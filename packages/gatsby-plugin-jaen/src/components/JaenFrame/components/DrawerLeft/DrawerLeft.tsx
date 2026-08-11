@@ -57,7 +57,7 @@ export const DrawerLeft: React.FC<DrawerLeftProps> = ({
             that carries the Chakra variable root. containerProps puts the id
             on the portal's own container, which is what media-modal.tsx and
             the notifications toast already do. */}
-        <DrawerContent borderRightRadius="xl" containerProps={{id: 'coco'}}>
+        <DrawerContent borderRightRadius="xl" containerProps={{id: 'momo'}}>
           <DrawerHeader p="4">
             <HStack justifyContent="space-between">
               <Box h="full" maxW="12rem">

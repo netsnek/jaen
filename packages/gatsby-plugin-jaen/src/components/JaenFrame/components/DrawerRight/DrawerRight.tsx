@@ -77,7 +77,7 @@ export const DrawerRight: React.FC<DrawerRightProps> = ({
         initialFocusRef={initialFocusRef}>
         <DrawerOverlay bg="rgba(0,0,0,0.1)" />
 
-        <DrawerContent borderLeftRadius="xl" containerProps={{id: 'coco'}}>
+        <DrawerContent borderLeftRadius="xl" containerProps={{id: 'momo'}}>
           <DrawerHeader p="4">
             <HStack justifyContent="space-between">
               <Stack>

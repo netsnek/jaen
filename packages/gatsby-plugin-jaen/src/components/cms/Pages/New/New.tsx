@@ -12,7 +12,7 @@ export interface NewProps {
 
 export const New: React.FC<NewProps> = props => {
   return (
-    <Flex id="coco">
+    <Flex id="momo">
       <PageContentForm {...props.form} />
     </Flex>
   )

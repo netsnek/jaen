@@ -133,7 +133,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
       <ModalContent
         overflow="hidden"
         containerProps={{
-          id: 'coco'
+          id: 'momo'
         }}
         bg="transparent"
         sx={{

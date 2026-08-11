@@ -150,7 +150,7 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
   }, [data])
 
   return (
-    <Box id="coco">
+    <Box id="momo">
       <form
         onSubmit={data => {
           void handleSubmit(onSubmit)(data)

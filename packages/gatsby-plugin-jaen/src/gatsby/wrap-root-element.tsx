@@ -123,7 +123,7 @@ export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = (
   }
 
   return (
-    <ChakraProvider theme={theme} cssVarsRoot="#coco">
+    <ChakraProvider theme={theme} cssVarsRoot="#momo">
       <NotificationsProvider>
         <AuthenticationProvider>
           <JaenIntlProvider>

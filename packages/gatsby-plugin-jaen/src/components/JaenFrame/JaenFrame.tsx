@@ -43,10 +43,10 @@ export interface JaenFrameProps {
 /**
  * The bar across the top of every CMS surface.
  *
- * `id="coco"` is load bearing, not decoration. The provider mounts as
- * `<ChakraProvider cssVarsRoot="#coco">`, so every Chakra custom property is
+ * `id="momo"` is load bearing, not decoration. The provider mounts as
+ * `<ChakraProvider cssVarsRoot="#momo">`, so every Chakra custom property is
  * emitted onto that selector rather than onto `:root`. The frame renders as a
- * sibling of the page layout, which owns the only other `#coco`, so without
+ * sibling of the page layout, which owns the only other `#momo`, so without
  * its own the header sits outside the variable scope entirely: `bg.subtle`,
  * `border.emphasized` and `brand.500` all resolve against nothing, and the
  * children that inherit from here go with it. That is what happened when this
@@ -56,7 +56,7 @@ export interface JaenFrameProps {
 export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
   return (
     <HStack
-      id="coco"
+      id="momo"
       as="header"
       bg="bg.subtle"
       {...(!props.navigation.isStickyDisabled && {

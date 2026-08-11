@@ -51,7 +51,7 @@ const MediaModal: React.FC<MediaSelectorProps> = props => {
       <ModalContent
         maxW="96rem"
         containerProps={{
-          id: 'coco'
+          id: 'momo'
         }}>
         {/* <ModalHeader>Modal Title</ModalHeader> */}
         <ModalCloseButton />

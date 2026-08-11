@@ -124,7 +124,7 @@ export const Media: React.FC<MediaProps> = ({
   }
 
   return (
-    <Flex id="coco" pos="relative" minH="calc(100dvh - 4rem - 3rem)">
+    <Flex id="momo" pos="relative" minH="calc(100dvh - 4rem - 3rem)">
       <Stack
         as="nav"
         h="calc(100dvh - 4rem)"

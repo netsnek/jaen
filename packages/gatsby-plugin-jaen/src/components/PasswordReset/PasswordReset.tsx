@@ -65,7 +65,7 @@ export const PasswordReset: React.FC<PasswordResetProps> = props => {
   }
 
   return (
-    <Box id="coco" minH="100dvh">
+    <Box id="momo" minH="100dvh">
       <Container maxW="lg" py={{base: '6', md: '12'}} px={{base: '0', sm: '8'}}>
         <Stack spacing="8">
           <Stack spacing="6">
