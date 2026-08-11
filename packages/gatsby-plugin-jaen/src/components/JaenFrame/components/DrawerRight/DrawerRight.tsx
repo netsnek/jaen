@@ -1,3 +1,4 @@
+import {useColorMode} from 'jaen'
 import {
   Avatar,
   AvatarBadge,
@@ -14,7 +15,6 @@ import {
   Spacer,
   Stack,
   Text,
-  useColorMode,
   useDisclosure
 } from '@chakra-ui/react'
 import {useRef} from 'react'

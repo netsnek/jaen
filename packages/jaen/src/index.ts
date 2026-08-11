@@ -18,6 +18,13 @@ export {
   DuplicateSlugError
 } from './contexts/cms-management'
 export {useContentManagement} from './hooks/use-content-management'
+export {
+  DarkMode,
+  LightMode,
+  useColorMode,
+  useColorModeValue
+} from './hooks/use-color-mode'
+export type {ColorMode, ColorModeWithSystem} from './hooks/use-color-mode'
 export {FieldHighlighterProvider} from './contexts/field-highlighter'
 export {
   NotificationsProvider,

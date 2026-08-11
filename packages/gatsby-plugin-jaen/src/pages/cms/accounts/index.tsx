@@ -1,4 +1,10 @@
-import {PageConfig, useAuth, zitadelGql} from 'jaen'
+import {
+  PageConfig,
+  useAuth,
+  useColorModeValue,
+  useNotificationsContext,
+  zitadelGql
+} from 'jaen'
 import {intlText} from '../../../lib/intl'
 import {Link as GatsbyLink, PageProps} from 'gatsby'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
@@ -37,9 +43,7 @@ import {
   SkeletonText,
   Stack,
   Text,
-  useColorModeValue,
-  useDisclosure,
-  useToast
+  useDisclosure
 } from '@chakra-ui/react'
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
 import {useForm} from 'react-hook-form'
@@ -69,7 +73,7 @@ const stateLabel = (state?: string | null): string =>
 const AccountsPage: React.FC = () => {
   const intl = useIntl()
   const auth = useAuth()
-  const toast = useToast()
+  const {toast} = useNotificationsContext()
 
   const [users, setUsers] = useState<UserSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -393,8 +397,7 @@ const AccountsPage: React.FC = () => {
           <Text color="fg.muted">
             {intl.formatMessage({
               id: 'CmsAccountsEmptyHint',
-              defaultMessage:
-                'Adjust the search term or create a new account.'
+              defaultMessage: 'Adjust the search term or create a new account.'
             })}
           </Text>
         </Box>

@@ -1,4 +1,4 @@
-import {PageConfig, useAuth, zitadelGql} from 'jaen'
+import {PageConfig, useAuth, useNotificationsContext, zitadelGql} from 'jaen'
 import {intlText} from '../../../lib/intl'
 import {navigate, PageProps} from 'gatsby'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
@@ -49,8 +49,7 @@ import {
   StatLabel,
   StatNumber,
   Text,
-  useDisclosure,
-  useToast
+  useDisclosure
 } from '@chakra-ui/react'
 
 interface UserDetail {
@@ -123,7 +122,7 @@ const UserDetailsPage: React.FC<PageProps> = props => {
 
   const intl = useIntl()
   const auth = useAuth()
-  const toast = useToast()
+  const {toast} = useNotificationsContext()
 
   const accessToken = auth.user?.access_token
 
@@ -203,11 +202,7 @@ const UserDetailsPage: React.FC<PageProps> = props => {
   }, [loadUser])
 
   const notifyResult = useCallback(
-    (
-      ok: boolean,
-      message: string | null | undefined,
-      successTitle: string
-    ) => {
+    (ok: boolean, message: string | null | undefined, successTitle: string) => {
       if (ok) {
         toast({title: successTitle, status: 'success'})
       } else {

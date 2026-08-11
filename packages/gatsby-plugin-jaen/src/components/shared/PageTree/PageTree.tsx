@@ -1,10 +1,5 @@
-import {
-  Box,
-  Text,
-  useColorModeValue,
-  useTheme,
-  useToken
-} from '@chakra-ui/react'
+import {useColorModeValue} from 'jaen'
+import {Box, Text, useTheme, useToken} from '@chakra-ui/react'
 import {mode, transparentize} from '@chakra-ui/theme-tools'
 
 import {useEffect, useState} from 'react'

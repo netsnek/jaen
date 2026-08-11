@@ -1,4 +1,5 @@
-import {useColorMode} from '@chakra-ui/react'
+import {useColorMode} from '../hooks/use-color-mode'
+
 import {createContext, useContext, useEffect, useState} from 'react'
 import 'vanilla-cookieconsent'
 

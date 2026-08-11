@@ -3,7 +3,7 @@ import {graphql} from 'gatsby'
 import {z} from 'zod'
 import {useForm} from 'react-hook-form'
 import {zodResolver} from '@hookform/resolvers/zod'
-import {PageConfig} from 'jaen'
+import {PageConfig, useNotificationsContext} from 'jaen'
 
 // Tiptap
 import {EditorContent, useEditor} from '@tiptap/react'
@@ -45,7 +45,6 @@ import {
   Checkbox,
   HStack,
   IconButton,
-  useToast,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -133,7 +132,7 @@ const replaceVariables = (
 
 // Define the component
 const EmailSendFormComponent: React.FC = () => {
-  const toast = useToast()
+  const {toast} = useNotificationsContext()
 
   // Local state for controlling the "Preview" modal
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)

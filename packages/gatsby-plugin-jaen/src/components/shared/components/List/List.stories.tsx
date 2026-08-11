@@ -1,4 +1,5 @@
-import {Icon, useColorModeValue} from '@chakra-ui/react'
+import {useColorModeValue} from 'jaen'
+import {Icon} from '@chakra-ui/react'
 import {ComponentMeta, Story} from '@storybook/react'
 import React from 'react'
 import {FaRocket} from '@react-icons/all-files/fa/FaRocket'
