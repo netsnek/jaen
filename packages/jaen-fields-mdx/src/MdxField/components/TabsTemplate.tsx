@@ -1,4 +1,4 @@
-import {AddIcon} from '@chakra-ui/icons'
+import {AddIcon} from './icons'
 import {
   Box,
   Button,

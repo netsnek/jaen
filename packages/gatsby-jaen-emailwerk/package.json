@@ -37,7 +37,6 @@
     "typescript": "^5.7.2"
   },
   "peerDependencies": {
-    "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.1",
     "gatsby": "^5.12.4",
     "gatsby-plugin-jaen": "^1.0.0",

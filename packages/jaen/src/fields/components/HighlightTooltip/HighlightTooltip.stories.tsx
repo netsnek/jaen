@@ -1,4 +1,4 @@
-import {ChevronLeftIcon, ChevronRightIcon, EditIcon} from '@chakra-ui/icons'
+import {ChevronLeftIcon, ChevronRightIcon, EditIcon} from './icons'
 import {Select} from '@chakra-ui/react'
 import {ComponentMeta, Story} from '@storybook/react'
 import React from 'react'

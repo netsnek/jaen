@@ -1,4 +1,4 @@
-import {EditIcon, ViewIcon} from '@chakra-ui/icons'
+import {EditIcon, ViewIcon} from './icons'
 import {Badge, Box, HStack} from '@chakra-ui/react'
 import {markdown, markdownLanguage} from '@codemirror/lang-markdown'
 import {languages} from '@codemirror/language-data'

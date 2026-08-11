@@ -24,7 +24,6 @@
     "dev": "yarn build --watch"
   },
   "dependencies": {
-    "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.0",
     "@react-icons/all-files": "https://github.com/react-icons/react-icons/releases/download/v4.11.0/react-icons-all-files-4.11.0.tgz",
     "@reduxjs/toolkit": "^1.9.5",

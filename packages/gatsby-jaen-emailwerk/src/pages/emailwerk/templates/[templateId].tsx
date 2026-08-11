@@ -1,7 +1,7 @@
 import {PageConfig, PageProps, useNotificationsContext} from 'jaen'
 import {useEffect, useMemo, useState} from 'react'
 
-import {CopyIcon, DeleteIcon} from '@chakra-ui/icons'
+import {CopyIcon, DeleteIcon} from '../../../icons'
 import {
   Box,
   Button,

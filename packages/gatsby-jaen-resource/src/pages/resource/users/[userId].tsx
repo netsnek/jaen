@@ -39,7 +39,7 @@ import {forwardRef, useEffect, useMemo, useState} from 'react'
 import {Controller, useFieldArray, useForm} from 'react-hook-form'
 
 import {useUser, useUsers} from '../../../hooks'
-import {InfoIcon} from '@chakra-ui/icons'
+import {InfoIcon} from '../../../icons'
 
 type FormValues = {
   emailAddress: string

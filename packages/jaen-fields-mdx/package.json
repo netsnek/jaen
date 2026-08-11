@@ -23,7 +23,6 @@
     "dev": "yarn build --watch"
   },
   "dependencies": {
-    "@chakra-ui/icons": "^2.1.0",
     "@chakra-ui/react": "^2.8.0",
     "@codemirror/lang-markdown": "^6.2.0",
     "@codemirror/language-data": "^6.3.1",
