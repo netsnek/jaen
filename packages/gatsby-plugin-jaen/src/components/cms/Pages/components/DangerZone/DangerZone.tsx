@@ -37,11 +37,11 @@ export const DangerZone: FC<DangerZoneProps> = ({actions}) => {
             </Stack>
             <Link
               as={Button}
-              leftIcon={<action.icon />}
               variant="outline"
-              colorScheme="red"
+              colorPalette="red"
               onClick={() => action.onClick(index)}
               isDisabled={action.isDisabled}>
+              <action.icon />
               {action.buttonText}
             </Link>
           </HStack>

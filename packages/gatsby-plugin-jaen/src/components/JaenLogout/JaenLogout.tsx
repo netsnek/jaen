@@ -21,9 +21,9 @@ export const JaenLogout: React.FC<JaenLogoutProps> = props => {
               <Link
                 as={Button}
                 variant="outline"
-                leftIcon={<FaArrowLeft />}
                 to={props.goBackPath}
                 onClick={props.onGoBack}>
+                <FaArrowLeft />
                 Back to website
               </Link>
             </HStack>

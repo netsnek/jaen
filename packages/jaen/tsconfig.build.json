@@ -1,0 +1,29 @@
+{
+  // Compile with the repo's own TypeScript before microbundle sees anything.
+  //
+  // microbundle 0.15.1 embeds rollup-plugin-typescript2, which resolves modules
+  // as if moduleResolution were "node" no matter what the tsconfig says. Under
+  // node10 resolution Chakra v3's exports map is ignored, HTMLChakraProps comes
+  // back without `children`, and every element that passes only children fails
+  // with TS2559. The same sources typecheck clean under `tsc` with the same
+  // module and target, so the checker is the problem, not the code.
+  //
+  // Feeding microbundle JavaScript instead of TypeScript keeps its bundling and
+  // its output filenames, which the package's exports map pins, while the type
+  // checking and the declarations come from the version everything else uses.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": ".tsbuild",
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    // the root config sets sourceRoot, which TS rejects without a source map
+    "sourceRoot": "",
+    "noEmit": false,
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["src/**/*.stories.tsx", "src/**/*.test.ts", "src/**/*.test.tsx"]
+}

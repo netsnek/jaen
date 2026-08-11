@@ -1,6 +1,6 @@
 import React from 'react'
-import {useForm, Controller} from 'react-hook-form'
-import {Input, Button, Stack, Text, Field} from '@chakra-ui/react'
+import {useForm} from 'react-hook-form'
+import {Input, Button, ButtonProps, Stack, Field} from '@chakra-ui/react'
 
 interface FormData {
   emailAddress: string
@@ -41,9 +41,12 @@ const StepEmail: React.FC<StepEmailProps> = props => {
             {errors.emailAddress && errors.emailAddress.message}
           </Field.ErrorText>
         </Field.Root>
+        {/* `primary` is jaen's own button recipe variant and resolves at
+            runtime; the prop union stays at v3's built-ins until `chakra
+            typegen` is run against src/theme, so the cast goes then. */}
         <Button
           type="submit"
-          variant="primary"
+          variant={'primary' as ButtonProps['variant']}
           size="lg"
           loading={isSubmitting}>
           Continue

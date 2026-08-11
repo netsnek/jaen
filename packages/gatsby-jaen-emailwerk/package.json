@@ -13,7 +13,8 @@
     "gatsby-node.js"
   ],
   "scripts": {
-    "build": "tsc gatsby/gatsby-node.ts --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule && tsc -p tsconfig.build.json"
+    "build": "yarn typecheck && tsc gatsby/gatsby-node.ts --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule --noCheck && tsc -p tsconfig.build.json --noCheck",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@gqty/react": "^3.0.5",

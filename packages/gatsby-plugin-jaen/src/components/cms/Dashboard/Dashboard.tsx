@@ -3,10 +3,10 @@ import {
   Heading,
   HStack,
   Icon,
+  List as ChakraList,
   SimpleGrid,
   Stack,
-  Text,
-  List
+  Text
 } from '@chakra-ui/react'
 import {FaBullhorn} from '@react-icons/all-files/fa/FaBullhorn'
 import {FaRocket} from '@react-icons/all-files/fa/FaRocket'
@@ -25,7 +25,7 @@ export interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = props => {
   return (
-    <Stack spacing="12">
+    <Stack gap="12">
       <Heading size="sm">
         {props.user ? (
           <>
@@ -36,13 +36,13 @@ export const Dashboard: React.FC<DashboardProps> = props => {
         )}
       </Heading>
 
-      <Stack spacing="4">
+      <Stack gap="4">
         <SimpleGrid
           columns={{
             base: 1,
             md: 2
           }}
-          spacing="4">
+          gap="4">
           <Card.Root>
             <Card.Header>
               <HStack>
@@ -69,36 +69,36 @@ export const Dashboard: React.FC<DashboardProps> = props => {
               </HStack>
             </Card.Header>
             <Card.Body>
-              <List.Root as="ul" listStyleType="disc" pl="1.5rem" gap={3}>
-                <ChakraListItem>
+              <ChakraList.Root as="ul" listStyleType="disc" pl="1.5rem" gap={3}>
+                <ChakraList.Item>
                   Easy to Use: Jaen CMS is designed with simplicity in mind. You
                   don't need to be a techie to use it. Just start creating!
-                </ChakraListItem>
-                <ChakraListItem>
+                </ChakraList.Item>
+                <ChakraList.Item>
                   Instant Preview: See how your changes look on your website in
                   real-time before publishing. No waiting or guessing!
-                </ChakraListItem>
-                <ChakraListItem>
+                </ChakraList.Item>
+                <ChakraList.Item>
                   Safe Editing: Don't worry about making mistakes. Jaen CMS
                   keeps track of your changes, so you can always go back to a
                   previous version if needed.
-                </ChakraListItem>
-                <ChakraListItem>
+                </ChakraList.Item>
+                <ChakraList.Item>
                   Beautiful Images: Easily add and manage images to make your
                   website visually stunning and engaging.
-                </ChakraListItem>
-                <ChakraListItem>
+                </ChakraList.Item>
+                <ChakraList.Item>
                   Better SEO: Improve your website's visibility in search
                   engines with built-in tools to optimize your content for
                   search results.
-                </ChakraListItem>
-              </List.Root>
+                </ChakraList.Item>
+              </ChakraList.Root>
             </Card.Body>
           </Card.Root>
         </SimpleGrid>
       </Stack>
 
-      <List spacing="12" overflowY="auto" label="Previouse releases">
+      <List gap="12" overflowY="auto" label="Previouse releases">
         {props.isPublishing && (
           <ListItem
             title="In progress"

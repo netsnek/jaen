@@ -1,6 +1,6 @@
 import React from 'react'
 import {useForm, Controller} from 'react-hook-form'
-import {Input, Button, Stack, Field} from '@chakra-ui/react'
+import {Input, Button, ButtonProps, Stack, Field} from '@chakra-ui/react'
 
 interface FormData {
   password: string
@@ -69,9 +69,12 @@ const StepPassword: React.FC<StepEmailProps> = props => {
           </Field.ErrorText>
         </Field.Root>
 
+        {/* `primary` is jaen's own button recipe variant and resolves at
+            runtime; the prop union stays at v3's built-ins until `chakra
+            typegen` is run against src/theme, so the cast goes then. */}
         <Button
           type="submit"
-          variant="primary"
+          variant={'primary' as ButtonProps['variant']}
           size="lg"
           loading={isSubmitting}>
           Send password reset mail

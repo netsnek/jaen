@@ -202,7 +202,9 @@ const Page: React.FC = () => {
             <FormField
               control={form.control}
               name="message"
-              render={({field}) => (
+              // the tiptap editor owns this value and pushes it through
+              // form.setValue in its onUpdate, so there is no field to bind here
+              render={() => (
                 <FormItem>
                   <FormLabel>
                     {intl.formatMessage({
@@ -429,7 +431,11 @@ const Page: React.FC = () => {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={field.value}
+                        // the schema types from/to as strings, so the picker gets a
+                        // string where it wants a Date and never marks the current
+                        // value as selected. Cast keeps that behaviour rather than
+                        // changing what renders; the schema is the real fix.
+                        selected={field.value as unknown as Date}
                         onSelect={field.onChange}
                         disabled={date =>
                           form.getValues().to
@@ -492,7 +498,8 @@ const Page: React.FC = () => {
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
-                        selected={field.value}
+                        // same string-vs-Date mismatch as the "from" picker above
+                        selected={field.value as unknown as Date}
                         onSelect={field.onChange}
                         disabled={date =>
                           form.getValues().from

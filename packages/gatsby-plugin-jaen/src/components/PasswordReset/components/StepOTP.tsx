@@ -1,12 +1,11 @@
 import React from 'react'
 import {useForm, Controller} from 'react-hook-form'
 import {
-  Input,
   Button,
+  ButtonProps,
   Center,
   HStack,
   PinInput,
-  PinInputField,
   VStack,
   Stack,
   Field
@@ -91,9 +90,12 @@ const StepOTP: React.FC<StepEmailProps> = props => {
           <Field.ErrorText>{errors.otp && errors.otp.message}</Field.ErrorText>
         </Field.Root>
 
+        {/* `primary` is jaen's own button recipe variant and resolves at
+            runtime; the prop union stays at v3's built-ins until `chakra
+            typegen` is run against src/theme, so the cast goes then. */}
         <Button
           type="submit"
-          variant="primary"
+          variant={'primary' as ButtonProps['variant']}
           size="lg"
           loading={isSubmitting}
           disabled={otp.length !== 6}>

@@ -118,12 +118,13 @@ const ImageBlock = connectBlock(
         <Box h="md" m="4" objectFit="contain">
           <Field.Image name="image" objectFit="contain" />
         </Box>
-        <Field.Text
-          name="caption"
-          textAlign="center"
-          variant="cursive"
-          fontSize="xs"
-        />
+        {/* v2 passed variant="cursive" here, which reached the site's Text
+            theme. That variant set fontWeight: normal and nothing else, which
+            is the weight Text already has, so it never showed. v3's Text has no
+            recipe to select a variant on at all, and the ported site theme
+            dropped the Text recipe as unused, so the prop goes rather than
+            landing on the DOM as a stray attribute. */}
+        <Field.Text name="caption" textAlign="center" fontSize="xs" />
       </Box>
     )
   },

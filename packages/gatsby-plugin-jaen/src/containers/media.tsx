@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react'
-import {MediaNode, uploadFile, useField, usePageContext} from 'jaen'
+import {MediaNode, uploadFile, useField} from 'jaen'
 import {v4 as uuidv4} from 'uuid'
 
 import {Media, MediaProps} from '../components/cms/Media/Media'
@@ -167,7 +167,7 @@ const MediaContainer: React.FC<MediaContainerProps> = props => {
           a.click()
           a.remove()
         })
-        .catch(error => {
+        .catch(() => {
           // Handle download error gracefully, show error message to user, etc.
         })
     }

@@ -2,14 +2,12 @@ import {
   AspectRatio,
   Button,
   ButtonGroup,
-  Center,
+  ButtonProps,
   HStack,
   IconButton,
   Image,
   Input,
-  Skeleton,
   Spacer,
-  Spinner,
   Text,
   Dialog,
   Portal
@@ -129,12 +127,17 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
       <Portal>
         <Dialog.Backdrop />
 
-        <Dialog.Positioner>
+        {/*
+          The portal lifts the dialog out of the `#momo` scope that every Chakra
+          custom property is emitted under, so the content needs an ancestor
+          carrying the id or its tokens resolve against nothing. v2 spelled that
+          as containerProps on ModalContent; the positioner is the element those
+          props reached. The backdrop stays outside it, unresolved, exactly as
+          the v2 overlay was.
+        */}
+        <Dialog.Positioner id="momo">
           <Dialog.Content
             overflow="hidden"
-            containerProps={{
-              id: 'momo'
-            }}
             bg="transparent"
             css={{
               '& .react-transform-wrapper': {
@@ -160,8 +163,12 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
                 bg="bg.surface"
                 borderBottom="1px solid"
                 borderColor="border.emphasized">
+                {/* `text` comes from theme/recipes/button.ts. v3 types variant
+                    off Chakra's shipped recipes.gen.d.ts, which only picks up
+                    theme recipes once `chakra typegen` regenerates it, and no
+                    package here runs typegen yet. */}
                 <Button
-                  variant="text"
+                  variant={'text' as ButtonProps['variant']}
                   onClick={() => {
                     onPreview(false)
                   }}>
@@ -261,10 +268,14 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
               </TransformWrapper>
 
               {selectedMediaNode && isPreview === 'EDIT' && (
+                // previewPixelRatio is declared required but has a default of
+                // window.devicePixelRatio in the editor's own defaultConfig, and
+                // passing it explicitly would override that default.
+                // @ts-expect-error - upstream types the prop as required
                 <FilerobotImageEditor
                   source={selectedMediaNode?.url}
                   closeAfterSave
-                  onSave={async (editedImageObject, designState) => {
+                  onSave={async editedImageObject => {
                     editedImageObject.imageCanvas?.toBlob(blob => {
                       if (blob) {
                         const newFile = new File(

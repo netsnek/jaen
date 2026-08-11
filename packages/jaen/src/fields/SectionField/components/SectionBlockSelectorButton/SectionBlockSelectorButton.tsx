@@ -1,4 +1,4 @@
-import {Box, Flex, IconButton, Icon} from '@chakra-ui/react'
+import {Box, Flex, IconButton, IconButtonProps, Icon} from '@chakra-ui/react'
 import React, {useRef, useState} from 'react'
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
 
@@ -51,7 +51,13 @@ export const SectionBlockSelectorButton: React.FC<
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}>
       <IconButton
-        variant="field-highlighter-tooltip"
+        variant={
+          // This variant is declared in gatsby-plugin-jaen's button recipe.
+          // Widening the type of `variant` beyond the names v3's own recipe
+          // carries takes a `chakra typegen` run, which no package here has a
+          // script for, so the name is asserted instead.
+          'field-highlighter-tooltip' as IconButtonProps['variant']
+        }
         ml={0.5}
         aria-label="Add"
         onClick={toggleOpen}>

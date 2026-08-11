@@ -5,7 +5,6 @@ import {
   IconButton,
   Input,
   InputGroup,
-  InputLeftElement,
   Text,
   VStack,
   Wrap,
@@ -102,14 +101,18 @@ export const TuneSelector: React.FC<TuneSelectorProps> = ({
       shadow="lg"
       border="1px"
       borderColor="gray.100">
-      <InputGroup size="sm" variant="filled" rounded="md">
-        <InputLeftElement pointerEvents="none">
-          <FaSearch color="gray.300" />
-        </InputLeftElement>
+      {/* v2's InputGroup fed size and variant to the Input through context and
+          v3's is a plain Group, so size sits on the Input now, which is where
+          v3 reads it. `filled` has no v3 counterpart at all and the ported
+          theme did not add one; the bg, _hover and _focus below were already
+          overriding everything filled contributed except its transparent
+          border, so the box gains outline's 1px edge and nothing else. */}
+      <InputGroup rounded="md" startElement={<FaSearch color="gray.300" />}>
         <Input
+          size="sm"
           placeholder="Search"
           value={searchTerm}
-          onValueChange={handleSearch}
+          onChange={handleSearch}
           px="10"
           py="1"
           bg="gray.50"
@@ -118,6 +121,11 @@ export const TuneSelector: React.FC<TuneSelectorProps> = ({
           }}
           _focus={{
             bg: 'gray.100',
+            // v2 resolved `outline` against Chakra's own shadow scale, which
+            // v3 does not ship and the ported theme did not replace, so this
+            // now draws nothing. Left standing rather than swapped for the
+            // theme's `focus`, which is a different ring: picking the
+            // replacement is the theme's call, not this file's.
             boxShadow: 'outline'
           }}
         />

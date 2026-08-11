@@ -1,30 +1,41 @@
-/*
- MIGRATION NOTE: The following Chakra UI hooks have been removed.
- Please replace them with the suggested alternatives:
-
-//   - useMergeRefs: Use react-use: useMergeRefs
-
- See: https://chakra-ui.com/docs/get-started/migration#hooks
-*/
 import {
+  Field,
   IconButton,
+  IconButtonProps,
   Input,
   InputGroup,
   InputProps,
-  InputRightElement,
-  useDisclosure,
-  Field
+  mergeRefs,
+  useDisclosure
 } from '@chakra-ui/react'
-import {forwardRef, useRef} from 'react'
+import {forwardRef, useMemo, useRef} from 'react'
 import {FaEye} from '@react-icons/all-files/fa/FaEye'
 import {FaEyeSlash} from '@react-icons/all-files/fa/FaEyeSlash'
 
-export const PasswordField = forwardRef<HTMLInputElement, InputProps>(
+/**
+ * v2's InputProps carried isInvalid and isRequired and this component read them
+ * straight off it. v3's does not, so they are spelled out here rather than
+ * renamed to the v3 spelling: this component is re-exported from the package
+ * index, so the two names are its published surface and dropping the prefix
+ * would break call sites outside this repo for no visual gain. The Signup copy
+ * under components/Signup is private and does rename them.
+ */
+export interface PasswordFieldProps extends InputProps {
+  isInvalid?: boolean
+  isRequired?: boolean
+}
+
+export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
   ({isInvalid, isRequired, ...props}, ref) => {
     const {open, onToggle} = useDisclosure()
     const inputRef = useRef<HTMLInputElement>(null)
 
-    const mergeRef = useMergeRefs(inputRef, ref)
+    /**
+     * v3 ships mergeRefs, the bare function behind v2's useMergeRefs. Without
+     * the memo a fresh callback ref on every render would detach and reattach
+     * the input, which loses focus mid-typing.
+     */
+    const mergeRef = useMemo(() => mergeRefs(inputRef, ref), [ref])
     const onClickReveal = () => {
       onToggle()
       if (inputRef.current) {
@@ -38,25 +49,29 @@ export const PasswordField = forwardRef<HTMLInputElement, InputProps>(
         invalid={isInvalid}
         required={isRequired}>
         <Field.Label htmlFor="password">Password</Field.Label>
-        <InputGroup>
+        <InputGroup
+          endElement={
+            // `text` is defined in theme/recipes/button.ts, but v3 takes the
+            // variant union from Chakra's shipped recipes.gen.d.ts, which only
+            // learns about theme recipes when `chakra typegen` regenerates it.
+            // Nothing here runs typegen, so the literal needs the cast.
+            <IconButton
+              variant={'text' as IconButtonProps['variant']}
+              color="brand.500"
+              aria-label={open ? 'Mask password' : 'Reveal password'}
+              onClick={onClickReveal}>
+              {open ? <FaEyeSlash /> : <FaEye />}
+            </IconButton>
+          }>
           <Input
             id="password"
             ref={mergeRef}
             name="password"
-            type={isOpen ? 'text' : 'password'}
+            type={open ? 'text' : 'password'}
             autoComplete="current-password"
             required
             {...props}
           />
-          <InputRightElement>
-            <IconButton
-              variant="text"
-              color="brand.500"
-              aria-label={isOpen ? 'Mask password' : 'Reveal password'}
-              onClick={onClickReveal}>
-              {isOpen ? <FaEyeSlash /> : <FaEye />}
-            </IconButton>
-          </InputRightElement>
         </InputGroup>
         <Field.ErrorText>
           {props.name === 'password' && 'Password is required'}

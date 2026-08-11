@@ -1,4 +1,4 @@
-import {As, Box, HStack, Icon, Input, Stack, Text} from '@chakra-ui/react'
+import {Box, HStack, Icon, Input, Stack, Text} from '@chakra-ui/react'
 import {useEffect, useMemo, useState} from 'react'
 
 import {MenuButton} from '../../../../shared/MenuButton/MenuButton'
@@ -10,7 +10,7 @@ export interface ChooseButtonProps {
     string,
     {
       label: string
-      Icon?: As
+      Icon?: React.ElementType
     }
   >
   placeholder?: ChooseButtonProps['items'][0]
@@ -69,7 +69,7 @@ export const ChooseButton: React.FC<ChooseButtonProps> = ({
   return (
     <Box pos="relative">
       <MenuButton
-        isDisabled={isDisabled}
+        disabled={isDisabled}
         bgColor="bg.subtle"
         items={menuButtonItems}
         renderItems={items => {
@@ -81,7 +81,7 @@ export const ChooseButton: React.FC<ChooseButtonProps> = ({
                 mx="2"
                 placeholder="Search..."
                 value={searchQuery}
-                onValueChange={e => {
+                onChange={e => {
                   setSearchQuery(e.target.value)
                 }}
               />

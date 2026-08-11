@@ -18,6 +18,7 @@ import {
   Button,
   Card,
   Checkbox,
+  CloseButton,
   Flex,
   Heading,
   HStack,
@@ -250,7 +251,7 @@ const AccountsPage: React.FC = () => {
             defaultMessage: 'Search by name, email or login name'
           })}
           value={searchTerm}
-          onValueChange={event => {
+          onChange={event => {
             setSearchTerm(event.target.value)
           }}
         />
@@ -280,7 +281,7 @@ const AccountsPage: React.FC = () => {
                   </HStack>
                 </Card.Header>
                 <Card.Body>
-                  <SkeletonText lineClamp={3} />
+                  <SkeletonText noOfLines={3} />
                 </Card.Body>
               </Card.Root>
             ))
@@ -410,7 +411,12 @@ const AccountsPage: React.FC = () => {
                     defaultMessage: 'Create a new account'
                   })}
                 </Dialog.Header>
-                <Dialog.CloseTrigger />
+                {/* Same as the drawers: v3's CloseTrigger draws nothing of its
+                    own, so the X v2's ModalCloseButton carried has to be handed
+                    to it, at the 32px and neutral hover v2 gave it. */}
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton size="xs" colorPalette="gray" />
+                </Dialog.CloseTrigger>
                 <Dialog.Body>
                   <Stack gap="4">
                     <Field.Root required invalid={!!errors.username}>

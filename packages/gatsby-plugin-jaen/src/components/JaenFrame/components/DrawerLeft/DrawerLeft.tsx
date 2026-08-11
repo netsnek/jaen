@@ -1,5 +1,6 @@
 import {
   Box,
+  CloseButton,
   Drawer,
   HStack,
   Icon,
@@ -45,7 +46,7 @@ export const DrawerLeft: React.FC<DrawerLeftProps> = ({
       <Drawer.Root
         placement="start"
         size="xs"
-        open={isOpen}
+        open={open}
         initialFocusEl={() => initialFocusRef.current}
         onOpenChange={e => {
           if (!e.open) {
@@ -55,24 +56,31 @@ export const DrawerLeft: React.FC<DrawerLeftProps> = ({
         <Portal>
           <Drawer.Backdrop bg="rgba(0,0,0,0.1)" />
 
-          {/* A drawer renders through a portal, so it lands outside the header
-              that carries the Chakra variable root. containerProps puts the id
-              on the portal's own container, which is what media-modal.tsx and
-              the notifications toast already do. */}
+          {/* v2 hung id="momo" on the portal container here, because the
+              provider scoped its variables to that selector and a portal
+              lands outside the header that carries it. v3 emits them globally
+              behind the `jaen` prefix instead (see gatsby/wrap-root-element),
+              so the drawer needs no root of its own, and v3 offers no
+              containerProps to put one on either way. */}
           <Drawer.Positioner>
-            <Drawer.Content
-              borderRightRadius="xl"
-              containerProps={{id: 'momo'}}>
+            <Drawer.Content borderRightRadius="xl">
               <Drawer.Header p="4">
                 <HStack justifyContent="space-between">
                   <Box h="full" maxW="12rem">
                     {logo || <JaenFullLogo />}
                   </Box>
-                  <Drawer.CloseTrigger
-                    ref={initialFocusRef}
-                    pos="static"
-                    onClick={onClose}
-                  />
+                  {/* v3's CloseTrigger renders whatever it is handed and
+                      nothing otherwise, where v2's DrawerCloseButton brought
+                      its own X. size="xs" matches the 32px v2 drew, and the
+                      gray palette keeps the hover neutral against the brand
+                      one jaen's button recipe pins in `base`. */}
+                  <Drawer.CloseTrigger asChild pos="static" onClick={onClose}>
+                    <CloseButton
+                      ref={initialFocusRef}
+                      size="xs"
+                      colorPalette="gray"
+                    />
+                  </Drawer.CloseTrigger>
                 </HStack>
               </Drawer.Header>
               <Drawer.Body p="4" display="flex" flexDirection="column">

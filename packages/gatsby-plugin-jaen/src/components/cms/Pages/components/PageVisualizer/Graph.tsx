@@ -49,13 +49,11 @@ export const Graph: React.FC<{
     }
   }, [selection])
 
-  const [brand500] = useToken(
-    // the key within the theme, in this case `theme.colors`
-    'colors',
-    // the subkey(s), resolving to `theme.colors.red.100`
-    ['brand.500']
-    // a single fallback or fallback array matching the length of the previous arg
-  )
+  // v3 dropped useToken's fallback argument and types the result as string[]
+  // rather than a tuple, so under noUncheckedIndexedAccess the element reads as
+  // possibly undefined while reagraph's Theme wants a colour everywhere. The
+  // token is declared in the theme, so the assertion is the whole fallback.
+  const brand500 = useToken('colors', ['brand.500'])[0]!
 
   const theme = useMemo(
     () => ({

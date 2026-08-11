@@ -1,4 +1,4 @@
-import {AuthUserProvider, PageConfig, useAuthUser} from 'jaen'
+import {PageConfig, useAuthUser} from 'jaen'
 import {PageProps} from 'gatsby'
 import React from 'react'
 

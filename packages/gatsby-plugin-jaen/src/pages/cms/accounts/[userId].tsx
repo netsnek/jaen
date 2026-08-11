@@ -15,6 +15,7 @@ import {
   Card,
   Checkbox,
   CheckboxGroup,
+  CloseButton,
   Flex,
   Heading,
   HStack,
@@ -464,7 +465,9 @@ const UserDetailsPage: React.FC<PageProps> = props => {
             </HStack>
           </Card.Header>
           <Card.Body>
-            <SkeletonText lineClamp={4} />
+            {/* SkeletonText kept its own noOfLines in v3; lineClamp is only a
+                style prop here and would leave the default three lines. */}
+            <SkeletonText noOfLines={4} />
           </Card.Body>
         </Card.Root>
         <Card.Root variant="outline">
@@ -986,48 +989,50 @@ const UserDetailsPage: React.FC<PageProps> = props => {
           }
         }}>
         <Portal>
-          <Dialog.Backdrop>
-            <Dialog.Positioner>
-              <Dialog.Content>
-                <Dialog.Header>
+          {/* v2's AlertDialogOverlay wrapped the content; in v3 the backdrop is
+              a sibling of the positioner, or its close animation fades the
+              dialog itself out along with the dimmed layer. */}
+          <Dialog.Backdrop />
+          <Dialog.Positioner>
+            <Dialog.Content>
+              <Dialog.Header>
+                {intl.formatMessage({
+                  id: 'CmsAccountsDeleteTitle',
+                  defaultMessage: 'Delete account'
+                })}
+              </Dialog.Header>
+              <Dialog.Body>
+                {intl.formatMessage(
+                  {
+                    id: 'CmsAccountsDeletePrompt',
+                    defaultMessage:
+                      'Are you sure you want to delete {username}? This cannot be undone.'
+                  },
+                  {username: user.userName}
+                )}
+              </Dialog.Body>
+              <Dialog.Footer>
+                <Button ref={deleteCancelRef} onClick={deleteDialog.onClose}>
                   {intl.formatMessage({
-                    id: 'CmsAccountsDeleteTitle',
+                    id: 'CmsAccountsActionsCancel',
+                    defaultMessage: 'Cancel'
+                  })}
+                </Button>
+                <Button
+                  colorPalette="red"
+                  ml={3}
+                  loading={isBusy}
+                  onClick={() => {
+                    void onDelete()
+                  }}>
+                  {intl.formatMessage({
+                    id: 'CmsAccountsActionsDelete',
                     defaultMessage: 'Delete account'
                   })}
-                </Dialog.Header>
-                <Dialog.Body>
-                  {intl.formatMessage(
-                    {
-                      id: 'CmsAccountsDeletePrompt',
-                      defaultMessage:
-                        'Are you sure you want to delete {username}? This cannot be undone.'
-                    },
-                    {username: user.userName}
-                  )}
-                </Dialog.Body>
-                <Dialog.Footer>
-                  <Button ref={deleteCancelRef} onClick={deleteDialog.onClose}>
-                    {intl.formatMessage({
-                      id: 'CmsAccountsActionsCancel',
-                      defaultMessage: 'Cancel'
-                    })}
-                  </Button>
-                  <Button
-                    colorPalette="red"
-                    ml={3}
-                    loading={isBusy}
-                    onClick={() => {
-                      void onDelete()
-                    }}>
-                    {intl.formatMessage({
-                      id: 'CmsAccountsActionsDelete',
-                      defaultMessage: 'Delete account'
-                    })}
-                  </Button>
-                </Dialog.Footer>
-              </Dialog.Content>
-            </Dialog.Positioner>
-          </Dialog.Backdrop>
+                </Button>
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
 
@@ -1048,7 +1053,12 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                   defaultMessage: 'Set a new password'
                 })}
               </Dialog.Header>
-              <Dialog.CloseTrigger />
+              {/* Same as the drawers: v3's CloseTrigger draws nothing of its
+                  own, so the X v2's ModalCloseButton carried has to be handed
+                  to it, at the 32px and neutral hover v2 gave it. */}
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="xs" colorPalette="gray" />
+              </Dialog.CloseTrigger>
               <Dialog.Body>
                 <Stack gap="4">
                   <Field.Root required>
@@ -1061,14 +1071,14 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                     <Input
                       type="password"
                       value={newPassword}
-                      onValueChange={event => {
+                      onChange={event => {
                         setNewPassword(event.target.value)
                       }}
                     />
                   </Field.Root>
                   <Checkbox.Root
-                    onCheckedChange={event => {
-                      setPasswordChangeRequired(event.target.checked)
+                    onCheckedChange={details => {
+                      setPasswordChangeRequired(details.checked === true)
                     }}
                     checked={passwordChangeRequired}>
                     <Checkbox.HiddenInput />
@@ -1130,7 +1140,9 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                       defaultMessage: 'Grant project roles'
                     })}
               </Dialog.Header>
-              <Dialog.CloseTrigger />
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="xs" colorPalette="gray" />
+              </Dialog.CloseTrigger>
               <Dialog.Body>
                 <Stack gap="4">
                   {!roleModalAuthorization ? (
@@ -1143,7 +1155,7 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                       </Field.Label>
                       <Input
                         value={roleModalProjectId}
-                        onValueChange={event => {
+                        onChange={event => {
                           setRoleModalProjectId(event.target.value)
                         }}
                         onBlur={() => {
@@ -1154,7 +1166,7 @@ const UserDetailsPage: React.FC<PageProps> = props => {
                   ) : null}
 
                   {rolesLoading ? (
-                    <SkeletonText lineClamp={3} />
+                    <SkeletonText noOfLines={3} />
                   ) : availableRoles.length > 0 ? (
                     <CheckboxGroup
                       value={selectedRoleKeys}

@@ -10,19 +10,9 @@ import {
   HStack,
   Input,
   Link,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
   NumberInput,
-  NumberInputField,
-  NumberInputStepper,
   Stack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr
+  Table
 } from '@chakra-ui/react'
 import {graphql, Link as GatsbyLink} from 'gatsby'
 import {useEffect, useState} from 'react'
@@ -240,11 +230,22 @@ const Page: React.FC = () => {
                 {isEditing && (
                   <Table.Cell maxW="24">
                     <NumberInput.Root
-                      defaultValue={String(service.meta?.order)}
-                      onValueChange={(value: string) => {
+                      // v2 took a number here and showed nothing for a nullish
+                      // order. v3 takes a string, and String(null) seeds the
+                      // machine with a literal "null": it renders empty, but
+                      // counts as non-empty, so the first blur clamps it to 0
+                      // and mutates the service nobody touched.
+                      defaultValue={
+                        service.meta?.order != null
+                          ? String(service.meta.order)
+                          : undefined
+                      }
+                      onValueChange={details => {
                         updateService(service.id, {
                           meta: {
-                            order: parseInt(value)
+                            // parseInt over valueAsNumber so an empty field
+                            // still writes NaN the way v2's onChange did
+                            order: parseInt(details.value)
                           }
                         })
                       }}>

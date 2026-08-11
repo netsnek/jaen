@@ -9,12 +9,7 @@ import {
   Skeleton,
   Stack,
   Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr
+  Text
 } from '@chakra-ui/react'
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
 import {Link as GatsbyLink, graphql} from 'gatsby'

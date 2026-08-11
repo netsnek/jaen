@@ -126,7 +126,6 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
     handleSubmit,
     setValue,
     control,
-    getValues,
     formState: {errors, isSubmitting, isDirty}
   } = useForm<FormDataType>({
     defaultValues
@@ -139,10 +138,13 @@ export const Settings: React.FC<SettingsProps> = ({data, onUpdate}) => {
   useEffect(() => {
     setDefaultValues(data)
 
+    // The empty branch was `null`, which DefaultValues does not accept. Both
+    // spellings leave every registered field blank, and the submit button stays
+    // disabled until one of them is dirty, so neither reaches onUpdate.
     reset({
       siteMetadata: Object.keys(data.siteMetadata || {}).length
         ? data.siteMetadata
-        : null
+        : undefined
     })
   }, [data])
 

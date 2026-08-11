@@ -5,16 +5,12 @@ import {
   Badge,
   Button,
   ButtonGroup,
+  CloseButton,
   HStack,
   Input,
   Switch,
   Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   VStack,
   useDisclosure,
   Separator,
@@ -133,7 +129,7 @@ export function SenderModal({
       </Button>
 
       <Dialog.Root
-        open={isOpen}
+        open={open}
         size="xl"
         onOpenChange={e => {
           if (!e.open) {
@@ -145,7 +141,12 @@ export function SenderModal({
           <Dialog.Positioner>
             <Dialog.Content>
               <Dialog.Header>Senders</Dialog.Header>
-              <Dialog.CloseTrigger />
+              {/* v3's CloseTrigger draws nothing of its own, so the X that
+                  v2's ModalCloseButton brought has to be handed to it, at the
+                  32px and neutral hover v2 gave it. */}
+              <Dialog.CloseTrigger asChild>
+                <CloseButton size="xs" colorPalette="gray" />
+              </Dialog.CloseTrigger>
               <form onSubmit={handleSubmit(onSubmitForm)}>
                 <Dialog.Body>
                   <VStack gap={4} align="stretch">
@@ -280,12 +281,19 @@ export function SenderModal({
                           <Field.Label htmlFor="secure" mb="0">
                             Secure
                           </Field.Label>
-                          <Switch
-                            id="secure"
-                            onValueChange={onChange}
+                          {/* The id goes on the hidden input, not on
+                              Switch.Root: Switch.Root would derive its own
+                              input id from it and the label's htmlFor would
+                              then point at nothing, so clicking the label
+                              would stop toggling the switch. */}
+                          <Switch.Root
                             checked={value}
-                            ref={ref}
-                          />
+                            onCheckedChange={e => onChange(e.checked)}>
+                            <Switch.HiddenInput id="secure" ref={ref} />
+                            <Switch.Control>
+                              <Switch.Thumb />
+                            </Switch.Control>
+                          </Switch.Root>
                         </Field.Root>
                       )}
                     />
@@ -325,12 +333,14 @@ export function SenderModal({
                           <Field.Label htmlFor="isDefault" mb="0">
                             Set as default sender
                           </Field.Label>
-                          <Switch
-                            id="isDefault"
-                            onValueChange={onChange}
+                          <Switch.Root
                             checked={value}
-                            ref={ref}
-                          />
+                            onCheckedChange={e => onChange(e.checked)}>
+                            <Switch.HiddenInput id="isDefault" ref={ref} />
+                            <Switch.Control>
+                              <Switch.Thumb />
+                            </Switch.Control>
+                          </Switch.Root>
                         </Field.Root>
                       )}
                     />

@@ -1,4 +1,4 @@
-import {As, Box, BoxProps} from '@chakra-ui/react'
+import {Box, BoxProps} from '@chakra-ui/react'
 import React, {forwardRef, useCallback, useMemo} from 'react'
 
 import {useHighlight} from '../../../contexts/field-highlighter'
@@ -12,9 +12,16 @@ export interface HighlightTooltipProps extends Omit<BoxProps, 'children'> {
         ref: (node: HTMLDivElement) => void
         tabIndex?: number
       }) => React.ReactNode)
-  asChild?: boolean
+  /**
+   * The codemod rewrote this to `asChild`, which is a different feature: it
+   * tells a Chakra component to merge itself into its child. This component
+   * reads `as` and renders it as the wrapper, so the two are not
+   * interchangeable. v3 still has the polymorphic `as`, and v2's `As` alias was
+   * only ever ElementType.
+   */
+  as?: React.ElementType
   asProps?: Record<string, unknown>
-  asAs?: As
+  asAs?: React.ElementType
   actions: React.ReactNode[]
   isEditing?: boolean
 }

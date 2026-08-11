@@ -1,18 +1,8 @@
-/*
- MIGRATION NOTE: The following Chakra UI hooks have been removed.
- Please replace them with the suggested alternatives:
-
-//   - useTheme: Use Import from system or use useChakraContext
-
- See: https://chakra-ui.com/docs/get-started/migration#hooks
-*/
 import {useColorModeValue} from 'jaen'
 import {Box, Text, useToken} from '@chakra-ui/react'
-import {mode, transparentize} from '@chakra-ui/theme-tools'
 
 import {useEffect, useState} from 'react'
 import {
-  StaticTreeDataProvider,
   Tree,
   ControlledTreeEnvironment,
   TreeItemIndex,
@@ -47,12 +37,18 @@ export const PageTree: React.FC<PageTreeProps> = ({
     setSelectedItems(defaultSelected ? [defaultSelected] : [])
   }, [defaultSelected])
 
-  const theme = useTheme()
+  const [brand50, brand100, brand200] = useToken('colors', [
+    'brand.50',
+    'brand.100',
+    'brand.200'
+  ])
 
-  const darkHoverBg = transparentize(`brand.200`, 0.12)(theme)
-  const darkActiveBg = transparentize(`brand.200`, 0.24)(theme)
-
-  const [brand50, brand100] = useToken('colors', ['brand.50', 'brand.100'])
+  // These land in CSS custom properties that react-complex-tree reads, so they
+  // have to be colour strings rather than style props. v2 got them from
+  // @chakra-ui/theme-tools' transparentize, a package that no longer exists;
+  // color-mix is what v3's own token/alpha syntax emits in its place.
+  const darkHoverBg = `color-mix(in srgb, ${brand200} 12%, transparent)`
+  const darkActiveBg = `color-mix(in srgb, ${brand200} 24%, transparent)`
 
   const hoverBg = useColorModeValue(brand50, darkHoverBg)
   const activeBg = useColorModeValue(brand100, darkActiveBg)
@@ -100,7 +96,7 @@ export const PageTree: React.FC<PageTreeProps> = ({
           </Text>
         )
       }}
-      canDropAt={(items, target) => {
+      canDropAt={() => {
         return true
       }}
       onFocusItem={item => setFocusedItem(item.index)}

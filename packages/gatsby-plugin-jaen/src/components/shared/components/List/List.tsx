@@ -1,4 +1,4 @@
-import {Box, Card, Stack, StackProps, Text} from '@chakra-ui/react'
+import {Card, Stack, StackProps, Text} from '@chakra-ui/react'
 import * as React from 'react'
 
 import type {ListItemProps} from './ListItem'

@@ -1,16 +1,5 @@
 import {AddIcon} from './icons'
-import {
-  Box,
-  Button,
-  Menu,
-  Spacer,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Portal
-} from '@chakra-ui/react'
+import {Box, Button, Menu, Spacer, Tabs, Portal} from '@chakra-ui/react'
 import React, {useState} from 'react'
 
 interface ComponentInfoProps {
@@ -78,14 +67,17 @@ export interface TabsProps {
 const TabsTemplate: React.FC<TabsProps> = props => {
   const [selectedTab, setSelectedTab] = useState(props.selectedTab)
 
-  const handleTabChange = (index: number) => {
-    setSelectedTab(index)
+  // v3 addresses tabs by string value where v2 addressed them by index. The
+  // index stays the currency of TabsProps, which is exported from the package,
+  // so the translation happens here instead of in the public type.
+  const handleTabChange = (details: {value: string}) => {
+    setSelectedTab(Number(details.value))
   }
 
   return (
     <Box position="relative">
       <Tabs.Root
-        value={selectedTab}
+        value={String(selectedTab)}
         onValueChange={handleTabChange}
         pos="relative"
         size="sm">
@@ -95,19 +87,21 @@ const TabsTemplate: React.FC<TabsProps> = props => {
           zIndex="1"
           bg="var(--chakra-colors-bg-canvas)">
           {props.tabs.map((tab, i) => (
-            <Tab key={i}>{tab.label}</Tab>
+            <Tabs.Trigger key={i} value={String(i)}>
+              {tab.label}
+            </Tabs.Trigger>
           ))}
           <Spacer />
           <ComponentInfo items={props.componentsInfo || []} />
         </Tabs.List>
 
-        <TabPanels>
+        <Tabs.ContentGroup>
           {props.tabs.map((tab, i) => (
-            <TabPanel key={i} p="0">
+            <Tabs.Content key={i} value={String(i)} p="0">
               {tab.content}
-            </TabPanel>
+            </Tabs.Content>
           ))}
-        </TabPanels>
+        </Tabs.ContentGroup>
       </Tabs.Root>
     </Box>
   )

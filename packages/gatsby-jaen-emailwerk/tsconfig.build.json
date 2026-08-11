@@ -1,13 +1,17 @@
 {
-  // The emit. gatsby-jaen-emailwerk is the one package whose build runs a bare
-  // `tsc`, so this config produces what ends up in dist and what consumers
-  // import. It stays on CommonJS, which is what Gatsby's node APIs need, and
-  // therefore on classic node resolution: "bundler" is not allowed alongside
-  // a CommonJS module target.
+  // The emit, and only the emit.
   //
-  // tsconfig.json next to it is the typecheck, on "bundler", because that is
-  // how the bundler actually resolves at build time and how Chakra v3's types
-  // expect to be read.
+  // It has to produce CommonJS for Gatsby's node APIs, and "bundler" resolution
+  // is not allowed alongside a CommonJS module target. The naive answer,
+  // moduleResolution "node", is what broke this build: node10 ignores exports
+  // maps, so Chakra v3's types come back incomplete and every element passing
+  // only children fails TS2559 although the source is correct. "node16" honours
+  // exports maps but demands explicit extensions on relative imports, which is
+  // a different rewrite of every file in the package.
+  //
+  // So this config does not typecheck at all. The build passes --noCheck, and
+  // the checking happens against tsconfig.json, which is on "bundler" because
+  // that is how webpack actually resolves these modules at build time.
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "CommonJS",

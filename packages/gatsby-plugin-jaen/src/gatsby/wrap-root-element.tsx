@@ -53,7 +53,7 @@ const matchLocale = (candidate?: string | null): LocaleKey | undefined => {
   const base = normalized.split('-')[0]
 
   return AVAILABLE_LOCALES.find(
-    locale => locale.split('-')[0].toLowerCase() === base
+    locale => locale.split('-')[0]?.toLowerCase() === base
   )
 }
 
@@ -108,11 +108,15 @@ const MediaModalComponent = lazy(
   async () => await import('../containers/media-modal')
 )
 
-export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = (
-  {element},
-  pluginOptions
-) => {
-  if (element?.type?.name === '' || element?.type?.name === 'Head') {
+export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = ({
+  element
+}) => {
+  // Only the component case carries a name; a host element's tag string never
+  // matched this branch either way.
+  const elementName =
+    typeof element?.type === 'string' ? undefined : element?.type?.name
+
+  if (elementName === '' || elementName === 'Head') {
     return (
       <IntlProvider
         messages={messagesByLocale[DEFAULT_LOCALE]}

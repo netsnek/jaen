@@ -49,12 +49,14 @@ const MediaModal: React.FC<MediaSelectorProps> = props => {
       }}>
       <Portal>
         <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content
-            maxW="96rem"
-            containerProps={{
-              id: 'momo'
-            }}>
+        {/*
+          v2 reached the content container through ModalContent's containerProps.
+          In v3 that container is a component of its own, so the id moves onto
+          the positioner rather than disappearing: it is the same DOM node, and
+          the CMS chrome inside the portal is scoped to #momo.
+        */}
+        <Dialog.Positioner id="momo">
+          <Dialog.Content maxW="96rem">
             {/* <ModalHeader>Modal Title</ModalHeader> */}
             <Dialog.CloseTrigger />
             <Dialog.Body p="1">

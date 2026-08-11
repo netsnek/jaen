@@ -61,6 +61,10 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
       <FieldGroup title="Account">
         <Stack width="full" gap="8" maxW="2xl">
           <Stack>
+            {/* The details.* and username paths below do not exist on
+                ProfileFormData, so these inputs bind to nothing. Broken the
+                same way before the v3 port; renaming them would change what
+                the form submits, which belongs in its own change. */}
             <Field.Root id="firstName" invalid={!!errors.details?.firstName}>
               <Field.Label>First Name</Field.Label>
               <Input placeholder="" {...register('details.firstName', {})} />

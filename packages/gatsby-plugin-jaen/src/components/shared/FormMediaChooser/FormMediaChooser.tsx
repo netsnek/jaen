@@ -21,6 +21,17 @@ export interface FormMediaChooserProps {
 export const FormMediaChooser: React.FC<FormMediaChooserProps> = props => {
   const [isLoading, setIsLoading] = useState(false)
 
+  /**
+   * v2's <Image fallback> is gone in v3. It preloaded the src and showed the
+   * placeholder until that succeeded, keeping it up forever if the load failed,
+   * which is what remembering the src that fired onLoad reproduces. Comparing
+   * against the src rather than holding a boolean means a new src brings the
+   * placeholder back without a resetting effect.
+   */
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
+
+  const src = props.value
+
   const onChoose = async () => {
     setIsLoading(true)
     try {
@@ -32,8 +43,19 @@ export const FormMediaChooser: React.FC<FormMediaChooserProps> = props => {
   return (
     <Stack direction="row" gap="6" align="center" width="full">
       <Box boxSize={36} minW="36" borderRadius="lg" bg="bg.subtle">
-        {props.value ? (
-          <Image borderRadius="lg" boxSize="100%" src={props.value} />
+        {src ? (
+          <>
+            {loadedSrc !== src && <Skeleton borderRadius="lg" boxSize="100%" />}
+            <Image
+              borderRadius="lg"
+              boxSize="100%"
+              display={loadedSrc === src ? undefined : 'none'}
+              src={src}
+              onLoad={() => {
+                setLoadedSrc(src)
+              }}
+            />
+          </>
         ) : (
           <Center boxSize="100%" borderRadius="lg">
             <Text color="muted" fontSize="sm">

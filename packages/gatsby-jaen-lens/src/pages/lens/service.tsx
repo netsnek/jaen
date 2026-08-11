@@ -2,7 +2,7 @@ import {Box} from '@chakra-ui/react'
 import {PageConfig, PageProps} from 'jaen'
 import {useEffect, useState} from 'react'
 
-const Page: React.FC<PageProps> = ({data, location}) => {
+const Page: React.FC<PageProps> = ({location}) => {
   const [fqdn, setFqdn] = useState<string | null>(null)
 
   useEffect(() => {

@@ -323,7 +323,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                             autoComplete="off"
                             bg="gray.100"
                             value={user?.userName}
-                            onValueChange={e =>
+                            onChange={e =>
                               setUser({...user, userName: e.target.value})
                             }
                           />
@@ -348,7 +348,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                           <Input
                             placeholder=""
                             value={user?.human?.profile?.firstName}
-                            onValueChange={e =>
+                            onChange={e =>
                               setUser({
                                 ...user,
                                 human: {
@@ -367,7 +367,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                           <Input
                             placeholder=""
                             value={user?.human?.profile?.lastName}
-                            onValueChange={e =>
+                            onChange={e =>
                               setUser({
                                 ...user,
                                 human: {
@@ -387,7 +387,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                           <Input
                             placeholder=""
                             value={user?.human?.profile?.nickName}
-                            onValueChange={e =>
+                            onChange={e =>
                               setUser({
                                 ...user,
                                 human: {
@@ -407,7 +407,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                           <Input
                             placeholder=""
                             value={user?.human?.profile?.displayName}
-                            onValueChange={e =>
+                            onChange={e =>
                               setUser({
                                 ...user,
                                 human: {
@@ -427,7 +427,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                           <NativeSelect.Root>
                             <NativeSelect.Field
                               defaultValue={user?.human?.profile?.gender}
-                              onValueChange={e => {
+                              onChange={e => {
                                 setUser({
                                   ...user,
                                   human: {
@@ -458,7 +458,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                               defaultValue={
                                 user?.human?.profile?.preferredLanguage
                               }
-                              onValueChange={e => {
+                              onChange={e => {
                                 setUser({
                                   ...user,
                                   human: {
@@ -662,7 +662,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                       maxW="md"
                       type="password"
                       placeholder="New password"
-                      onValueChange={e => setCurrentPassword(e.target.value)}
+                      onChange={e => setCurrentPassword(e.target.value)}
                     />
                   </Field.Root>
 
@@ -764,7 +764,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                         type="password"
                         placeholder="New password"
                         autoComplete="new-password"
-                        onValueChange={e => setPassword(e.target.value)}
+                        onChange={e => setPassword(e.target.value)}
                       />
                     </Field.Root>
                     <Field.Root>
@@ -773,9 +773,7 @@ export const Settings: React.FC<SettingsProps> = props => {
                         type="password"
                         placeholder="Confirm password"
                         autoComplete="new-password"
-                        onValueChange={e =>
-                          setPasswordConfirmation(e.target.value)
-                        }
+                        onChange={e => setPasswordConfirmation(e.target.value)}
                       />
                     </Field.Root>
                   </HStack>

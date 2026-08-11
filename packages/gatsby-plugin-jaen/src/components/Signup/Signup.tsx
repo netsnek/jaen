@@ -3,14 +3,12 @@ import {
   Alert,
   Box,
   Button,
-  Checkbox,
+  ButtonProps,
   CloseButton,
   Container,
   Heading,
   HStack,
   Input,
-  Modal,
-  ModalContent,
   Stack,
   Text,
   Field
@@ -86,9 +84,9 @@ export const Signup: React.FC<SignupProps> = props => {
               <Link
                 as={Button}
                 variant="outline"
-                leftIcon={<FaArrowLeft />}
                 to={props.goBackPath}
                 onClick={props.onGoBack}>
+                <FaArrowLeft />
                 Back to website
               </Link>
             </HStack>
@@ -204,15 +202,20 @@ export const Signup: React.FC<SignupProps> = props => {
 
                   <PasswordField
                     {...register('password', {required: true})}
-                    isRequired
-                    isInvalid={!!errors.password?.message}
+                    required
+                    invalid={!!errors.password?.message}
                   />
                 </Stack>
 
                 <Stack gap="6">
+                  {/* `primary` is a real variant of theme/recipes/button.ts, but
+                      v3 reads the variant union out of Chakra's shipped
+                      recipes.gen.d.ts, which only learns about theme recipes
+                      when `chakra typegen` regenerates it. No package here runs
+                      typegen, so the literal has to be cast until one does. */}
                   <Button
                     type="submit"
-                    variant="primary"
+                    variant={'primary' as ButtonProps['variant']}
                     size="lg"
                     loading={isSubmitting}>
                     Sign up

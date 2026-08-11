@@ -1,18 +1,19 @@
 import {
-  As,
   Button,
-  CreateToastFnReturn,
+  createToaster,
   Icon,
   Input,
   NativeSelect,
   Stack,
   Text,
-  useToast,
+  Toast,
+  Toaster,
   Dialog,
   Portal
 } from '@chakra-ui/react'
 import {
   createContext,
+  ElementType,
   ReactNode,
   useCallback,
   useContext,
@@ -29,7 +30,7 @@ enum ModalType {
 interface OpenerFn {
   (
     args: {
-      icon?: As
+      icon?: ElementType
       title: string
       message: string
       options?: Array<{
@@ -44,11 +45,60 @@ interface OpenerFn {
   ): Promise<any>
 }
 
+/**
+ * What v2's useToast() took, narrowed to the keys the CMS passes.
+ *
+ * v3 replaces the hook with a store whose `create` reads `type` where v2 read
+ * `status`, and which has no `isClosable` or `position` at all. Handing that
+ * store out as `toast` would have meant rewriting some forty call sites across
+ * five packages from `toast({...})` to `toaster.create({...})`, so `toast`
+ * stays a function taking v2's options and this file does the translating.
+ *
+ * `position` is deliberately not the full v2 list. A v3 toaster fixes its
+ * placement when the store is created, so only placements that have a store
+ * below can be honoured, and a name with no store would silently come out
+ * somewhere else. The two here are the two the repo asks for.
+ */
+export interface ToastOptions {
+  title?: ReactNode
+  description?: ReactNode
+  status?: 'info' | 'success' | 'warning' | 'error' | 'loading'
+  duration?: number
+  isClosable?: boolean
+  position?: 'bottom' | 'top-right'
+}
+
 export interface Notifications {
   alert: OpenerFn
   confirm: OpenerFn
   prompt: OpenerFn
-  toast: CreateToastFnReturn
+  toast: (options: ToastOptions) => void
+}
+
+/**
+ * One store per placement, created once for the module rather than per mount,
+ * because a store that is recreated on render loses the toasts it is showing.
+ *
+ * The duration is v2's provider-wide 2000ms. v3 would otherwise use its own
+ * per-type defaults, which are 5000ms for most types and forever for loading.
+ */
+const toasters = {
+  bottom: createToaster({placement: 'bottom', duration: 2000}),
+  'top-right': createToaster({placement: 'top-end', duration: 2000})
+}
+
+const toast = ({status, isClosable, position, ...rest}: ToastOptions) => {
+  toasters[position ?? 'bottom'].create({
+    ...rest,
+    // Spelled out rather than passed through as undefined, because the store
+    // merges the toast over its own defaults and an explicit undefined would
+    // erase them. 'info' is what v2's Alert fell back to.
+    type: status ?? 'info',
+    // v2 set isClosable on the provider, so every toast carried a close button
+    // unless a call site said otherwise. v3 decides per toast and defaults to
+    // none.
+    closable: isClosable ?? true
+  })
 }
 
 const defaultContext: Notifications = {
@@ -61,7 +111,9 @@ const defaultContext: Notifications = {
   prompt() {
     throw new Error('<NotificationsProvider> is missing')
   },
-  toast: {} as CreateToastFnReturn
+  toast() {
+    throw new Error('<NotificationsProvider> is missing')
+  }
 }
 
 const Context = createContext<Notifications>(defaultContext)
@@ -71,13 +123,6 @@ interface AnyEvent {
 }
 
 export const NotificationsProvider = ({children}: {children: ReactNode}) => {
-  const toast = useToast({
-    position: 'bottom',
-    duration: 2000,
-    isClosable: true,
-    variant: 'subtle'
-  })
-
   const [modal, setModal] = useState<ReactNode | null>(null)
   const input = useRef<HTMLInputElement | HTMLSelectElement>(null)
   const ok = useRef<HTMLButtonElement>(null)
@@ -142,7 +187,7 @@ export const NotificationsProvider = ({children}: {children: ReactNode}) => {
                               ref={input as React.RefObject<HTMLSelectElement>}
                               placeholder={args.placeholder}
                               defaultValue={defaultValue}
-                              onValueChange={e => setInputValue(e.target.value)}
+                              onChange={e => setInputValue(e.target.value)}
                               value={inputValue}>
                               {args.options.map(option => (
                                 <option key={option.id} value={option.id}>
@@ -157,7 +202,7 @@ export const NotificationsProvider = ({children}: {children: ReactNode}) => {
                             ref={input as React.RefObject<HTMLInputElement>}
                             placeholder={args.placeholder}
                             defaultValue={defaultValue}
-                            onValueChange={e => setInputValue(e.target.value)}
+                            onChange={e => setInputValue(e.target.value)}
                             value={inputValue}
                           />
                         )}
@@ -188,19 +233,21 @@ export const NotificationsProvider = ({children}: {children: ReactNode}) => {
               initialFocusEl={() =>
                 (type === ModalType.Prompt ? input : ok).current
               }
-              onOpenChange={e => {
+              onOpenChange={(e: {open: boolean}) => {
                 if (!e.open) {
                   handleClose()
                 }
               }}>
               <Portal>
                 <Dialog.Backdrop />
+                {/* v2 hung id="momo" on the content's container here, because
+                    the provider scoped its custom properties to that selector
+                    and a portal lands outside the element that carries it. v3
+                    emits them globally behind the `jaen` prefix, so the dialog
+                    needs no root of its own, which is as well because v3 has no
+                    containerProps to put one on. */}
                 <Dialog.Positioner>
-                  <Dialog.Content
-                    containerProps={{
-                      id: 'momo'
-                    }}
-                    overflow="hidden">
+                  <Dialog.Content overflow="hidden">
                     <Content />
                   </Dialog.Content>
                 </Dialog.Positioner>
@@ -219,6 +266,30 @@ export const NotificationsProvider = ({children}: {children: ReactNode}) => {
         prompt: createOpener(ModalType.Prompt),
         toast
       }}>
+      {/* v2's hook rendered its own container into the body; v3 draws nothing
+          until a Toaster is mounted for the store, so each store needs one.
+          The toast itself is v3's default shape, since the ported theme has no
+          toast recipe and v2's `variant: 'subtle'` has no v3 counterpart to
+          carry it to. */}
+      <Portal>
+        {Object.entries(toasters).map(([position, toaster]) => (
+          <Toaster key={position} toaster={toaster}>
+            {({title, description, closable}) => (
+              <Toast.Root width={{md: 'sm'}}>
+                <Toast.Indicator />
+                <Stack gap="1" flex="1" maxWidth="100%">
+                  {title && <Toast.Title>{title}</Toast.Title>}
+                  {description && (
+                    <Toast.Description>{description}</Toast.Description>
+                  )}
+                </Stack>
+                {closable && <Toast.CloseTrigger />}
+              </Toast.Root>
+            )}
+          </Toaster>
+        ))}
+      </Portal>
+
       {modal}
 
       {children}

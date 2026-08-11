@@ -1,5 +1,4 @@
-import {useColorModeValue} from 'jaen'
-import {Circle, Flex, Heading, Stack, StackProps, Text} from '@chakra-ui/react'
+import {Circle, Flex, Stack, StackProps, Text} from '@chakra-ui/react'
 
 export interface ListItemProps extends StackProps {
   title: string

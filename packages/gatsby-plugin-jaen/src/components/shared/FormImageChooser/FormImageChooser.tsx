@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react'
+import React, {useState, useCallback, useMemo} from 'react'
 import {
   HStack,
   Button,
@@ -44,6 +44,23 @@ export const FormImageChooser: React.FC<FormImageChooserProps> = props => {
     props.onRemove()
   }
 
+  /**
+   * v2's <Image fallback> is gone in v3. It preloaded the src and showed the
+   * placeholder until that succeeded, which is what remembering the src that
+   * fired onLoad reproduces.
+   *
+   * The URL has to be held across renders for that to work. v2 built a new one
+   * on every render, so its fallback never settled: each render handed the
+   * image a src it had not seen, the placeholder came back, and the load
+   * started over. The placeholder is restored; that loop is not.
+   */
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null)
+
+  const src = useMemo(
+    () => (selectedImage ? URL.createObjectURL(selectedImage) : props.value),
+    [selectedImage, props.value]
+  )
+
   const {getRootProps, getInputProps, open} = useDropzone({
     accept: {
       'image/*': ['.jpg', '.jpeg', '.png', '.gif']
@@ -61,14 +78,19 @@ export const FormImageChooser: React.FC<FormImageChooserProps> = props => {
         bg="bg.subtle"
         cursor="pointer"
         {...getRootProps()}>
-        {selectedImage || props.value ? (
-          <Image
-            borderRadius="lg"
-            boxSize="100%"
-            src={
-              selectedImage ? URL.createObjectURL(selectedImage) : props.value
-            }
-          />
+        {src ? (
+          <>
+            {loadedSrc !== src && <Skeleton borderRadius="lg" boxSize="100%" />}
+            <Image
+              borderRadius="lg"
+              boxSize="100%"
+              display={loadedSrc === src ? undefined : 'none'}
+              src={src}
+              onLoad={() => {
+                setLoadedSrc(src)
+              }}
+            />
+          </>
         ) : (
           <Center boxSize="100%" borderRadius="lg">
             <Text color="muted" fontSize="sm">

@@ -8,15 +8,9 @@ import {
   IconButton,
   Input,
   InputGroup,
-  InputLeftElement,
-  InputRightElement,
   Slider,
-  SliderFilledTrack,
-  SliderThumb,
-  SliderTrack,
   Spacer,
-  Tag,
-  TagCloseButton
+  Tag
 } from '@chakra-ui/react'
 import {MediaNode} from 'jaen'
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
@@ -288,17 +282,22 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
             </Icon>
             <Slider.Root
               w="12"
-              aria-label="slider-image-size"
-              value={columnCount}
+              // One label per thumb, which is where v2 put the single string too.
+              aria-label={['slider-image-size']}
+              value={[columnCount]}
               min={1}
               max={5}
-              onValueChange={value => {
-                setColumnCount(value)
+              onValueChange={({value}) => {
+                // One thumb, so the array is always a single entry; the fallback
+                // only exists to satisfy noUncheckedIndexedAccess.
+                setColumnCount(value[0] ?? columnCount)
               }}>
-              <SliderTrack>
-                <SliderFilledTrack />
-              </SliderTrack>
-              <SliderThumb />
+              <Slider.Control>
+                <Slider.Track>
+                  <Slider.Range />
+                </Slider.Track>
+                <Slider.Thumbs />
+              </Slider.Control>
             </Slider.Root>
             <Icon boxSize="2" asChild>
               <FaPlus
@@ -325,21 +324,23 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
 
         <Spacer />
 
-        <InputGroup maxW="md" size="sm">
-          <InputLeftElement pointerEvents="none" h="full">
+        {/*
+          v2's InputGroup pushed `size` down to the input and both elements
+          through context. v3 has no such context, so the size rides on the
+          input and the elements size themselves off `--input-height`.
+        */}
+        <InputGroup
+          maxW="md"
+          startElement={
             <Icon color="gray.300" asChild>
               <FaSearch />
             </Icon>
-          </InputLeftElement>
-          <Input
-            ref={searchRef}
-            type="text"
-            placeholder="Search media..."
-            defaultValue={searchQuery}
-            onValueChange={handleSearchChange}
-          />
-          {searchQuery.length > 0 && (
-            <InputRightElement h="full" mr="1">
+          }
+          // The 4px kept the clear button off the right border; nothing in
+          // InputElement reproduces it.
+          endElementProps={{mr: '1'}}
+          endElement={
+            searchQuery.length > 0 ? (
               <IconButton
                 aria-label="Clear search"
                 variant="ghost"
@@ -353,8 +354,16 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({
                 }}>
                 <FaTimes />
               </IconButton>
-            </InputRightElement>
-          )}
+            ) : undefined
+          }>
+          <Input
+            ref={searchRef}
+            size="sm"
+            type="text"
+            placeholder="Search media..."
+            defaultValue={searchQuery}
+            onChange={handleSearchChange}
+          />
         </InputGroup>
 
         <ButtonGroup variant="outline" size="xs">

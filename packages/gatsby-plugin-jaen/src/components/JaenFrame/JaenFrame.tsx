@@ -52,6 +52,11 @@ export interface JaenFrameProps {
  * children that inherit from here go with it. That is what happened when this
  * header was rewritten without the id, and why the colours ended up written
  * out by hand.
+ *
+ * `backdropBlur` sets a custom property nobody reads: no backdrop-filter is
+ * declared here, in v3 any more than in v2, so this header has never actually
+ * blurred. The value only grew a unit because v3's typing insists on one.
+ * Making the blur real would be a visual change rather than a migration.
  */
 export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
   return (
@@ -69,7 +74,7 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
       px="16px"
       borderBottom="1px"
       borderColor="border.emphasized"
-      backdropBlur={8}
+      backdropBlur="8px"
       justifyContent="space-between"
       zIndex="sticky">
       <HStack gap="5" w="full" h="full">
@@ -93,10 +98,13 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
               base: 'none',
               md: 'block'
             }}>
+            {/* css, not sx: the prop is gone in v3, and Link's props are
+                typed `any`, so leaving it would have silently restored the
+                underline bar the link recipe paints in `_before`. */}
             <Link
               to="/"
               textDecoration="none"
-              sx={{
+              css={{
                 _before: {
                   content: 'none'
                 }
@@ -127,7 +135,7 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
             <Link
               to="/"
               textDecoration="none"
-              sx={{
+              css={{
                 _before: {
                   content: 'none'
                 }
@@ -147,19 +155,19 @@ export const JaenFrame: React.FC<JaenFrameProps> = React.memo(props => {
           justifyContent="end">
           <Toolbar />
 
+          {/* leftIcon is gone in v3, so the plus becomes the trigger's only
+              child; the caret to its right still comes from MenuButton. */}
           <MenuButton
             display={{
               base: 'none',
               md: 'flex'
             }}
-            leftIcon={
-              <Icon color="brand.500" asChild>
-                <FaPlus />
-              </Icon>
-            }
             variant="outline"
-            items={props.navigation.addMenu.items}
-          />
+            items={props.navigation.addMenu.items}>
+            <Icon color="brand.500" asChild>
+              <FaPlus />
+            </Icon>
+          </MenuButton>
 
           <DrawerRight
             user={props.navigation.user.user}

@@ -29,22 +29,21 @@ export const JaenFrameActivationButton: React.FC<
         p="2"
         rounded="full"
         separator={<StackSeparator />}>
-        <Link
-          as={Button}
-          to="/jaen"
-          variant="ghost"
-          rounded="full"
-          size="sm"
-          leftIcon={
-            <Icon asChild>
-              <FaSignInAlt />
-            </Icon>
-          }>
+        {/* Link types its props as `any`, so leftIcon would have gone through
+            to the DOM unnoticed and the icon would simply have stopped
+            rendering. As a child it sits where v2 drew it. */}
+        <Link as={Button} to="/jaen" variant="ghost" rounded="full" size="sm">
+          <Icon asChild>
+            <FaSignInAlt />
+          </Icon>
           Log in to edit
         </Link>
+        {/* v2 suppressed MenuButton's default caret here by overriding
+            rightIcon with undefined. v3 has no such prop, so this trigger
+            depends on MenuButton adding no caret of its own behind the
+            children it is given. */}
         <MenuButton
           variant="ghost"
-          rightIcon={undefined}
           rounded="full"
           menuPlacement="top-end"
           items={{

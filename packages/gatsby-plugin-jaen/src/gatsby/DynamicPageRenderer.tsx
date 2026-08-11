@@ -1,7 +1,13 @@
 import {PageProps, PageProvider, useDynamicPaths, withRedux} from 'jaen'
 
-import React, {lazy, useEffect, useMemo} from 'react'
+import React, {lazy, useMemo} from 'react'
 import {useJaenPagePaths} from './jaen-page-paths'
+
+/**
+ * Injected by gatsby-source-jaen's webpack DefinePlugin (on-create-webpack-config/
+ * jaen-template.ts), so nothing in this package can import it.
+ */
+declare const __JAEN_SOURCE_TEMPLATES__: string
 
 export interface DynamicPageRendererProps extends Omit<PageProps, 'children'> {
   children: React.ReactElement<any, string | React.JSXElementConstructor<any>>

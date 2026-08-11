@@ -15,27 +15,18 @@ import {
   HStack,
   Input,
   InputGroup,
-  InputRightElement,
   Skeleton,
-  SkeletonCircle,
-  SkeletonText,
   Stack,
   Switch,
   Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   Field
 } from '@chakra-ui/react'
 import {navigate} from 'gatsby'
-import {forwardRef, useEffect, useMemo, useState} from 'react'
+import {forwardRef, useEffect, useState} from 'react'
 import {Controller, useFieldArray, useForm} from 'react-hook-form'
 
 import {useUser, useUsers} from '../../../hooks'
-import {InfoIcon} from '../../../icons'
 
 type FormValues = {
   emailAddress: string
@@ -60,19 +51,31 @@ const PasswordInput = forwardRef<HTMLInputElement, any>(
     const handleClick = () => setShow(!show)
 
     return (
-      <InputGroup size="md">
-        <Input
-          autoComplete="new-password"
-          ref={ref}
-          pr="4.5rem"
-          type={show ? 'text' : 'password'}
-          {...props}
-        />
-        <InputRightElement width="4.5rem">
+      /**
+       * v3's InputGroup clones its single child with a computed `pe` derived
+       * from the input height, so the reserved 4.5rem has to be written as `pe`
+       * to win that merge; as `pr` it would sit alongside the narrower `pe` and
+       * the winner would come down to declaration order. Identical rendering in
+       * LTR, which is all this admin is. `px: 0` restores v2's
+       * InputRightElement box, since v3's InputElement adds its own px="3" and
+       * would otherwise squeeze the button inside the 4.5rem slot. The dropped
+       * size="md" no longer has anywhere to go now that InputGroup is a plain
+       * Group; it was already a no-op, md being Input's default size.
+       */
+      <InputGroup
+        endElementProps={{width: '4.5rem', px: '0'}}
+        endElement={
           <Button h="1.75rem" size="sm" onClick={handleClick}>
             {show ? 'Hide' : 'Show'}
           </Button>
-        </InputRightElement>
+        }>
+        <Input
+          autoComplete="new-password"
+          ref={ref}
+          pe="4.5rem"
+          type={show ? 'text' : 'password'}
+          {...props}
+        />
       </InputGroup>
     )
   }
@@ -308,12 +311,21 @@ const Page: React.FC<PageProps> = props => {
                 name="isActive"
                 defaultValue={user?.isActive}
                 render={({field: {value, onChange, onBlur, ref}}) => (
-                  <Switch
-                    ref={ref}
-                    onValueChange={onChange}
-                    onBlur={onBlur}
+                  /**
+                   * ref and onBlur belong on the hidden input, which is where
+                   * v2's Switch forwarded them, so react-hook-form can still
+                   * focus the field on a validation error. v2 handed onChange
+                   * the change event and let RHF pull target.checked out of it;
+                   * zag hands us the boolean, so unwrap it here.
+                   */
+                  <Switch.Root
                     checked={value}
-                  />
+                    onCheckedChange={details => onChange(details.checked)}>
+                    <Switch.HiddenInput ref={ref} onBlur={onBlur} />
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch.Root>
                 )}
               />
             </Skeleton>
@@ -339,10 +351,8 @@ const Page: React.FC<PageProps> = props => {
                       <Table.Cell>{role.id}</Table.Cell>
                       <Table.Cell textAlign="right">
                         <Checkbox.Root
-                          onCheckedChange={(
-                            e: React.ChangeEvent<HTMLInputElement>
-                          ) => {
-                            if (e.target.checked) {
+                          onCheckedChange={details => {
+                            if (details.checked) {
                               append(role)
                             } else {
                               const found = fields.findIndex(
@@ -390,12 +400,14 @@ const Page: React.FC<PageProps> = props => {
                 name="isAdmin"
                 defaultValue={user?.isAdmin}
                 render={({field: {value, onChange, onBlur, ref}}) => (
-                  <Switch
-                    ref={ref}
-                    onValueChange={onChange}
-                    onBlur={onBlur}
+                  <Switch.Root
                     checked={value}
-                  />
+                    onCheckedChange={details => onChange(details.checked)}>
+                    <Switch.HiddenInput ref={ref} onBlur={onBlur} />
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                  </Switch.Root>
                 )}
               />
             </Skeleton>
@@ -416,14 +428,29 @@ const Page: React.FC<PageProps> = props => {
 
           <Box mt={4}>
             <HStack width="full">
+              {/**
+               * v2's ButtonGroup published isDisabled through its context and
+               * every Button below it picked that up. v3's only feeds the
+               * button recipe's own variants (size, variant) down that path, so
+               * a disabled on the group would land on its div and leave the
+               * buttons live. Repeating it per button is what keeps both greyed
+               * out on a pristine form, as before. Delete stays outside the
+               * group and stays enabled, also as before.
+               */}
               <ButtonGroup>
                 <Skeleton width={'fit-content'} loading={!!isLoading}>
-                  <Button type="submit" loading={isSubmitting}>
+                  <Button
+                    type="submit"
+                    loading={isSubmitting}
+                    disabled={!isDirty}>
                     Save Changes
                   </Button>
                 </Skeleton>
                 <Skeleton width={'fit-content'} loading={!!isLoading}>
-                  <Button variant="outline" onClick={onReset}>
+                  <Button
+                    variant="outline"
+                    onClick={onReset}
+                    disabled={!isDirty}>
                     Cancel
                   </Button>
                 </Skeleton>

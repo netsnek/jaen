@@ -1,12 +1,6 @@
 import {Heading, Progress, Stack, Text, StackSeparator} from '@chakra-ui/react'
 import {navigate} from 'gatsby'
-import {
-  AuthUserProvider,
-  PageConfig,
-  PageProps,
-  useAuthUser,
-  useNotificationsContext
-} from 'jaen'
+import {PageConfig, PageProps, useAuthUser, useNotificationsContext} from 'jaen'
 
 import {sq} from '../../clients/lens/src'
 import {PasswordUpdateForm} from '../../components/PasswordUpdateForm'
@@ -46,8 +40,9 @@ const Page: React.FC<PageProps> = () => {
   }
 
   if (!user) {
+    // a null value is what puts v3's progress into the indeterminate state
     return (
-      <Progress.Root size="xs" indeterminate>
+      <Progress.Root size="xs" value={null}>
         <Progress.Track>
           <Progress.Range />
         </Progress.Track>
@@ -79,7 +74,10 @@ const Page: React.FC<PageProps> = () => {
         onPasswordUpdate={handlePasswordChange}
       />
 
-      <Text size="xs" asChild>
+      {/* the v2 `size="xs"` is dropped rather than mapped to textStyle: no
+          theme ever defined Text sizes, so it rendered nothing. Making the
+          note smaller is a design change and belongs in its own commit. */}
+      <Text asChild>
         <em>
           Note: This password is only valid for services connected to Lens
           authentication. If you have any questions or issues, please reach out

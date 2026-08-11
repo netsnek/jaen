@@ -7,22 +7,17 @@ import {FaEdit} from '@react-icons/all-files/fa/FaEdit'
 import {
   Button,
   ButtonGroup,
+  CloseButton,
   Flex,
   HStack,
   Heading,
   IconButton,
   Input,
   InputGroup,
-  InputRightElement,
   Skeleton,
   Stack,
   Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   useDisclosure,
   Icon,
   SkeletonCircle,
@@ -79,7 +74,7 @@ const Page: React.FC = () => {
               [...Array(3)].map((_, index) => (
                 <Table.Row key={index}>
                   <Table.Cell>
-                    <SkeletonCircle size="10" isLoaded={!isLoading} />
+                    <SkeletonCircle size="10" loading={!!isLoading} />
                   </Table.Cell>
                   <Table.Cell>
                     <Skeleton
@@ -223,19 +218,26 @@ const PasswordInput = React.forwardRef<HTMLInputElement, any>(
     const handleClick = () => setShow(!show)
 
     return (
-      <InputGroup size="md">
-        <Input
-          autoComplete="new-password"
-          ref={ref}
-          pr="4.5rem"
-          type={show ? 'text' : 'password'}
-          {...props}
-        />
-        <InputRightElement width="4.5rem">
+      /**
+       * The twin of the PasswordInput in ./[userId], which carries the
+       * reasoning for `pe` over `pr`, for the endElement's px: 0, and for
+       * dropping the group's size="md". The two render the same control, so
+       * they have to move together.
+       */
+      <InputGroup
+        endElementProps={{width: '4.5rem', px: '0'}}
+        endElement={
           <Button h="1.75rem" size="sm" onClick={handleClick}>
             {show ? 'Hide' : 'Show'}
           </Button>
-        </InputRightElement>
+        }>
+        <Input
+          autoComplete="new-password"
+          ref={ref}
+          pe="4.5rem"
+          type={show ? 'text' : 'password'}
+          {...props}
+        />
       </InputGroup>
     )
   }
@@ -254,8 +256,7 @@ const AddUserControl = () => {
     register,
     reset,
     handleSubmit,
-    control,
-    formState: {errors, isSubmitting, isDirty, isValid}
+    formState: {errors, isSubmitting, isDirty}
   } = useForm<UserCreate['values']>({})
 
   const handleClose = () => {
@@ -275,7 +276,7 @@ const AddUserControl = () => {
   return (
     <>
       <Dialog.Root
-        open={isOpen}
+        open={open}
         initialFocusEl={() => initialRef.current}
         onOpenChange={e => {
           if (!e.open) {
@@ -288,7 +289,12 @@ const AddUserControl = () => {
             <Dialog.Content>
               <form onSubmit={handleSubmit(onSubmit)}>
                 <Dialog.Header>Add a user</Dialog.Header>
-                <Dialog.CloseTrigger onClick={handleClose} />
+                {/* Same as the accounts pages: v3's CloseTrigger draws nothing
+                    of its own, so the X v2's ModalCloseButton carried has to be
+                    handed to it, at the 32px and neutral hover v2 gave it. */}
+                <Dialog.CloseTrigger asChild onClick={handleClose}>
+                  <CloseButton size="xs" colorPalette="gray" />
+                </Dialog.CloseTrigger>
                 <Dialog.Body pb={6}>
                   <Field.Root invalid={!!errors.emailAddress}>
                     <Field.Label>E-Mail</Field.Label>

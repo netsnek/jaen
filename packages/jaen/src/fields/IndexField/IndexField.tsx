@@ -1,4 +1,4 @@
-import {Button, Text} from '@chakra-ui/react'
+import {Button, ButtonProps, Text} from '@chakra-ui/react'
 
 import {useJaenPageIndex} from '../../contexts/page'
 import {withRedux} from '../../redux/index'
@@ -42,7 +42,15 @@ export const IndexField: React.FC<IndexFieldProps> = withRedux(
         id={name}
         actions={[
           <Button
-            variant="jaen-highlight-tooltip-text"
+            variant={
+              // No theme has ever defined `jaen-highlight-tooltip-text`. The
+              // name the other fields use is `field-highlighter-tooltip-text`.
+              // A variant that misses contributes nothing in either version,
+              // so this chip has always drawn as a bare base-style button, and
+              // it still does. Correcting the name would restyle it, which is
+              // a change of its own and not part of the migration.
+              'jaen-highlight-tooltip-text' as ButtonProps['variant']
+            }
             key="jaen-highlight-tooltip-text-index">
             <Text as="span" lineClamp={1}>
               Index

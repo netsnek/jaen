@@ -1,4 +1,4 @@
-import {Box, Button, HStack, Stack, Text} from '@chakra-ui/react'
+import {Box, Button, ButtonProps, HStack, Stack, Text} from '@chakra-ui/react'
 import * as React from 'react'
 import {FaArrowDown} from '@react-icons/all-files/fa/FaArrowDown'
 import {FaArrowUp} from '@react-icons/all-files/fa/FaArrowUp'
@@ -30,7 +30,12 @@ export interface SectionFieldProps {
   name: string // chapterName
   label: string
   blocks: IBlockConnection[]
-  asChild?: boolean
+  /**
+   * The wrapper this section renders as, read below as `rest.as`. The codemod
+   * rewrote it to v3's `asChild`, which is a boolean asking a Chakra component
+   * to merge into its child, and this component is neither Chakra nor merging.
+   */
+  as?: React.ComponentType<React.HTMLAttributes<HTMLElement>>
   sectionAs?: React.ComponentType<React.HTMLAttributes<HTMLElement>>
   props?: Record<string, any>
   sectionProps?: Record<string, any> | SectionPropsCallback
@@ -76,7 +81,13 @@ export const SectionField = withRedux(
       ? [
           <Button
             key="section-field-tooltip-button-add"
-            variant="field-highlighter-tooltip-text"
+            variant={
+              // This variant is declared in gatsby-plugin-jaen's button recipe.
+              // Widening the type of `variant` beyond the names v3's own recipe
+              // carries takes a `chakra typegen` run, which no package here has
+              // a script for, so the name is asserted instead.
+              'field-highlighter-tooltip-text' as ButtonProps['variant']
+            }
             size="xs">
             <Text as="span" lineClamp={1}>
               {label}
@@ -134,11 +145,13 @@ export const SectionField = withRedux(
       if (shouldDelete) {
         onSectionDelete(id, ptrPrev, ptrNext)
 
+        // The `variant: 'subtle'` that stood here asked for the variant the
+        // provider already set on every toast, so it never changed anything.
+        // v3's toast recipe has no variants for it to ask for either.
         toast({
           title: 'Block deleted',
           description: `Block has been removed from the ${label} section`,
-          status: 'info',
-          variant: 'subtle'
+          status: 'info'
         })
       }
     }
@@ -195,7 +208,9 @@ export const SectionField = withRedux(
               isEditing={isEditing}
               actions={[
                 <Button
-                  variant="field-highlighter-tooltip-text"
+                  variant={
+                    'field-highlighter-tooltip-text' as ButtonProps['variant']
+                  }
                   key={`section-field-tooltip-button-${item.id}`}>
                   <Text as="span" lineClamp={1}>
                     {s.Component.options.label}

@@ -8,12 +8,11 @@ import {
   Heading,
   HStack,
   Icon,
-  IconButton,
   Input,
   Stack,
   Text,
   Textarea,
-  Fieldset,
+  Field,
   StackSeparator
 } from '@chakra-ui/react'
 import {useEffect, useState} from 'react'
@@ -30,7 +29,6 @@ import slugify from 'slugify'
 import FormMediaChooser from '../../../../../containers/form-media-chooser'
 import {Link} from '../../../../shared/Link'
 import {ChooseButton, ChooseButtonProps} from '../ChooseButton/ChooseButton'
-import {FaClone} from '@react-icons/all-files/fa/FaClone'
 
 const useTexts = () => {
   const intl = useIntl()
@@ -455,7 +453,8 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
             </HStack>
 
             <ButtonGroup variant="outline">
-              <Link as={Button} leftIcon={<FaEye />} to={props.path}>
+              <Link as={Button} to={props.path}>
+                <FaEye />
                 {intl.formatMessage({
                   id: 'CmsPagesFormButtonsPreview',
                   defaultMessage: 'Preview'
@@ -585,9 +584,20 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
           </Text>
         </Stack>
 
+        {/*
+          v2 wrote every one of these as <FormControl as="fieldset"> with a
+          <FormLabel as="legend">, which is v3's Field and not its Fieldset:
+          only Field passes invalid/required/disabled down to the Input inside
+          it, and only Field is styled by the ported theme. `as` keeps the
+          fieldset and legend elements v2 rendered, and the asterisk that v2's
+          FormLabel drew on its own now has to be asked for.
+        */}
         {mode == 'create' && (
-          <Fieldset.Root invalid={!!errors.parentPage} required>
-            <Fieldset.Legend>{texts.parentPage[mode]}</Fieldset.Legend>
+          <Field.Root as="fieldset" invalid={!!errors.parentPage} required>
+            <Field.Label as="legend">
+              {texts.parentPage[mode]}
+              <Field.RequiredIndicator />
+            </Field.Label>
 
             <Controller
               control={control}
@@ -606,23 +616,24 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
               }}
             />
 
-            <Fieldset.HelperText>
-              {texts.parentHelperText[mode]}
-            </Fieldset.HelperText>
-            <Fieldset.ErrorText>
+            <Field.HelperText>{texts.parentHelperText[mode]}</Field.HelperText>
+            <Field.ErrorText>
               {errors.parentPage &&
                 intl.formatMessage({
                   id: 'CmsPagesFormErrorsParentRequired',
                   defaultMessage: 'Parent is required'
                 })}
-            </Fieldset.ErrorText>
-          </Fieldset.Root>
+            </Field.ErrorText>
+          </Field.Root>
         )}
 
         <Stack gap="4">
           {props.disableSlug ? (
-            <Fieldset.Root required invalid={!!errors.slug}>
-              <Fieldset.Legend>{texts.title[mode]}</Fieldset.Legend>
+            <Field.Root as="fieldset" required invalid={!!errors.slug}>
+              <Field.Label as="legend">
+                {texts.title[mode]}
+                <Field.RequiredIndicator />
+              </Field.Label>
               <Input
                 {...register('title', {
                   required: true
@@ -632,14 +643,24 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                   defaultMessage: 'Title'
                 })}
               />
-              <Fieldset.HelperText>
-                {texts.titleHelperText[mode]}
-              </Fieldset.HelperText>
-            </Fieldset.Root>
+              <Field.HelperText>{texts.titleHelperText[mode]}</Field.HelperText>
+            </Field.Root>
           ) : (
-            <Fieldset.Root required invalid={!!errors.title || !!errors.slug}>
-              <Fieldset.Legend>{texts.title[mode]}</Fieldset.Legend>
-              <Grid templateColumns="70% 30%" gap="2">
+            <Field.Root
+              as="fieldset"
+              required
+              invalid={!!errors.title || !!errors.slug}>
+              <Field.Label as="legend">
+                {texts.title[mode]}
+                <Field.RequiredIndicator />
+              </Field.Label>
+              {/*
+                v2's FormControl was a block, so this grid filled it. v3's Field
+                root is a flex column with align-items: flex-start, under which
+                a grid whose columns are percentages of its own width collapses
+                to its content.
+              */}
+              <Grid w="full" templateColumns="70% 30%" gap="2">
                 <Input
                   {...register('title', {required: true})}
                   placeholder={intl.formatMessage({
@@ -661,19 +682,20 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                       })
                     }}
                   />
-                  <Fieldset.ErrorText>
+                  <Field.ErrorText>
                     {errors.slug && errors.slug.message}
-                  </Fieldset.ErrorText>
+                  </Field.ErrorText>
                 </Stack>
               </Grid>
-              <Fieldset.HelperText>
-                {texts.titleHelperText[mode]}
-              </Fieldset.HelperText>
-            </Fieldset.Root>
+              <Field.HelperText>{texts.titleHelperText[mode]}</Field.HelperText>
+            </Field.Root>
           )}
 
-          <Fieldset.Root required invalid={!!errors.description}>
-            <Fieldset.Legend>{texts.description[mode]}</Fieldset.Legend>
+          <Field.Root as="fieldset" required invalid={!!errors.description}>
+            <Field.Label as="legend">
+              {texts.description[mode]}
+              <Field.RequiredIndicator />
+            </Field.Label>
             <Textarea
               {...register('description', {required: true})}
               placeholder={intl.formatMessage({
@@ -681,18 +703,23 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                 defaultMessage: 'Description'
               })}
             />
-            <Fieldset.HelperText justifyContent="space-between" asChild>
+            {/* w="full" for the same reason as the grid above: space-between
+                has nothing to spread across a shrink-to-fit row. */}
+            <Field.HelperText w="full" justifyContent="space-between" asChild>
               <HStack>
                 <Text>{texts.descriptionHelperText[mode]}</Text>
                 <Text>{watch('description')?.length || 0}</Text>
               </HStack>
-            </Fieldset.HelperText>
-          </Fieldset.Root>
+            </Field.HelperText>
+          </Field.Root>
         </Stack>
 
         {!(mode === 'edit' && !props.values?.template) && (
-          <Fieldset.Root required invalid={!!errors.template}>
-            <Fieldset.Legend>{texts.template[mode]}</Fieldset.Legend>
+          <Field.Root as="fieldset" required invalid={!!errors.template}>
+            <Field.Label as="legend">
+              {texts.template[mode]}
+              <Field.RequiredIndicator />
+            </Field.Label>
             {mode === 'create' ? (
               <Controller
                 control={control}
@@ -715,27 +742,27 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                 {jaenTemplate?.label}
               </Button>
             )}
-            <Fieldset.HelperText>
+            <Field.HelperText>
               {texts.templateHelperText[mode]}
-            </Fieldset.HelperText>
+            </Field.HelperText>
 
-            <Fieldset.ErrorText>
+            <Field.ErrorText>
               {errors.template &&
                 intl.formatMessage({
                   id: 'CmsPagesFormErrorsTemplateRequired',
                   defaultMessage: 'Template is required'
                 })}
-            </Fieldset.ErrorText>
-          </Fieldset.Root>
+            </Field.ErrorText>
+          </Field.Root>
         )}
 
-        <Fieldset.Root>
+        <Field.Root as="fieldset">
           <Stack gap="4">
             <Checkbox.Root
               onCheckedChange={e => {
-                setIsImageInUse(e.target.checked)
+                setIsImageInUse(!!e.checked)
 
-                if (!e.target.checked) {
+                if (!e.checked) {
                   setValue('image.src', undefined)
                 }
               }}
@@ -792,16 +819,17 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
               />
             </Box>
           </Stack>
-        </Fieldset.Root>
+        </Field.Root>
 
-        <Fieldset.Root
+        <Field.Root
+          as="fieldset"
           invalid={!!errors.blogPost?.date || !!errors.blogPost?.author}>
           <Stack gap="4">
             <Checkbox.Root
               onCheckedChange={e => {
-                setIsBlogPostInUse(e.target.checked)
+                setIsBlogPostInUse(!!e.checked)
 
-                if (!e.target.checked) {
+                if (!e.checked) {
                   setValue('blogPost', undefined)
                 }
               }}
@@ -831,11 +859,15 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                 // If the checkbox is checked, display the fields
                 isBlogPostInUse ? 'flex' : 'none'
               }>
-              <Fieldset.Root
+              <Field.Root
+                as="fieldset"
                 invalid={!!errors.blogPost?.date}
                 required={isBlogPostInUse}
                 disabled={!isBlogPostInUse}>
-                <Fieldset.Legend>{texts.postDate[mode]}</Fieldset.Legend>
+                <Field.Label as="legend">
+                  {texts.postDate[mode]}
+                  <Field.RequiredIndicator />
+                </Field.Label>
                 <Input
                   {...register('blogPost.date', {
                     validate: value => {
@@ -851,16 +883,20 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                   })}
                   type="datetime-local"
                 />
-                <Fieldset.HelperText>
+                <Field.HelperText>
                   {texts.postDateHelperText[mode]}
-                </Fieldset.HelperText>
-              </Fieldset.Root>
+                </Field.HelperText>
+              </Field.Root>
 
-              <Fieldset.Root
+              <Field.Root
+                as="fieldset"
                 invalid={!!errors.blogPost?.author}
                 required={isBlogPostInUse}
                 disabled={!isBlogPostInUse}>
-                <Fieldset.Legend>{texts.postAuthor[mode]}</Fieldset.Legend>
+                <Field.Label as="legend">
+                  {texts.postAuthor[mode]}
+                  <Field.RequiredIndicator />
+                </Field.Label>
                 <Input
                   {...register('blogPost.author', {
                     validate: value => {
@@ -879,15 +915,18 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                     defaultMessage: 'Author'
                   })}
                 />
-                <Fieldset.HelperText>
+                <Field.HelperText>
                   {texts.postAuthorHelperText[mode]}
-                </Fieldset.HelperText>
-              </Fieldset.Root>
+                </Field.HelperText>
+              </Field.Root>
 
-              <Fieldset.Root
+              <Field.Root
+                as="fieldset"
                 invalid={!!errors.blogPost?.category}
                 disabled={!isBlogPostInUse}>
-                <Fieldset.Legend>{texts.postCategory[mode]}</Fieldset.Legend>
+                <Field.Label as="legend">
+                  {texts.postCategory[mode]}
+                </Field.Label>
                 <Input
                   {...register('blogPost.category')}
                   placeholder={intl.formatMessage({
@@ -895,15 +934,15 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                     defaultMessage: 'Category'
                   })}
                 />
-                <Fieldset.HelperText>
+                <Field.HelperText>
                   {texts.postCategoryHelperText[mode]}
-                </Fieldset.HelperText>
-              </Fieldset.Root>
+                </Field.HelperText>
+              </Field.Root>
             </Stack>
           </Stack>
-        </Fieldset.Root>
+        </Field.Root>
 
-        <Fieldset.Root invalid={!!errors.isExcludedFromIndex}>
+        <Field.Root as="fieldset" invalid={!!errors.isExcludedFromIndex}>
           <Checkbox.Root
             {...register('isExcludedFromIndex', {
               required: false
@@ -928,7 +967,7 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
               </HStack>
             </Checkbox.Label>
           </Checkbox.Root>
-        </Fieldset.Root>
+        </Field.Root>
 
         <HStack justifyContent="right">
           <ButtonGroup>

@@ -81,9 +81,9 @@ export const PasswordReset: React.FC<PasswordResetProps> = props => {
                 <Link
                   as={Button}
                   variant="outline"
-                  leftIcon={<FaArrowLeft />}
                   to={props.goBackPath}
                   onClick={props.onGoBack}>
+                  <FaArrowLeft />
                   Back to website
                 </Link>
               )}

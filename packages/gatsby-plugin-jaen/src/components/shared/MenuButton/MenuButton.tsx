@@ -1,18 +1,17 @@
 import {
-  As,
   Box,
   Button,
   ButtonProps,
   Icon,
   Menu,
-  MenuProps,
+  MenuRootProps,
   Portal
 } from '@chakra-ui/react'
 import {FaCaretDown} from '@react-icons/all-files/fa/FaCaretDown'
 import {Link} from '../Link/Link'
 
 export interface MenuItem {
-  icon?: As
+  icon?: React.ElementType
   label: string
   path?: string
   onClick?: () => void
@@ -22,32 +21,36 @@ export interface MenuItem {
 export interface MenuButtonProps extends ButtonProps {
   items?: Record<string, MenuItem>
   renderItems?: (items: React.ReactNode) => React.ReactNode
-  menuPlacement?: MenuProps['placement']
+  menuPlacement?: NonNullable<MenuRootProps['positioning']>['placement']
 }
 
 export const MenuButton: React.FC<MenuButtonProps> = ({
   items = {},
   renderItems,
   menuPlacement,
+  children,
   ...buttonProps
 }) => {
   const rendredItems = Object.entries(items).map(([key, value]) => {
     return (
       <Box key={key} mx="2">
-        <ChakraMenuItem
-          as={Link}
-          variant="ghost"
-          icon={
-            value.icon ? (
+        {/*
+          v2's MenuItem took the anchor through `as` and the icon through an
+          `icon` prop that wrapped it in its own spacer span. v3 keeps neither:
+          the item hands its props to the child through asChild, and the icon is
+          just the first child, spaced by the item's own gap. `value` is
+          required in v3 and only feeds typeahead, so it is the record key.
+        */}
+        <Menu.Item asChild value={key} onClick={value.onClick}>
+          <Link variant="ghost" to={value.path || '#'}>
+            {value.icon && (
               <Icon color="brand.500" asChild>
                 <value.icon />
               </Icon>
-            ) : undefined
-          }
-          onClick={value.onClick}
-          to={value.path || '#'}>
-          {value.label}
-        </ChakraMenuItem>
+            )}
+            {value.label}
+          </Link>
+        </Menu.Item>
         {value.divider && <Menu.Separator borderColor="border.emphasized" />}
       </Box>
     )
@@ -62,17 +65,14 @@ export const MenuButton: React.FC<MenuButtonProps> = ({
       positioning={{
         placement: menuPlacement
       }}>
-      <ChakraMenuButton
-        as={Button}
-        rightIcon={
+      <Menu.Trigger asChild>
+        <Button size="sm" variant="outline" {...buttonProps}>
+          {children}
           <Icon asChild>
             <FaCaretDown />
           </Icon>
-        }
-        size="sm"
-        variant="outline"
-        {...buttonProps}
-      />
+        </Button>
+      </Menu.Trigger>
       <Portal>
         <Menu.Positioner>
           <Menu.Content>

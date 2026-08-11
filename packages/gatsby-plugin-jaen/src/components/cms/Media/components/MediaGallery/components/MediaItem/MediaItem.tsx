@@ -1,29 +1,14 @@
 import {
   AspectRatio,
-  Box,
-  Center,
-  HStack,
   Image,
   Input,
   InputGroup,
-  InputLeftAddon,
-  InputLeftElement,
-  InputRightAddon,
-  InputRightElement,
-  Skeleton,
   Spinner,
   Stack,
   Text
 } from '@chakra-ui/react'
 import {MediaNode} from 'jaen'
-import {
-  MouseEventHandler,
-  RefObject,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import {MouseEventHandler, useEffect, useRef, useState} from 'react'
 
 export interface MediaItemProps {
   node: MediaNode
@@ -102,15 +87,25 @@ export const MediaItem: React.FC<MediaItemProps> = ({
         />
       </AspectRatio>
 
-      <InputGroup size="xs">
-        {!isLoaded && (
-          <InputLeftAddon pointerEvents="none">
-            <Spinner size="xs" />
-          </InputLeftAddon>
-        )}
-
+      {/*
+        v2's InputGroup handed `size` to the input and both addons through
+        context, which v3 dropped, so each of the three carries its own.
+        `w: '4.5trem'` is the v2 typo verbatim: it is not a length, so the
+        addon has always sized itself to its content. Correcting it here would
+        widen the addon and move the input edge.
+      */}
+      <InputGroup
+        startAddon={!isLoaded ? <Spinner size="xs" /> : undefined}
+        startAddonProps={{size: 'xs', pointerEvents: 'none'}}
+        endAddon={
+          <Text fontSize="xs" fontWeight="bold">
+            {node.width}x{node.height}
+          </Text>
+        }
+        endAddonProps={{size: 'xs', w: '4.5trem'}}>
         <Input
           key={node?.description}
+          size="xs"
           textAlign="center"
           fontSize="xs"
           fontWeight="bold"
@@ -119,11 +114,6 @@ export const MediaItem: React.FC<MediaItemProps> = ({
             onUpdateDescription?.(e.target.value)
           }}
         />
-        <InputRightAddon w="4.5trem">
-          <Text fontSize="xs" fontWeight="bold">
-            {node.width}x{node.height}
-          </Text>
-        </InputRightAddon>
       </InputGroup>
     </Stack>
   )

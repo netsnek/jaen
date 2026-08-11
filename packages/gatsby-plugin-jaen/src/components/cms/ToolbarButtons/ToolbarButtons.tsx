@@ -72,10 +72,8 @@ export const ToolbarButtons: React.FC<ToolbarButtonsProps> = props => {
             label: publishLabel,
             onClick: publishOnClick
           }
-        }}
-        leftIcon={
-          <Icon as={editButtonIsEditing ? FaEdit : JaenLogo} color="pink.500" />
-        }>
+        }}>
+        <Icon as={editButtonIsEditing ? FaEdit : JaenLogo} color="pink.500" />
         Jaen CMS
       </MenuButton>
     </ButtonGroup>

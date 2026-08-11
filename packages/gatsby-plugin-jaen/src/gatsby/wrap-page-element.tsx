@@ -1,14 +1,12 @@
 import {
   FieldHighlighterProvider,
-  JaenPage,
-  PageConfig,
   PageProps,
   useAuth,
   withAuthSecurity
 } from 'jaen'
 import {Flex} from '@chakra-ui/react'
 import {GatsbyBrowser, Slice} from 'gatsby'
-import React, {useEffect, useMemo} from 'react'
+import React from 'react'
 import * as Sentry from '@sentry/gatsby'
 
 import {DynamicPageRenderer} from './DynamicPageRenderer'

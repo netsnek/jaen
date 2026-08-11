@@ -1,5 +1,11 @@
-import {As, Button, Text, TextProps} from '@chakra-ui/react'
-import {Tooltip} from '@/components/ui/tooltip'
+import {
+  Button,
+  ButtonProps,
+  Portal,
+  Text,
+  TextProps,
+  Tooltip
+} from '@chakra-ui/react'
 import DOMPurify from 'isomorphic-dompurify'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 
@@ -78,8 +84,13 @@ const containsFlowContent = (input: string) => {
 }
 
 export interface TextFieldProps extends Omit<TextProps, 'children'> {
-  asChild?: boolean
-  asAs?: As
+  /**
+   * The component the field renders as, destructured below as `as: Wrapper`.
+   * The codemod turned it into v3's `asChild` boolean, which is a different
+   * feature and would have left every caller's Heading rendering as a Text.
+   */
+  as?: React.ElementType
+  asAs?: React.ElementType
   defaultValue?: string
   styleTunes?: TuneOption[]
   isRTF?: boolean
@@ -329,15 +340,32 @@ export const TextField = connectField<string, TextFieldProps>(
         id={jaenField.id || jaenField.name}
         actions={[
           <Button
-            variant="field-highlighter-tooltip-text"
+            variant={
+              // This variant is declared in gatsby-plugin-jaen's button recipe.
+              // Widening the type of `variant` beyond the names v3's own recipe
+              // carries takes a `chakra typegen` run, which no package here has
+              // a script for, so the name is asserted instead.
+              'field-highlighter-tooltip-text' as ButtonProps['variant']
+            }
             key={`jaen-highlight-tooltip-text-${jaenField.name}`}>
-            <Tooltip
-              content={`ID: ${jaenField.id}`}
-              positioning={{
-                placement: 'top-start'
-              }}>
-              <Text>Text</Text>
-            </Tooltip>
+            {/* The delays are v2's, which opened and closed on the same frame
+                as the pointer; v3 waits 400ms and 150ms, long enough on a chip
+                this small to read as a hint that never comes. The Portal is
+                v2's too, which put every tooltip in one whatever the caller
+                asked for. */}
+            <Tooltip.Root
+              openDelay={0}
+              closeDelay={0}
+              positioning={{placement: 'top-start'}}>
+              <Tooltip.Trigger asChild>
+                <Text>Text</Text>
+              </Tooltip.Trigger>
+              <Portal>
+                <Tooltip.Positioner>
+                  <Tooltip.Content>{`ID: ${jaenField.id}`}</Tooltip.Content>
+                </Tooltip.Positioner>
+              </Portal>
+            </Tooltip.Root>
           </Button>,
           ...(isRTF
             ? [
@@ -345,14 +373,13 @@ export const TextField = connectField<string, TextFieldProps>(
                   key={`jaen-highlight-tooltip-tune-${jaenField.name}`}
                   aria-label="Customize"
                   tunes={[styleTune, ...fieldStyleTunes]}
-                  icon={
-                    <Text as="span" fontSize="sm" fontFamily="serif">
-                      T
-                    </Text>
-                  }
                   activeTunes={tunes.activeTunes}
-                  onTune={jaenField.tune}
-                />
+                  onTune={jaenField.tune}>
+                  {/* The button's glyph, which v2 took as `icon`. */}
+                  <Text as="span" fontSize="sm" fontFamily="serif">
+                    T
+                  </Text>
+                </TuneSelectorButton>
               ]
             : []),
           <TuneSelectorButton
@@ -400,7 +427,7 @@ export const TextField = connectField<string, TextFieldProps>(
             }
           }
         }}
-        sx={{
+        css={{
           // Links inside a text field are brand coloured, and they have to
           // match the brand colour the rest of the site uses for controls.
           // brand.300 is a light tint that reads as a different orange next

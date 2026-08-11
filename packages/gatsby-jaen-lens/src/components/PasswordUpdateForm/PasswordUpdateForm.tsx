@@ -37,16 +37,22 @@ export const PasswordUpdateForm: React.FC<PasswordUpdateFormProps> = props => {
 
   return (
     <Stack gap="6">
-      <Field.Label>
-        Enter the new password according to the policy below.
-      </Field.Label>
+      {/* v2's FormLabel rendered standalone; v3's Field.Label throws without
+          the Root context, so this control-less caption needs an empty Root.
+          It adds no box of its own: width is already 100% and the gap needs a
+          second child to show up. */}
+      <Field.Root>
+        <Field.Label>
+          Enter the new password according to the policy below.
+        </Field.Label>
+      </Field.Root>
       <Field.Root>
         <Field.Label>Current Password</Field.Label>
         <Input
           maxW="md"
           type="password"
           placeholder="New password"
-          onValueChange={e => setCurrentPassword(e.target.value)}
+          onChange={e => setCurrentPassword(e.target.value)}
         />
       </Field.Root>
 
@@ -147,7 +153,7 @@ export const PasswordUpdateForm: React.FC<PasswordUpdateFormProps> = props => {
             type="password"
             placeholder="New password"
             autoComplete="new-password"
-            onValueChange={e => setPassword(e.target.value)}
+            onChange={e => setPassword(e.target.value)}
           />
         </Field.Root>
         <Field.Root>
@@ -156,7 +162,7 @@ export const PasswordUpdateForm: React.FC<PasswordUpdateFormProps> = props => {
             type="password"
             placeholder="Confirm password"
             autoComplete="new-password"
-            onValueChange={e => setPasswordConfirmation(e.target.value)}
+            onChange={e => setPasswordConfirmation(e.target.value)}
           />
         </Field.Root>
       </HStack>

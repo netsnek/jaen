@@ -12,20 +12,13 @@ import {
   IconButton,
   Input,
   InputGroup,
-  InputLeftAddon,
-  InputRightElement,
   Link,
   NativeSelect,
   Skeleton,
   Stack,
   Table,
-  Tbody,
-  Td,
   Text,
   Textarea,
-  Th,
-  Thead,
-  Tr,
   Field,
   List
 } from '@chakra-ui/react'
@@ -371,12 +364,22 @@ const Page: React.FC<PageProps> = ({params}) => {
       <Heading size="md">Email Template</Heading>
 
       <Skeleton loading={!!state.isLoading}>
-        <InputGroup>
-          <InputLeftAddon>Template ID</InputLeftAddon>
+        <InputGroup
+          startAddon="Template ID"
+          // v2's InputRightElement was exactly one input-height wide with no
+          // padding, and `as={IconButton}` made the button that box. v3's
+          // InputElement adds px="3", which would push the button off the
+          // right border and past the `pe` the group reserves on the input.
+          endElementProps={{px: '0'}}
+          endElement={
+            <IconButton
+              aria-label="copy template id"
+              onClick={onCopy}
+              variant="outline">
+              <CopyIcon />
+            </IconButton>
+          }>
           <Input type="text" defaultValue={templateId} disabled />
-          <InputRightElement icon={<CopyIcon />} variant="outline" asChild>
-            <IconButton onClick={onCopy} />
-          </InputRightElement>
         </InputGroup>
       </Skeleton>
 
@@ -431,7 +434,13 @@ const Page: React.FC<PageProps> = ({params}) => {
             <Skeleton loading={!!state.isLoading}>
               <Field.Root id="verifyReplyTo">
                 <Field.Label>Verify Reply To</Field.Label>
-                <Checkbox.Root {...register('verifyReplyTo')}>
+                {/* v3's Checkbox.Root is the label, so register's ref lands on
+                    it instead of the input and the box no longer follows the
+                    reset() that fetchData does. The form value has to drive it
+                    for a loaded template to show its state, as it did in v2. */}
+                <Checkbox.Root
+                  {...register('verifyReplyTo')}
+                  checked={watch('verifyReplyTo')}>
                   <Checkbox.HiddenInput />
                   <Checkbox.Control>
                     <Checkbox.Indicator />
@@ -449,7 +458,7 @@ const Page: React.FC<PageProps> = ({params}) => {
                       <List.Item key={t.id}>
                         <Link asChild>
                           <GatsbyLink to={`../${t.id}`}>
-                            {t.description}({t.id})
+                            {t.description} ({t.id})
                           </GatsbyLink>
                         </Link>
                       </List.Item>
@@ -482,20 +491,22 @@ const Page: React.FC<PageProps> = ({params}) => {
                       <Stack>
                         {envelopeToField.fields.map((_, index) => (
                           <Field.Root key={index} id={`envelope.to.${index}`}>
-                            <InputGroup>
-                              <Input
-                                type="text"
-                                placeholder="Enter email address"
-                                {...register(`envelope.to.${index}.email`)}
-                              />
-                              <InputRightElement>
+                            <InputGroup
+                              // Same as the Template ID field above.
+                              endElementProps={{px: '0'}}
+                              endElement={
                                 <IconButton
                                   aria-label="delete to field"
                                   onClick={() => envelopeToField.remove(index)}
                                   variant="ghost">
                                   <DeleteIcon />
                                 </IconButton>
-                              </InputRightElement>
+                              }>
+                              <Input
+                                type="text"
+                                placeholder="Enter email address"
+                                {...register(`envelope.to.${index}.email`)}
+                              />
                             </InputGroup>
                           </Field.Root>
                         ))}
@@ -579,7 +590,7 @@ const Page: React.FC<PageProps> = ({params}) => {
               </Card.Header>
               <Card.Body>
                 <Stack gap={4}>
-                  <Table.Root variant="striped" colorPalette="gray">
+                  <Table.Root striped colorPalette="gray">
                     <Table.Header>
                       <Table.Row>
                         <Table.ColumnHeader>Name</Table.ColumnHeader>
@@ -627,8 +638,11 @@ const Page: React.FC<PageProps> = ({params}) => {
                             />
                           </Table.Cell>
                           <Table.Cell>
+                            {/* Value-driven for the same reason as
+                                verifyReplyTo above. */}
                             <Checkbox.Root
-                              {...register(`variables.${index}.isRequired`)}>
+                              {...register(`variables.${index}.isRequired`)}
+                              checked={watch(`variables.${index}.isRequired`)}>
                               <Checkbox.HiddenInput />
                               <Checkbox.Control>
                                 <Checkbox.Indicator />
@@ -637,7 +651,8 @@ const Page: React.FC<PageProps> = ({params}) => {
                           </Table.Cell>
                           <Table.Cell>
                             <Checkbox.Root
-                              {...register(`variables.${index}.isConstant`)}>
+                              {...register(`variables.${index}.isConstant`)}
+                              checked={watch(`variables.${index}.isConstant`)}>
                               <Checkbox.HiddenInput />
                               <Checkbox.Control>
                                 <Checkbox.Indicator />
@@ -670,14 +685,17 @@ const Page: React.FC<PageProps> = ({params}) => {
             </Card.Root>
           </Stack>
 
+          {/* v2 also carried isDisabled={state.isLoading} on the group, but
+              that was only a fallback for buttons that set none, and each of
+              these sets its own with state.isLoading already in it. v3 has no
+              group-level disabling, and there is nothing to carry over. */}
           <ButtonGroup justifyContent="end">
             <Button
               type="button"
               variant="outline"
               colorPalette="red"
               disabled={state.isLoading || isSubmitting}
-              onClick={handleDeleteClick}
-              disabled={state.isLoading}>
+              onClick={handleDeleteClick}>
               Delete
             </Button>
 
@@ -687,16 +705,14 @@ const Page: React.FC<PageProps> = ({params}) => {
               disabled={state.isLoading || isSubmitting || !isDirty}
               onClick={async () => {
                 await fetchData()
-              }}
-              disabled={state.isLoading}>
+              }}>
               Cancel
             </Button>
 
             <Button
               type="submit"
               loading={state.isLoading || isSubmitting}
-              disabled={state.isLoading || isSubmitting}
-              disabled={state.isLoading}>
+              disabled={state.isLoading || isSubmitting}>
               Save
             </Button>
           </ButtonGroup>

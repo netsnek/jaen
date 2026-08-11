@@ -5,12 +5,7 @@ import {
   Heading,
   Stack,
   Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   StackSeparator
 } from '@chakra-ui/react'
 import {graphql, PageProps, useStaticQuery} from 'gatsby'
@@ -75,7 +70,7 @@ const Page: React.FC<PageProps> = () => {
                     about the Gatsby and Gatsby CLI versions installed in your
                     project.
                   </Text>
-                  <Table.Root variant="simple">
+                  <Table.Root variant="line">
                     <Table.Body>
                       <Table.Row>
                         <Table.Cell>Gatsby version:</Table.Cell>
@@ -118,7 +113,7 @@ const Page: React.FC<PageProps> = () => {
                     information about the Jaen version installed in your
                     project.
                   </Text>
-                  <Table.Root variant="simple">
+                  <Table.Root variant="line">
                     <Table.Body>
                       <Table.Row>
                         <Table.Cell>Jaen version:</Table.Cell>
@@ -153,7 +148,7 @@ const Page: React.FC<PageProps> = () => {
                     Plugins extend the functionality of your website. Below,
                     you'll find a list of installed plugins and their versions.
                   </Text>
-                  <Table.Root variant="simple">
+                  <Table.Root variant="line">
                     <Table.Body>
                       {data.allSitePlugin.nodes.map(node => (
                         <Table.Row key={node.id}>
@@ -192,7 +187,7 @@ const WidgetsTable: React.FC = () => {
   const widgets = useWidgetContext()
 
   return (
-    <Table.Root variant="simple">
+    <Table.Root variant="line">
       <Table.Header>
         <Table.Row>
           <Table.ColumnHeader>Name</Table.ColumnHeader>

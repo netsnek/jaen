@@ -61,7 +61,7 @@ export const IconChooser: React.FC<IconChooserProps> = props => {
                 size="sm"
                 mx="2"
                 placeholder="Search icons..."
-                onValueChange={e => {
+                onChange={e => {
                   handleFilterChange(e.target.value)
                 }}
               />
@@ -73,12 +73,17 @@ export const IconChooser: React.FC<IconChooserProps> = props => {
                   return (
                     <Menu.Item
                       key={key}
-                      icon={<Icon as={IconComponent} />}
                       onSelect={() => {
                         setIcon(key)
                         props.setIcon(key)
                       }}
-                      value="item-0">
+                      // every item needs its own value, otherwise Ark
+                      // highlights the whole list at once on hover
+                      value={key}>
+                      {/* v2's `icon` prop wrapped the glyph in a 0.8em span
+                          with a 0.75rem end margin; v3 dropped that slot, so
+                          the two carry over onto the icon itself */}
+                      <Icon as={IconComponent} fontSize="0.8em" me="0.75rem" />
                       {key.replace('Si', '')}
                     </Menu.Item>
                   )

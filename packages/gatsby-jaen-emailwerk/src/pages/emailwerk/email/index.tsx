@@ -32,6 +32,7 @@ import {
   Box,
   Button,
   Card,
+  CloseButton,
   Heading,
   Text,
   Input,
@@ -774,7 +775,12 @@ const EmailSendFormComponent: React.FC = () => {
             <Dialog.Positioner>
               <Dialog.Content>
                 <Dialog.Header>Email Preview</Dialog.Header>
-                <Dialog.CloseTrigger />
+                {/* v3's CloseTrigger draws nothing of its own, so the X that
+                    v2's ModalCloseButton brought has to be handed to it, at
+                    the 32px and neutral hover v2 gave it. */}
+                <Dialog.CloseTrigger asChild>
+                  <CloseButton size="xs" colorPalette="gray" />
+                </Dialog.CloseTrigger>
                 <Dialog.Body>
                   {/* Display selected template name */}
                   <Heading size="sm" mb={2}>

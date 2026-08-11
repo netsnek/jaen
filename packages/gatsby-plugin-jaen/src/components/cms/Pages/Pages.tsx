@@ -7,12 +7,7 @@ import {
   Icon,
   Stack,
   Table,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
-  Tr,
   StackSeparator
 } from '@chakra-ui/react'
 import {FaPlus} from '@react-icons/all-files/fa/FaPlus'
@@ -133,8 +128,8 @@ export const Pages: React.FC<PagesProps> = props => {
               isDisabled={props.disableNewButton}
               as={Button}
               to={`./new/#${btoa(props.pageId)}`}
-              leftIcon={<FaPlus />}
               variant="outline">
+              <FaPlus />
               <FormattedMessage
                 id="CmsPagesTableNewPage"
                 defaultMessage="New page"

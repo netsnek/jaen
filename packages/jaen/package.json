@@ -20,7 +20,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rimraf dist && microbundle src/index.ts --format cjs,esm",
+    "build": "rimraf dist .tsbuild && tsc -p tsconfig.build.json && microbundle .tsbuild/index.js --format cjs,esm --generateTypes false && rsync -a --include=\"*/\" --include=\"*.d.ts\" --exclude=\"*\" .tsbuild/ dist/ && rimraf .tsbuild",
     "dev": "yarn build --watch"
   },
   "dependencies": {

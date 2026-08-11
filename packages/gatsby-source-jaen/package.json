@@ -15,7 +15,7 @@
     "index.js"
   ],
   "scripts": {
-    "build": "tsc src/gatsby-node.ts src/gatsby-config.ts --outDir dist --esModuleInterop --skipLibCheck --resolveJsonModule"
+    "build": "tsc src/gatsby-node.ts src/gatsby-config.ts --outDir dist --esModuleInterop --skipLibCheck --resolveJsonModule --noCheck"
   },
   "dependencies": {
     "@babel/generator": "^7.22.15",

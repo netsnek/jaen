@@ -66,19 +66,6 @@ export const NavigationGroups: React.FC<NavigationGroupsProps> = ({
                         // does nothing rather than a link back to itself.
                         isDisabled={isActive || item.isLoading}
                         bg={isActive ? 'bg.muted' : undefined}
-                        leftIcon={
-                          item.isLoading ? (
-                            <Spinner mr="2" size="sm" />
-                          ) : (
-                            <Icon
-                              fontSize="lg"
-                              mr="2"
-                              color="brand.500"
-                              asChild>
-                              <item.icon />
-                            </Icon>
-                          )
-                        }
                         variant="ghost"
                         w="full"
                         px="2"
@@ -90,6 +77,17 @@ export const NavigationGroups: React.FC<NavigationGroupsProps> = ({
 
                           onClick?.()
                         }}>
+                        {/* mr="2" is v2's, and it stays: v2 stacked the icon's
+                            own margin on top of the leftIcon wrapper's 0.5rem,
+                            and v3's button gap is the same 0.5rem, so keeping
+                            it keeps the 1rem the entry actually had. */}
+                        {item.isLoading ? (
+                          <Spinner mr="2" size="sm" />
+                        ) : (
+                          <Icon fontSize="lg" mr="2" color="brand.500" asChild>
+                            <item.icon />
+                          </Icon>
+                        )}
                         {item.label}
                       </Link>
                     </List.Item>

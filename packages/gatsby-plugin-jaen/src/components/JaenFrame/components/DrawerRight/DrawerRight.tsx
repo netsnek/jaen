@@ -1,7 +1,8 @@
 import {useColorMode} from 'jaen'
 import {
   Avatar,
-  AvatarBadge,
+  Box,
+  CloseButton,
   Drawer,
   HStack,
   Icon,
@@ -58,19 +59,29 @@ export const DrawerRight: React.FC<DrawerRightProps> = ({
         onClick={onToggle}>
         <Avatar.Fallback name={user.username} />
         <Avatar.Image src={user.avatarURL} />
-        // TODO [BREAKING]: AvatarBadge removed. Migrate to Float + Circle
-        pattern.// See https://chakra-ui.com/docs/components/avatar#badge//
-        Original:{' '}
-        <AvatarBadge
+
+        {/* v3 has no AvatarBadge, and Float, the pattern that replaces it,
+            hangs the dot half outside the avatar where v2's badge sat a
+            quarter outside. The v2 geometry, including the ring colour the
+            avatar theme used to supply, is written out so the badge does not
+            move. */}
+        <Box
+          pos="absolute"
+          bottom="0"
+          insetEnd="0"
           boxSize="1.25em"
           bg="pink.500"
+          rounded="full"
+          border="0.2em solid"
+          borderColor={{base: 'white', _dark: 'gray.800'}}
+          transform="translate(25%, 25%)"
           visibility={isBadgeVisible ? 'visible' : 'hidden'}
         />
       </Avatar.Root>
       <Drawer.Root
         placement="end"
         size="xs"
-        open={isOpen}
+        open={open}
         initialFocusEl={() => initialFocusRef.current}
         onOpenChange={e => {
           if (!e.open) {
@@ -80,8 +91,10 @@ export const DrawerRight: React.FC<DrawerRightProps> = ({
         <Portal>
           <Drawer.Backdrop bg="rgba(0,0,0,0.1)" />
 
+          {/* No id="momo" on the portal any more, for the reason spelled out
+              in DrawerLeft: v3 emits the variables globally. */}
           <Drawer.Positioner>
-            <Drawer.Content borderLeftRadius="xl" containerProps={{id: 'momo'}}>
+            <Drawer.Content borderLeftRadius="xl">
               <Drawer.Header p="4">
                 <HStack justifyContent="space-between">
                   <Stack>
@@ -101,11 +114,16 @@ export const DrawerRight: React.FC<DrawerRightProps> = ({
                     </HStack>
                   </Stack>
 
-                  <Drawer.CloseTrigger
-                    ref={initialFocusRef}
-                    pos="static"
-                    onClick={onClose}
-                  />
+                  {/* Same as DrawerLeft: v3's CloseTrigger draws nothing of
+                      its own, so the X v2's DrawerCloseButton carried has to
+                      be handed to it. */}
+                  <Drawer.CloseTrigger asChild pos="static" onClick={onClose}>
+                    <CloseButton
+                      ref={initialFocusRef}
+                      size="xs"
+                      colorPalette="gray"
+                    />
+                  </Drawer.CloseTrigger>
                 </HStack>
               </Drawer.Header>
               <Drawer.Body p="4" display="flex" flexDirection="column">
