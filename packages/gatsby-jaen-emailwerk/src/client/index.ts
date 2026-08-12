@@ -2,8 +2,6 @@
  * GQty client for the emailwerk GraphQL API.
  */
 
-import {User} from 'oidc-client-ts'
-
 import {createReactClient} from '@gqty/react'
 import {
   Cache,
@@ -55,7 +53,25 @@ function sessionAccessToken(): string | null {
 
     if (!oidcStorage) return null
 
-    return User.fromStorageString(oidcStorage)?.access_token || null
+    // Parsed by hand instead of through oidc-client-ts's
+    // `User.fromStorageString`, which is only
+    // `new User(JSON.parse(storageString))` (2.4.0,
+    // dist/esm/oidc-client-ts.js) while its counterpart `toStorageString`
+    // writes `access_token` as a plain top-level string. The value import cost
+    // 201 KB of source in the always-loaded `app` chunk, measured by
+    // source-map attribution on a cold load of netsnek.com's home page, for
+    // this one `JSON.parse` — and the anonymous visitors paying for it are
+    // exactly the ones who never have a session to read.
+    //
+    // Duplicated from jaen's `utils/oidc-session.ts` rather than imported:
+    // jaen's exports map exposes no subpath for it, and going through the
+    // barrel would pull the whole framework into this client.
+    const stored = JSON.parse(oidcStorage) as {access_token?: unknown} | null
+    const accessToken = stored?.access_token
+
+    return typeof accessToken === 'string' && accessToken !== ''
+      ? accessToken
+      : null
   } catch {
     // Unreadable or malformed session state is no session either.
     return null
