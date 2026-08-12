@@ -29,7 +29,26 @@ export interface ZitadelGqlConfig {
   graphqlUrl?: string
 }
 
-export const getZitadelGqlConfig = (): ZitadelGqlConfig => __JAEN_ZITADEL_GQL__
+/**
+ * Signing in is plain OIDC and needs no organization, so the injected config
+ * types `organizationId` as optional. Talking to the Zitadel API is a
+ * different matter: every query is scoped to an organization and there is no
+ * sensible default. A site that manages users through this client and forgets
+ * it should be told, rather than sending `undefined` to the server and reading
+ * the answer as an empty result.
+ */
+export const getZitadelGqlConfig = (): ZitadelGqlConfig => {
+  const config = __JAEN_ZITADEL_GQL__
+
+  if (!config.organizationId) {
+    throw new Error(
+      'jaen: zitadelGql.organizationId is required to use the Zitadel API. ' +
+        'It is optional only for signing in, which is plain OIDC.'
+    )
+  }
+
+  return config as ZitadelGqlConfig
+}
 
 export const getZitadelGqlUrl = (): string => {
   const config = getZitadelGqlConfig()

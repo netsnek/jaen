@@ -9,12 +9,27 @@ declare global {
   var __JAEN_PYLON_URL__: string | undefined
   var __JAEN_EMAILWERK_URL__: string | undefined
 
+  /**
+   * Two concerns behind one name, for historical reasons: the OIDC provider
+   * jaen signs in against, and the Zitadel API it manages users through.
+   *
+   * Signing in is plain OIDC. `scope` and `rolesClaim` are the two places that
+   * were Zitadel-shaped and are now overridable, so jaen works against any
+   * provider. Both default to Zitadel's behaviour, so existing sites see no
+   * change. `organizationId` is only read while deriving the default scope.
+   *
+   * User management stays Zitadel-specific and is not affected by either.
+   */
   var __JAEN_ZITADEL_GQL__: {
-    organizationId: string
+    organizationId?: string
     clientId: string
     authority: string
     redirectUri: string
     projectIds?: string[]
+    /** Overrides the derived scope entirely. */
+    scope?: string
+    /** Where the roles live in the token. Default Zitadel's own claim. */
+    rolesClaim?: string
     /** GraphQL endpoint of the zitadel-gql server. Defaults to `${authority}/graphql`. */
     graphqlUrl?: string
   }

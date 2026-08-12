@@ -9,16 +9,29 @@ import {AuthUserProvider} from './auth-user'
 import {useNotificationsContext} from './notifications'
 
 /**
- * Role keys carried in the token itself. Zitadel emits the claim as one
- * object (single project) or an array of objects (multi-project audience);
- * both shapes map role keys to org projections.
+ * Where the roles sit in the token. Zitadel's own claim by default, so every
+ * existing site keeps working without touching its config.
+ */
+const ROLES_CLAIM =
+  __JAEN_ZITADEL_GQL__.rolesClaim ?? 'urn:zitadel:iam:org:project:roles'
+
+/**
+ * Role keys carried in the token itself.
+ *
+ * Two shapes are read, because providers disagree. Zitadel emits one object
+ * per project, keyed by role name, either alone or in an array when the
+ * audience covers several projects. Most other providers emit a plain array of
+ * strings. Reading both means jaen's sign-in works against any OIDC provider,
+ * while the Zitadel deployments it was written for see no change.
  */
 const rolesFromTokenClaim = (claim: unknown): string[] => {
   const items = Array.isArray(claim) ? claim : claim ? [claim] : []
 
-  return items.flatMap(item =>
-    item && typeof item === 'object' ? Object.keys(item) : []
-  )
+  return items.flatMap(item => {
+    if (typeof item === 'string') return [item]
+
+    return item && typeof item === 'object' ? Object.keys(item) : []
+  })
 }
 
 export const useAuth = () => {
@@ -32,7 +45,7 @@ export const useAuth = () => {
 
     const getRoles = async () => {
       const claimRoles = rolesFromTokenClaim(
-        oidcAuth.user?.profile['urn:zitadel:iam:org:project:roles']
+        oidcAuth.user?.profile[ROLES_CLAIM]
       )
 
       // Token-claim roles are available synchronously; merge them into the
@@ -99,23 +112,41 @@ export const checkUserRoles = (
 export const AuthenticationProvider: React.FC<{
   children: React.ReactNode
 }> = ({children}) => {
+  /**
+   * The scope, which is the one genuinely provider-specific part of signing in.
+   *
+   * Zitadel needs its URN scopes: one to bind the session to an organization,
+   * one per project to put that project into the audience, and without them it
+   * issues no roles claim at all. Any other provider needs none of them and
+   * will reject scopes it does not know.
+   *
+   * So a site can set `scope` outright. Left unset and given an
+   * organizationId, the Zitadel scopes are derived exactly as before. Left
+   * unset with no organizationId, what remains is plain OIDC.
+   */
   const scope = useMemo(() => {
-    // Copy before extending: mutating the DefinePlugin-injected array would
-    // append 'zitadel' again on every provider mount.
-    const projectIds: string[] = [
-      ...(__JAEN_ZITADEL_GQL__.projectIds || []),
-      'zitadel'
-    ]
+    if (__JAEN_ZITADEL_GQL__.scope) return __JAEN_ZITADEL_GQL__.scope
 
     const parts = new Set<string>()
 
     parts.add('openid')
     parts.add('profile')
     parts.add('email')
-    parts.add(`urn:zitadel:iam:org:id:${__JAEN_ZITADEL_GQL__.organizationId}`)
-    projectIds.forEach(projectId => {
-      parts.add(`urn:zitadel:iam:org:project:id:${projectId}:aud`)
-    })
+
+    if (__JAEN_ZITADEL_GQL__.organizationId) {
+      // Copy before extending: mutating the DefinePlugin-injected array would
+      // append 'zitadel' again on every provider mount.
+      const projectIds: string[] = [
+        ...(__JAEN_ZITADEL_GQL__.projectIds || []),
+        'zitadel'
+      ]
+
+      parts.add(`urn:zitadel:iam:org:id:${__JAEN_ZITADEL_GQL__.organizationId}`)
+      projectIds.forEach(projectId => {
+        parts.add(`urn:zitadel:iam:org:project:id:${projectId}:aud`)
+      })
+    }
+
     parts.add('offline_access')
 
     return Array.from(parts).join(' ')
