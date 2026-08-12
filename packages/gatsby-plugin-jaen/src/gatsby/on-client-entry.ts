@@ -8,13 +8,11 @@ export const onClientEntry: GatsbyBrowser['onClientEntry'] = async (
   pluginOptions: JaenPluginOptions
 ) => {
   /**
-   * Build and show the banner here rather than in the provider's effect.
-   *
-   * onClientEntry runs before hydration, the effect ran after the whole tree
-   * had mounted. Since the banner is the largest thing on the page it was
-   * being measured as the LCP element, at 18.3 s on netsnek.com with 17.6 s of
-   * that pure render delay. It needs no React, so it has no reason to wait for
-   * it.
+   * Nothing is built or shown here any more: the banner is a React component
+   * that gatsby writes into the static HTML, so it has already painted by the
+   * time this runs. What is left is the consent state, and that is read
+   * straight out of the cookie — the plugin is not loaded unless a visitor
+   * opens the settings modal, and this must not wait for it.
    */
   const cc = bootstrapCookieConsent({
     useGoogleAnalytics: Boolean(pluginOptions.googleAnalytics?.trackingIds?.[0])

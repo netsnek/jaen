@@ -36,6 +36,14 @@ declare global {
 
   interface Window {
     cookieConsent: CookieConsent
+
+    /**
+     * The consent button a visitor pressed before the bundle had hydrated,
+     * recorded by the pre-paint script gatsby-plugin-jaen injects and replayed
+     * by the banner when it mounts. Set to undefined once React is listening,
+     * which is also the signal for that script to stand down.
+     */
+    __JAEN_COOKIE_CONSENT_EARLY_CLICK__?: string | null
   }
 }
 

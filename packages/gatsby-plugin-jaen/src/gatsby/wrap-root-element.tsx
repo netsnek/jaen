@@ -21,6 +21,7 @@ import {
 import {IntlProvider} from 'react-intl'
 
 import {JaenWidgetProvider} from '../contexts/jaen-widget'
+import {JaenPluginOptions} from './types'
 import {SiteMetadataProvider} from '../connectors/site-metadata'
 import {system} from '../theme/system'
 import {JaenFrameMenuProvider} from '../contexts/jaen-frame-menu'
@@ -108,9 +109,54 @@ const MediaModalComponent = lazy(
   async () => await import('../containers/media-modal')
 )
 
-export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = ({
-  element
-}) => {
+/**
+ * The locale of the page being rendered, taken from its path.
+ *
+ * The consent banner is rendered here, above the router, so there is no
+ * pageContext to read it from — and it has to be right at build time, because
+ * the banner is baked into every one of the generated HTML files and each of
+ * them has to carry its own language. During build-html gatsby passes the page
+ * path in; in the browser this function runs once at bootstrap, where the
+ * current location says the same thing.
+ *
+ * The prefix rules are gatsby-source-jaen's: the default locale keeps
+ * unprefixed paths, every other locale is served under its prefix, and a
+ * prefix defaults to the language part of the locale.
+ */
+const localeForPathname = (
+  pathname: string | undefined,
+  i18n: JaenPluginOptions['i18n']
+): string | undefined => {
+  if (!i18n) return undefined
+
+  const path =
+    pathname ??
+    (typeof window !== 'undefined' ? window.location.pathname : undefined)
+
+  if (!path) return i18n.defaultLocale
+
+  const segment = path.replace(/^\/+/, '').split('/')[0]?.toLowerCase()
+
+  const match = i18n.locales.find(entry => {
+    const prefix = entry.prefix ?? entry.locale.split('-')[0]
+
+    return prefix?.toLowerCase() === segment
+  })
+
+  return match?.locale ?? i18n.defaultLocale
+}
+
+export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = (
+  args,
+  pluginOptions
+) => {
+  const {element} = args
+
+  // build-html hands wrapRootElement the page path; the browser signature has
+  // no such field, which is what localeForPathname's fallback is for.
+  const {pathname} = args as {pathname?: string}
+  const options = (pluginOptions ?? {}) as JaenPluginOptions
+
   // Only the component case carries a name; a host element's tag string never
   // matched this branch either way.
   const elementName =
@@ -169,7 +215,16 @@ export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = ({
             <JaenIntlProvider>
               <Toaster />
 
-              <CookieConsentProvider>
+              {/* The banner is markup now, so both of these have to be known
+                  while the HTML is generated: the locale decides which of the
+                  five translations is written into this page, and the
+                  analytics flag decides the settings modal's cookie table for
+                  whenever the plugin is loaded. */}
+              <CookieConsentProvider
+                locale={localeForPathname(pathname, options.i18n)}
+                useGoogleAnalytics={Boolean(
+                  options.googleAnalytics?.trackingIds?.[0]
+                )}>
                 <JaenUpdateModalProvider>
                   <SiteMetadataProvider>
                     <JaenFrameMenuProvider>

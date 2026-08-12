@@ -39,6 +39,18 @@ export interface JaenPluginOptions extends PluginOptions {
     trackingIds?: string[]
   }
 
+  /**
+   * Localized page generation. Only the parts the browser side reads are
+   * declared; gatsby-node's copy of this interface carries the rest.
+   */
+  i18n?: {
+    defaultLocale: string
+    locales: Array<{
+      locale: string
+      prefix?: string
+    }>
+  }
+
   sentry?: {
     org: string
     project: string
