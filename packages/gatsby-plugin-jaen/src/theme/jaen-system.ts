@@ -55,9 +55,22 @@ import {
 export const jaenConfig = defineConfig({
   cssVarsPrefix: 'jaen',
   disableLayers: true,
-  // jaen's provider is mounted on every route, CMS and site alike, so it is the
-  // one that owns the reset. The site's system sets preflight: false.
-  preflight: true,
+  /**
+   * Scoped to jaen's own root, not the document.
+   *
+   * jaen's provider mounts on every route, so an unscoped preflight is jaen
+   * restyling the consuming site, which is the thing jaen is least allowed to
+   * do. v2 got away with it because v2's CSSReset only set border, box-sizing
+   * and word-wrap on `*`. v3's preflight adds `font: inherit` there, and SVG
+   * presentation attributes lose to any CSS declaration, so every inline SVG
+   * that sizes its own text with `font-size="7.8"` was silently reset to the
+   * inherited 16px. The hero illustration on netsnek.com is where that shows.
+   *
+   * A consuming site that wants v3's reset can set preflight on its own system
+   * and decide that for itself. What it cannot do is opt out of one it never
+   * asked for.
+   */
+  preflight: {scope: '#momo'},
   globalCss,
   theme: {
     breakpoints,
