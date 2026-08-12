@@ -48,32 +48,56 @@ const Config = (themeOptions: JaenThemeOptions): GatsbyConfig => ({
         icon: `src/favicon.ico`
       }
     },
-    {
-      resolve: 'gatsby-plugin-google-gtag',
-      options: {
-        trackingIds: [],
-        gtagConfig: {
-          anonymize_ip: true
-        },
-        pluginConfig: {
-          head: true
-        }
-      }
-    },
-    {
-      resolve: '@sentry/gatsby',
-      options: {
-        sampleRate: 1,
-        enableTracing: true,
-        debug: true,
-        // Performance Monitoring
-        tracesSampleRate: 1.0, //  Capture 100% of the transactions
-        // Set 'tracePropagationTargets' to control for which URLs distributed tracing should be enabled
-        // Session Replay
-        replaysSessionSampleRate: 1.0, // This sets the sample rate at 10%. You may want to change it to 100% while in development and then sample at a lower rate in production.
-        replaysOnErrorSampleRate: 1.0 // If you're not already sampling the entire session, change the sample rate to 100% when sampling sessions where errors occur.
-      }
-    },
+    /**
+     * `gatsby-plugin-google-gtag` is deliberately not registered here either,
+     * and for a harder reason than Sentry below.
+     *
+     * Its `onRenderBody` writes four elements into every built page with no
+     * condition on any of them but NODE_ENV — read node_modules/
+     * gatsby-plugin-google-gtag/gatsby-ssr.js:
+     *
+     *     setHeadComponents([<link rel="preconnect" href={origin}/>,
+     *                        <link rel="dns-prefetch" href={origin}/>])
+     *     ...
+     *     setComponents([<script async src={origin + "/gtag/js?id=" + id}/>,
+     *                    <script>{renderHtml()}</script>])
+     *
+     * `pluginOptionsSchema` in its gatsby-node.js offers `trackingIds`,
+     * `gtagConfig` and a `pluginConfig` of head / respectDNT / exclude /
+     * origin / delayOnRouteUpdate. Not one of them suppresses the two links,
+     * and `respectDNT` only wraps the inline config script in an `if`, leaving
+     * the `<script src>` in place. An empty `trackingIds` does not help
+     * either: the preconnect is emitted regardless and the script is still
+     * requested, with an empty id.
+     *
+     * A preconnect is not a hint that costs nothing. The browser resolves DNS
+     * and completes the TCP and TLS handshake immediately, so Google learns
+     * the visitor's IP address, and through the SNI extension the host, before
+     * the cookie banner has been answered — before it has even painted. The
+     * `window['ga-disable-<id>']` flag this theme used to set in
+     * on-client-entry stopped the tag from tracking, but it could not stop any
+     * of that, because all of it happens while the flag is being set.
+     *
+     * So gtag.js is loaded by hand in src/gatsby/on-client-entry.ts, after the
+     * visitor has allowed the consent category, with the tracking ids and the
+     * gtag config coming from the `googleAnalytics` plugin option. Nothing
+     * reaches www.googletagmanager.com before that, which also means a
+     * Lighthouse or PageSpeed run — neither of which ever answers a banner —
+     * no longer pays for a third party the visitor was not asked about.
+     */
+    /**
+     * `@sentry/gatsby` is deliberately not registered here.
+     *
+     * Its gatsby-browser calls `Sentry.init` for every visitor the moment the
+     * runtime starts, which is before anyone has answered the cookie banner,
+     * and there is no option that turns that off: gatsby-node writes the dsn
+     * into this plugin's options, and the plugin treats any option at all as
+     * "configured, go". Registering it and hoping is not a gate.
+     *
+     * The SDK is loaded by hand in src/gatsby/on-client-entry.ts once the
+     * visitor has allowed the consent category, with the sampling rates and
+     * the integration list coming from the `sentry` plugin option.
+     */
     {
       resolve: 'gatsby-plugin-remove-console',
       options: {
