@@ -68,6 +68,7 @@ export {
 } from './contexts/jaen-update-modal'
 
 export {
+  bootstrapCookieConsent,
   CookieConsentProvider,
   useCookieConsentContext,
   useCookieConsentCategory,

@@ -500,6 +500,70 @@ const dispatchConsentChange = (detail: CookieConsentChangeDetail): void => {
 
 const CookieContext = createContext<CookieConsent | null>(null)
 
+/**
+ * Build and show the consent banner, outside React.
+ *
+ * This used to live in the provider's effect, which meant the banner was only
+ * created once the whole tree had hydrated. Lighthouse measured the result on
+ * netsnek.com: the banner is the largest element it sees, so it became the LCP
+ * element at 18.3 s, of which 17.6 s was render delay. Nothing else on the page
+ * mattered next to that number.
+ *
+ * vanilla-cookieconsent is a plain DOM library and needs neither React nor the
+ * provider. Everything it wants is available before hydration: the flag comes
+ * from the plugin options and the language from `<html lang>`, which
+ * gatsby-plugin-jaen has already stamped. Calling this from onClientEntry
+ * paints the banner as soon as the bundle runs instead of after the last
+ * component has mounted.
+ *
+ * It is idempotent. The provider calls it too, and on the second call it just
+ * hands back the instance that is already running.
+ */
+export const bootstrapCookieConsent = (settings?: {
+  useGoogleAnalytics?: boolean
+  locale?: string
+}): CookieConsent | null => {
+  if (typeof window === 'undefined') return null
+
+  if (window.cookieConsent && document.getElementById('cc--main')) {
+    return window.cookieConsent
+  }
+
+  const cc = window.initCookieConsent()
+  const pluginConfig = buildPluginConfig({
+    useGoogleAnalytics: settings?.useGoogleAnalytics
+  })
+
+  // Without an explicit locale the language of the rendered document is the
+  // best signal: gatsby-plugin-jaen stamps `<html lang>` with the locale of
+  // the localized page.
+  const currentLang = resolveLanguage(
+    settings?.locale ?? document.documentElement.lang,
+    pluginConfig.languages ?? {}
+  )
+
+  cc.run({
+    ...pluginConfig,
+    current_lang: currentLang,
+    onAccept: cookie => {
+      dispatchConsentChange({
+        categories: cookie?.categories ?? [],
+        changedCategories: []
+      })
+    },
+    onChange: (cookie, changedCookieCategories) => {
+      dispatchConsentChange({
+        categories: cookie?.categories ?? [],
+        changedCategories: changedCookieCategories ?? []
+      })
+    }
+  })
+
+  window.cookieConsent = cc
+
+  return cc
+}
+
 export interface CookieConsentProviderProps {
   locale?: string
   useGoogleAnalytics?: boolean
@@ -516,42 +580,9 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
   const {colorMode} = useColorMode()
 
   useEffect(() => {
-    if (!document.getElementById('cc--main')) {
-      const _cc = window.initCookieConsent()
-
-      setCC(_cc)
-
-      const pluginConfig = buildPluginConfig({
-        useGoogleAnalytics
-      })
-
-      // Without an explicit locale the language of the rendered document is
-      // the best signal: gatsby-plugin-jaen stamps `<html lang>` with the
-      // locale of the localized page.
-      const currentLang = resolveLanguage(
-        locale ?? document.documentElement.lang,
-        pluginConfig.languages ?? {}
-      )
-
-      _cc.run({
-        ...pluginConfig,
-        current_lang: currentLang,
-        onAccept: cookie => {
-          dispatchConsentChange({
-            categories: cookie?.categories ?? [],
-            changedCategories: []
-          })
-        },
-        onChange: (cookie, changedCookieCategories) => {
-          dispatchConsentChange({
-            categories: cookie?.categories ?? [],
-            changedCategories: changedCookieCategories ?? []
-          })
-        }
-      })
-
-      window.cookieConsent = _cc
-    }
+    // onClientEntry has usually built it already, in which case this only
+    // adopts the running instance.
+    setCC(bootstrapCookieConsent({useGoogleAnalytics, locale}))
   }, [locale, useGoogleAnalytics])
 
   useEffect(() => {
