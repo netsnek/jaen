@@ -127,14 +127,20 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
         <Dialog.Backdrop />
 
         {/*
-          The portal lifts the dialog out of the `#momo` scope that every Chakra
-          custom property is emitted under, so the content needs an ancestor
-          carrying the id or its tokens resolve against nothing. v2 spelled that
-          as containerProps on ModalContent; the positioner is the element those
-          props reached. The backdrop stays outside it, unresolved, exactly as
-          the v2 overlay was.
+          v2 spelled a `#momo` root here as containerProps on ModalContent,
+          because the provider scoped every Chakra custom property to that
+          selector and a portal lands outside it. v3 emits them globally behind
+          the `jaen` prefix (see gatsby/wrap-root-element), so the portalled
+          content resolves its tokens without a root of its own.
+
+          The id must not be re-homed onto the positioner either: zag owns that
+          element's id and resolves it back with getElementById to write
+          `--layer-index` and `--z-index`. An override sends that lookup to
+          JaenFrame's header instead — and this dialog opens inside the media
+          modal, so both would have claimed the same id at once and neither
+          positioner would have received its layer index.
         */}
-        <Dialog.Positioner id="momo">
+        <Dialog.Positioner>
           <Dialog.Content
             overflow="hidden"
             bg="transparent"

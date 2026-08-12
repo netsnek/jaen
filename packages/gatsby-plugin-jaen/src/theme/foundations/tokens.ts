@@ -10,13 +10,77 @@ import {defineTokens} from '@chakra-ui/react'
 
 export const tokens = defineTokens({
   colors: {
+    /**
+     * v2's gray, pinned in full.
+     *
+     * Only 25/50/950 were jaen's own; 100-900 came from @chakra-ui/theme and
+     * were never written down, which is why they went missing. v2's ramp is
+     * blue-tinted (500 #718096) and v3's is neutral zinc (500 #71717a), so
+     * inheriting v3's silently re-tints every neutral surface and every line of
+     * body text in the CMS: fg.default, fg.emphasized, fg.muted, fg.subtle,
+     * all three border.* and bg.subtle/bg.muted resolve through these.
+     *
+     * Read out of /home/snekmin/git/jaen/node_modules/@chakra-ui/theme, not
+     * copied from a docs page.
+     */
     gray: {
-      // v3 has no gray.25 at all, and its gray.50/950 are neutral greys
-      // (#fafafa, #111111) where jaen's carry a blue cast. The CMS chrome is
-      // built on those three, so they are a real disagreement, not a restatement.
+      // jaen's own three. v3 has no 25 at all, and its 50/950 (#fafafa,
+      // #111111) are neutral where jaen's carry the same blue cast as the ramp.
       25: {value: '#fcfdfe'},
       50: {value: '#f4f8fa'},
+      // v2 @chakra-ui/theme, verbatim.
+      100: {value: '#EDF2F7'},
+      200: {value: '#E2E8F0'},
+      300: {value: '#CBD5E0'},
+      400: {value: '#A0AEC0'},
+      500: {value: '#718096'},
+      600: {value: '#4A5568'},
+      700: {value: '#2D3748'},
+      800: {value: '#1A202C'},
+      900: {value: '#171923'},
       950: {value: '#14151e'}
+    }
+  },
+  /**
+   * v2's `borders` scale, pinned.
+   *
+   * v3 renamed the whole scale to xs/sm/md/lg/xl and dropped the pixel keys, so
+   * `border="1px"` stops resolving. An unresolvable token is not an error: the
+   * literal `1px` is emitted, `border: 1px` resets border-style to its initial
+   * `none`, and nothing paints. Five call sites in these packages rely on it
+   * (JaenFrame, DangerZone, TuneSelector, SectionBlockSelector, emailwerk's
+   * email index), and v3's own `xs`/`sm`/`md` keep their meanings alongside.
+   */
+  borders: {
+    '1px': {value: '1px solid'},
+    '2px': {value: '2px solid'},
+    '4px': {value: '4px solid'},
+    '8px': {value: '8px solid'}
+  },
+  /**
+   * v2's `radii.base`, pinned.
+   *
+   * v3's scale is shifted one name down (v2 sm 0.125 -> v3 xs, v2 base 0.25 ->
+   * v3 sm) and has no `base` at all, so `card` size=sm, `checkbox` size=md and
+   * `progress` emitted the literal `border-radius: base` and the browser
+   * dropped the declaration. md/lg/xl/full hold the same value in both, which
+   * is why they were never noticed. Two consequences of the same shift are
+   * fixed in the slot recipes rather than here: `checkbox` size=sm had to move
+   * from `sm` to `xs` to keep v2's 0.125rem, and `progress` had to move its
+   * radius into v3's `shape` variant to win over it.
+   */
+  radii: {
+    base: {value: '0.25rem'}
+  },
+  /**
+   * v2's `shadows.base`, pinned, for the same reason: `card` variant=elevated
+   * asks for it and v3 has no raw shadow tokens at all. The five jaen shadows
+   * that DO carry a light/dark axis stay in semantic-tokens.ts; this one had
+   * none in v2 either.
+   */
+  shadows: {
+    base: {
+      value: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)'
     }
   },
   fonts: {

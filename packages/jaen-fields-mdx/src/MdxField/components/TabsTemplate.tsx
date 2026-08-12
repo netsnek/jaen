@@ -81,11 +81,20 @@ const TabsTemplate: React.FC<TabsProps> = props => {
         onValueChange={handleTabChange}
         pos="relative"
         size="sm">
+        {/* Stays a literal var() rather than becoming bg="bg.canvas". A style
+            prop compiles against the nearest provider, and this editor mounts
+            both inside the CMS (jaen's system) and inline on a site page
+            (the site's), where bg.canvas need not exist — netsnek.com's system
+            defines no `canvas`, so the token form would emit the unresolvable
+            literal `background: bg.canvas` there. jaen's provider is mounted at
+            the root on every route and its variables are global in v3, so the
+            var() resolves in both places, which is exactly what v2 got out of
+            cssVarsRoot="#momo". Only the prefix changes. */}
         <Tabs.List
           pos="sticky"
           top="0"
           zIndex="1"
-          bg="var(--chakra-colors-bg-canvas)">
+          bg="var(--jaen-colors-bg-canvas)">
           {props.tabs.map((tab, i) => (
             <Tabs.Trigger key={i} value={String(i)}>
               {tab.label}

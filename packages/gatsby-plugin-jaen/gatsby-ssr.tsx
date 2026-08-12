@@ -13,6 +13,19 @@ export {wrapRootElement} from './src/gatsby/wrap-root-element'
  * (`.dark, .dark .chakra-theme:not(.light)`), and `color-scheme` is what stops
  * the browser painting white scrollbars over a dark page.
  *
+ * The fallback is 'light', not 'system', and has to stay in lockstep with
+ * NextThemeProvider's defaultTheme in wrap-root-element.tsx: v2's effective
+ * default was the literal "light" that extendTheme put in theme.config, so an
+ * unconfigured visitor gets light here whatever the OS says. See the comment
+ * over the provider for why the site's initialColorMode:'system' never counted.
+ *
+ * Before falling back it adopts v2's key once. v2's ColorModeScript did not
+ * merely read `chakra-ui-color-mode`, it WROTE the resolved mode into it on
+ * every first paint, so every returning visitor carries one — 'light' for the
+ * many, 'dark' for whoever toggled. Without the adoption those few would be
+ * silently reset to light. Only the two resolved values are adopted; v2 never
+ * stored 'system' under that key.
+ *
  * It moves from setPreBodyComponents to setHeadComponents so it runs before the
  * first paint rather than after the opening body tag.
  *
@@ -21,8 +34,11 @@ export {wrapRootElement} from './src/gatsby/wrap-root-element'
  * never diffs the class this writes.
  */
 const NO_FLASH = `(function(){try{
-var d=document.documentElement,s=localStorage.getItem('theme')||'system',
-m=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',
+var d=document.documentElement,s=localStorage.getItem('theme');
+if(!s){var o=localStorage.getItem('chakra-ui-color-mode');
+if(o==='light'||o==='dark'){localStorage.setItem('theme',o);s=o}}
+s=s||'light';
+var m=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light',
 r=s==='system'?m:s;
 d.classList.remove('light','dark');d.classList.add(r);d.style.colorScheme=r;
 }catch(e){}})()`

@@ -545,10 +545,17 @@ const Page: React.FC<PageProps> = ({params}) => {
                         <Controller
                           control={control}
                           name="content"
+                          // Monaco takes a plain CSS length, so the height has
+                          // to stay a literal var() rather than a size token.
+                          // Only the prefix moves: this page declares layout
+                          // {name: 'jaen'}, so jaen's system is the only one
+                          // mounted and it emits --jaen-*. --jaen-sizes-md is
+                          // 28rem, the same value v2's --chakra-sizes-md
+                          // carried.
                           render={({field}) => (
                             <Editor
                               theme={'vs-dark'}
-                              height="var(--chakra-sizes-md)"
+                              height="var(--jaen-sizes-md)"
                               defaultLanguage="html"
                               defaultValue={field.value || undefined}
                               onChange={(value, _) => field.onChange(value)}

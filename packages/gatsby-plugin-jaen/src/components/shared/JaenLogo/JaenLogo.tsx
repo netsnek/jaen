@@ -1,3 +1,12 @@
+/**
+ * The fill stays a hand-written var() rather than a style prop, because
+ * createIcon puts this <svg> inside another one and Chakra styles only the
+ * outer element. The name is the only thing that changes: jaen's system emits
+ * --jaen-*, and CMS routes mount that system alone, so --chakra-colors-pink-500
+ * resolved against nothing there. `fill` is an inherited property, so the
+ * unresolvable value did not fall back to the v2 pink but to whatever the
+ * ancestors carried, i.e. black.
+ */
 import {createIcon} from '@chakra-ui/react'
 
 export const JaenLogo = createIcon({
@@ -5,7 +14,7 @@ export const JaenLogo = createIcon({
   viewBox: '0 0 512 512',
   path: (
     <svg
-      fill="var(--chakra-colors-pink-500)"
+      fill="var(--jaen-colors-pink-500)"
       version="1.1"
       id="Ebene_1"
       xmlns="http://www.w3.org/2000/svg"
@@ -57,7 +66,7 @@ export const JaenFullLogo = createIcon({
   viewBox: '0 0 1112 475',
   path: (
     <svg
-      fill="var(--chakra-colors-pink-500)"
+      fill="var(--jaen-colors-pink-500)"
       version="1.1"
       id="Ebene_1"
       xmlns="http://www.w3.org/2000/svg"

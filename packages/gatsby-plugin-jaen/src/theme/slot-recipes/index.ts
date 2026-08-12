@@ -88,7 +88,10 @@ export const checkboxSlotRecipe = defineSlotRecipe({
     size: {
       sm: {
         label: {fontSize: 'xs', lineHeight: '1.125rem'},
-        control: {borderRadius: 'sm'},
+        // v2 asked for `sm` and got 0.125rem. v3 shifted the whole radii scale
+        // one name down (v2 sm 0.125 -> v3 xs; v2 base 0.25 -> v3 sm), so the
+        // literal `sm` would round a 1rem control twice as far as v2 did.
+        control: {borderRadius: 'xs'},
         indicator: {fontSize: '0.45rem'}
       },
       md: {
@@ -192,7 +195,22 @@ export const progressSlotRecipe = defineSlotRecipe({
   slots: ['root', 'label', 'track', 'range', 'valueText'],
   base: {
     root: {colorPalette: 'brand'},
-    track: {borderRadius: 'base', bg: 'bg.muted'}
+    track: {bg: 'bg.muted'}
+  },
+  /**
+   * The track radius has to be set HERE, not in `base`.
+   *
+   * v2 had no `shape` axis, so jaen's baseStyle radius was the only one and the
+   * track rendered at radii.base, 0.25rem. v3 adds `shape` with a default of
+   * `rounded`, whose `track: {borderRadius: 'l1'}` is applied after base and
+   * therefore beats it — measured, `getSlotRecipeFn('progress')({}).track` came
+   * back as l1 (radii.xs, 0.125rem) even with `base` declared and resolving.
+   * Overriding the same variant is what puts v2's value back.
+   */
+  variants: {
+    shape: {
+      rounded: {track: {borderRadius: 'base'}}
+    }
   }
 })
 

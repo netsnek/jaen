@@ -37,10 +37,11 @@ export const PageTree: React.FC<PageTreeProps> = ({
     setSelectedItems(defaultSelected ? [defaultSelected] : [])
   }, [defaultSelected])
 
-  const [brand50, brand100, brand200] = useToken('colors', [
+  const [brand50, brand100, brand200, brand500] = useToken('colors', [
     'brand.50',
     'brand.100',
-    'brand.200'
+    'brand.200',
+    'brand.500'
   ])
 
   // These land in CSS custom properties that react-complex-tree reads, so they
@@ -73,16 +74,20 @@ export const PageTree: React.FC<PageTreeProps> = ({
           w="full"
           className="tree"
           css={{
-            '--rct-bar-color': 'var(--chakra-colors-brand-500)',
+            // Hand-written var() names cannot survive the prefix change: jaen's
+            // system emits --jaen-*, and on a CMS route it is the only provider
+            // mounted, so var(--chakra-colors-brand-500) resolves against
+            // nothing. useToken reads the same token through the system that is
+            // actually in scope, which is what the three above already do.
+            '--rct-bar-color': brand500,
 
-            '--rct-color-drag-between-line-bg':
-              'var(--chakra-colors-brand-500)',
+            '--rct-color-drag-between-line-bg': brand500,
 
             '--rct-item-height': '2rem',
             '--rct-color-focustree-item-hover-bg': hoverBg,
             '--rct-color-focustree-item-selected-bg': selectedBg,
             '--rct-color-focustree-item-active-bg': activeBg,
-            '--rct-color-arrow': 'var(--chakra-colors-brand-500)'
+            '--rct-color-arrow': brand500
           }}>
           <ul className="tree-root tree-node-list" {...props.containerProps}>
             {props.children}

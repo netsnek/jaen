@@ -129,12 +129,26 @@ export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = ({
 
   return (
     /**
-     * Two things changed here, and they are the same change seen from two ends.
+     * What changed here is the provider, not the default it hands out.
      *
      * next-themes sits OUTSIDE Chakra because it writes the class onto <html>
      * that v3's dark condition selects on, so the provider reading tokens has
-     * to be inside the one setting the class. defaultTheme="system" with
-     * enableSystem is what the site asked for in v2 and never actually got.
+     * to be inside the one setting the class.
+     *
+     * defaultTheme="light" is what v2 actually shipped, and it stays. jaen's
+     * theme carried no `config`, so extendTheme filled in @chakra-ui/theme's
+     * own `initialColorMode: "light"` (measured: theme.config in the v2 tree is
+     * {useSystemColorMode:false, initialColorMode:"light", cssVarPrefix:
+     * "chakra"}), and that literal is what ColorModeScript wrote and what
+     * ColorModeProvider defaulted to. The site theme's initialColorMode:
+     * 'system' never reached a provider — the site's Layout mounted emotion's
+     * ThemeProvider, not ChakraProvider — so no visitor has ever been given an
+     * OS-following default here. Following the OS would flip every dark-OS
+     * visitor to a dark first paint, which is a redesign, not a migration.
+     *
+     * enableSystem stays on regardless: it only adds 'system' to the set of
+     * values setColorMode accepts, it does not make it the default. Choosing it
+     * still works, and next-themes then tracks the OS live.
      *
      * cssVarsRoot="#momo" is gone, and its absence is what lets that work. In
      * v3 only the base bucket honours cssVarsRoot; the dark bucket always lands
@@ -146,7 +160,7 @@ export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = ({
      */
     <NextThemeProvider
       attribute="class"
-      defaultTheme="system"
+      defaultTheme="light"
       enableSystem
       disableTransitionOnChange>
       <ChakraProvider value={system}>

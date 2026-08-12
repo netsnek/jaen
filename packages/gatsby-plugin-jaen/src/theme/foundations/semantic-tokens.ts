@@ -18,6 +18,23 @@
  * fg.emphasized and border.active are new names. And fg.default / border.default
  * do NOT collide, because v3 spells its fallback `DEFAULT` in capitals while a
  * lowercase `default` is an ordinary path segment.
+ *
+ * `_light`, NOT `base`, FOR EVERY NAME THAT COLLIDES. This is the part that was
+ * wrong and it made the light half of each override dead code. v3 spells its own
+ * light value `_light`; a `base` alongside it does not replace it, both survive
+ * the deep merge, and they land on different selectors:
+ *
+ *   &:where(html, .chakra-theme) { --jaen-colors-fg-subtle: …gray-500 }  <- base
+ *   :root &, .light &            { --jaen-colors-fg-subtle: …gray-400 }  <- v3
+ *
+ * `:root`/`.light` is (0,1,0) and emitted later; `:where(...)` is (0,0,0). v3
+ * wins every time, so jaen's value only ever showed up in dark mode. The rule:
+ * a token v3 also defines must be spelled `_light`; a name v3 does not define is
+ * free to use `base`. The colliding set is measurable, not a judgement call —
+ * `Object.keys` over `defaultConfig.theme.semanticTokens.{colors,shadows}` lists
+ * it, and today it is exactly bg.subtle, bg.muted, fg.muted, fg.subtle,
+ * fg.inverted, border.emphasized and shadows xs/sm/md/lg/xl. Re-check it when
+ * bumping @chakra-ui/react.
  */
 import {defineSemanticTokens} from '@chakra-ui/react'
 
@@ -26,8 +43,9 @@ export const semanticTokens = defineSemanticTokens({
     bg: {
       canvas: {value: {base: '{colors.gray.25}', _dark: '{colors.gray.950}'}},
       surface: {value: {base: '{colors.white}', _dark: '{colors.gray.900}'}},
-      subtle: {value: {base: '{colors.gray.50}', _dark: '{colors.gray.800}'}},
-      muted: {value: {base: '{colors.gray.100}', _dark: '{colors.gray.700}'}},
+      // collides with v3: _light, not base
+      subtle: {value: {_light: '{colors.gray.50}', _dark: '{colors.gray.800}'}},
+      muted: {value: {_light: '{colors.gray.100}', _dark: '{colors.gray.700}'}},
       translucent: {
         value: {
           base: 'rgba(255, 255, 255, 0.8)',
@@ -46,9 +64,12 @@ export const semanticTokens = defineSemanticTokens({
       emphasized: {
         value: {base: '{colors.gray.700}', _dark: '{colors.gray.200}'}
       },
-      muted: {value: {base: '{colors.gray.600}', _dark: '{colors.gray.300}'}},
-      subtle: {value: {base: '{colors.gray.500}', _dark: '{colors.gray.400}'}},
-      inverted: {value: {base: '{colors.white}', _dark: '{colors.gray.950}'}},
+      // the three that collide with v3: _light, not base
+      muted: {value: {_light: '{colors.gray.600}', _dark: '{colors.gray.300}'}},
+      subtle: {
+        value: {_light: '{colors.gray.500}', _dark: '{colors.gray.400}'}
+      },
+      inverted: {value: {_light: '{colors.white}', _dark: '{colors.gray.950}'}},
       accent: {
         default: {value: '{colors.white}'},
         subtle: {value: '{colors.brand.100}'},
@@ -58,8 +79,10 @@ export const semanticTokens = defineSemanticTokens({
 
     border: {
       default: {value: {base: '{colors.gray.200}', _dark: '{colors.gray.800}'}},
+      // collides with v3 (same value, but it still has to win the selector
+      // fight to be the one that renders): _light, not base
       emphasized: {
-        value: {base: '{colors.gray.300}', _dark: '{colors.gray.700}'}
+        value: {_light: '{colors.gray.300}', _dark: '{colors.gray.700}'}
       },
       active: {value: {base: '{colors.gray.400}', _dark: '{colors.gray.600}'}}
     },
@@ -103,38 +126,49 @@ export const semanticTokens = defineSemanticTokens({
     }
   },
 
+  /**
+   * All five of xs..xl collide with v3's own semantic shadows, so all five take
+   * `_light`. With `base` they lost every light-mode Card, Menu and Drawer to
+   * v3's `0px 4px 8px color-mix(… gray.900 10% …)` and only showed up in dark
+   * mode. `focus` is jaen's own name and keeps `base`.
+   */
   shadows: {
     xs: {
       value: {
-        base: '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 1px 2px rgba(45, 55, 72,  0.1)',
+        _light:
+          '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 1px 2px rgba(45, 55, 72,  0.1)',
         _dark:
           '0px 0px 1px rgba(13, 14, 20, 1), 0px 1px 2px rgba(13, 14, 20, 0.9)'
       }
     },
     sm: {
       value: {
-        base: '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 2px 4px rgba(45, 55, 72,  0.1)',
+        _light:
+          '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 2px 4px rgba(45, 55, 72,  0.1)',
         _dark:
           '0px 0px 1px rgba(13, 14, 20, 1), 0px 2px 4px rgba(13, 14, 20, 0.9)'
       }
     },
     md: {
       value: {
-        base: '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 4px 8px rgba(45, 55, 72,  0.1)',
+        _light:
+          '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 4px 8px rgba(45, 55, 72,  0.1)',
         _dark:
           '0px 0px 1px rgba(13, 14, 20, 1), 0px 4px 8px rgba(13, 14, 20, 0.9)'
       }
     },
     lg: {
       value: {
-        base: '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 8px 16px rgba(45, 55, 72,  0.1)',
+        _light:
+          '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 8px 16px rgba(45, 55, 72,  0.1)',
         _dark:
           '0px 0px 1px rgba(13, 14, 20, 1), 0px 8px 16px rgba(13, 14, 20, 0.9)'
       }
     },
     xl: {
       value: {
-        base: '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 16px 24px rgba(45, 55, 72,  0.1)',
+        _light:
+          '0px 0px 1px rgba(45, 55, 72, 0.05), 0px 16px 24px rgba(45, 55, 72,  0.1)',
         _dark:
           '0px 0px 1px rgba(13, 14, 20, 1), 0px 16px 24px rgba(13, 14, 20, 0.9)'
       }
