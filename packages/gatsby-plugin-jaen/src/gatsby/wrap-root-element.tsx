@@ -22,7 +22,7 @@ import {IntlProvider} from 'react-intl'
 
 import {JaenWidgetProvider} from '../contexts/jaen-widget'
 import {SiteMetadataProvider} from '../connectors/site-metadata'
-import {system} from '../theme'
+import {system} from '../theme/system'
 import {JaenFrameMenuProvider} from '../contexts/jaen-frame-menu'
 import {Toaster} from '../components/ui/toaster'
 import {Popup} from '../components/Popup'
