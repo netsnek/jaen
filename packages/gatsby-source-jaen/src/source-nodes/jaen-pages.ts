@@ -69,6 +69,10 @@ The existing templates are: ${jaenTemplates
           id: mediaId,
           jaenPageId: node.jaenPageId,
           description: node.description,
+          // Kept on the node so a page metadata image that stores only the
+          // address can be resolved back to this media node, see the
+          // jaenMetadataImage field extension.
+          url: node.url,
           node: fileNode.id
         }
 

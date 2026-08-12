@@ -2,6 +2,7 @@ import deepmerge from 'deepmerge'
 import {HeadProps} from 'gatsby'
 import React from 'react'
 
+import {resolvePageMetadataImage} from '../components/PageMetadataImage'
 import {useSiteMetadataContext} from '../contexts/site-metadata'
 import {useAppSelector, withRedux} from '../redux'
 import {PageProps} from '../types'
@@ -41,7 +42,6 @@ export const Head: React.FC<
     metadataTitle || configLabel || siteMetadata?.title || defaultTitle
 
   const description = jaenPageMetadata?.description || siteMetadata?.description
-  const image = jaenPageMetadata?.image || siteMetadata?.image
   const normalizedSiteUrl = siteMetadata?.siteUrl?.replace(/\/+$/, '')
   const canonicalUrl = normalizedSiteUrl
     ? new URL(
@@ -51,6 +51,24 @@ export const Head: React.FC<
     : undefined
   const siteUrl = normalizedSiteUrl || '/'
   const url = canonicalUrl || props.location.pathname
+
+  // Every social preview tag needs a plain absolute url and would silently
+  // break on anything else, so `jaenPageMetadata.image` — the address, the
+  // one thing every page has ever stored — keeps first claim and this stays
+  // exactly the string it was before the optimised path existed.
+  //
+  // The middle rung is new and only fires for a page that carries a media id
+  // and no address at all: the resolved file's public src, absolutized
+  // against siteUrl because sharp emits `/static/...`. Without it such a page
+  // would fall through to the site image and lose its own preview.
+  const resolvedImage = resolvePageMetadataImage(jaenPageMetadata)
+  const resolvedImageUrl =
+    resolvedImage?.src && normalizedSiteUrl
+      ? new URL(resolvedImage.src, `${normalizedSiteUrl}/`).toString()
+      : resolvedImage?.src
+
+  const image =
+    jaenPageMetadata?.image || resolvedImageUrl || siteMetadata?.image
   const isBlogPost = !!jaenPageMetadata?.blogPost?.date || false
   const datePublished =
     (isBlogPost && jaenPageMetadata?.blogPost?.date) || false

@@ -40,6 +40,8 @@ export type {ImageFieldProps, TextFieldProps} from './fields'
 export {useField} from './hooks/use-field'
 export {
   JaenPage,
+  JaenPageMetadata,
+  JaenPageMetadataImage,
   PageConfig,
   PageProps,
   JaenTemplate,
@@ -49,6 +51,12 @@ export {
   ISite as JaenSite,
   Widget
 } from './types'
+export {
+  PageMetadataImage,
+  PageMetadataImageProps,
+  ResolvedPageMetadataImage,
+  resolvePageMetadataImage
+} from './components/PageMetadataImage'
 export {generatePageOriginPath} from './utils/path'
 export * from './utils/open-storage-gateway'
 

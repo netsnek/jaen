@@ -282,7 +282,15 @@ interface FormValues {
     category?: string
   }
   image?: {
+    /** The address, which is what the SEO tags read. Always written. */
     src?: string
+    /**
+     * The media library id of the same picture. The chooser has always
+     * handed the whole media node over and this form used to keep only the
+     * url, which is why a metadata image could never be served through
+     * sharp. Optional, because a page from an older patch has none.
+     */
+    id?: string
   }
   isExcludedFromIndex?: boolean
 }
@@ -764,6 +772,7 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
 
                 if (!e.checked) {
                   setValue('image.src', undefined)
+                  setValue('image.id', undefined)
                 }
               }}
               checked={isImageInUse}>
@@ -802,9 +811,18 @@ export const PageContentForm: React.FC<PageContentFormProps> = ({
                         setValue('image.src', media.url, {
                           shouldDirty: true
                         })
+                        // The id is what lets the build serve this picture
+                        // through sharp. The url stays next to it because
+                        // the social preview tags need a plain address.
+                        setValue('image.id', media.id, {
+                          shouldDirty: true
+                        })
                       }}
                       onRemove={() => {
                         setValue('image.src', '', {
+                          shouldDirty: true
+                        })
+                        setValue('image.id', '', {
                           shouldDirty: true
                         })
                       }}

@@ -103,6 +103,7 @@ const PagesNew: React.FC = () => {
             jaenPageMetadata: {
               title: data.title,
               image: data.image?.src,
+              imageId: data.image?.id,
               description: data.description,
               blogPost: data.blogPost
             }

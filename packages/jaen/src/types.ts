@@ -192,6 +192,38 @@ export type IJaenFields = Record<
   >
 > | null
 
+/**
+ * The picture of a page, in the two shapes a page can carry it.
+ *
+ * `image` is the plain address and is the only thing pages published before
+ * the media reference existed have. It is also what the SEO tags need, so it
+ * is never going away.
+ *
+ * `imageId` and the build-time resolved `imageFile` are the optimised path,
+ * added on top. Read them through `resolvePageMetadataImage` rather than by
+ * hand, so a consumer never has to know which of the two it got.
+ */
+export interface JaenPageMetadataImage {
+  image?: string | null
+  imageId?: string | null
+  imageFile?: {
+    childImageSharp?: {
+      gatsbyImageData: IGatsbyImageData
+    } | null
+  } | null
+}
+
+export interface JaenPageMetadata extends JaenPageMetadataImage {
+  title: string
+  description: string
+
+  blogPost?: {
+    date?: string
+    author?: string
+    category?: string
+  }
+}
+
 export interface JaenPage {
   id: string
   slug: string
@@ -199,17 +231,7 @@ export interface JaenPage {
   createdBy: string
   createdAt: string
   modifiedAt: string
-  jaenPageMetadata: Partial<{
-    title: string
-    image: string
-    description: string
-
-    blogPost?: {
-      date?: string
-      author?: string
-      category?: string
-    }
-  }>
+  jaenPageMetadata: Partial<JaenPageMetadata>
   jaenFields: IJaenFields
   mediaNodes: Array<{
     id: string

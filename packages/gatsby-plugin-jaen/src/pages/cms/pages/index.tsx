@@ -210,7 +210,8 @@ const PagesPage: React.FC = () => {
               defaultMessage: 'No title'
             }),
           image: {
-            src: currentPage.jaenPageMetadata?.image
+            src: currentPage.jaenPageMetadata?.image,
+            id: currentPage.jaenPageMetadata?.imageId
           },
           slug: currentPage.slug,
           template: currentPage.template,
@@ -236,6 +237,7 @@ const PagesPage: React.FC = () => {
             jaenPageMetadata: {
               title: data.title,
               image: data.image?.src,
+              imageId: data.image?.id,
               description: data.description,
               blogPost: data.blogPost
             }
