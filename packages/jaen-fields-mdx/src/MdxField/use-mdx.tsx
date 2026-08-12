@@ -9,7 +9,41 @@ import * as runtime from 'react/jsx-runtime'
 import rehypeSlug from 'rehype-slug-custom-id'
 import rehypeMdxCodeProps from 'rehype-mdx-code-props'
 import {rehypeUnwrapImages} from './rehype-unwrap-images'
-import rehypeMathjax from 'rehype-mathjax/svg'
+/**
+ * MathJax is fetched when a document actually contains mathematics.
+ *
+ * `rehype-mathjax/svg` carries mathjax-full, 1.77 MB of source and the largest
+ * package in a consuming site's bundle. A static import put it in the chunk
+ * graph of every page that mounts an MdxField, so netsnek.com's home page
+ * downloaded a full TeX typesetter to render a hero illustration that contains
+ * no formula at all.
+ *
+ * `evaluateSync` cannot await, so the plugin cannot simply be imported on
+ * demand inside it. Instead the source is checked for math first: documents
+ * without it never load the typesetter, documents with it start the fetch and
+ * are re-evaluated once it lands. The rendered result is unchanged in both
+ * cases, it only arrives a moment later the first time.
+ */
+let rehypeMathjax: any = null
+let mathjaxPromise: Promise<any> | null = null
+const mathReadyListeners = new Set<() => void>()
+
+/** `$…$`, `$$…$$`, `\(…\)`, `\[…\]` and `\begin{…}`, which is what remark-math reads. */
+const HAS_MATH = /\$\$|\$[^$\n]+\$|\\\(|\\\[|\\begin\{/
+
+const loadMathjax = () => {
+  if (!mathjaxPromise) {
+    mathjaxPromise = import(
+      /* webpackChunkName: "rehype-mathjax" */
+      'rehype-mathjax/svg'
+    ).then(m => {
+      rehypeMathjax = (m as any).default || m
+      for (const fn of mathReadyListeners) fn()
+      return rehypeMathjax
+    })
+  }
+  return mathjaxPromise
+}
 
 import {directiveToMarkdown} from 'mdast-util-directive'
 import remarkDirective from 'remark-directive'
@@ -48,6 +82,11 @@ function evaluateFile(file: VFile, components: {[key: string]: any}) {
     file.data[name] = tree
   }
 
+  // Only a document that carries math pays for the typesetter, and it pays on
+  // the second pass rather than blocking the first.
+  const needsMath = HAS_MATH.test(String(file.value ?? ''))
+  if (needsMath && !rehypeMathjax) void loadMathjax()
+
   try {
     file.result = evaluateSync(file as any, {
       ...(runtime as any),
@@ -71,7 +110,7 @@ function evaluateFile(file: VFile, components: {[key: string]: any}) {
             tagName: 'code'
           }
         ],
-        rehypeMathjax
+        ...(needsMath && rehypeMathjax ? [rehypeMathjax] : [])
       ],
       recmaPlugins: []
     }).default
@@ -131,6 +170,25 @@ export function useMdx(
       setState(initializeState(defaults, components))
     }
   }, [defaults, live])
+
+  // The typesetter arrives after the first pass, so the document that asked for
+  // it is evaluated once more. Documents without math never subscribe to
+  // anything that fires.
+  useEffect(() => {
+    const reevaluate = () => {
+      setState(s => {
+        const file = createFile(s.value)
+        evaluateFile(file, components)
+        return {...s, file}
+      })
+    }
+
+    mathReadyListeners.add(reevaluate)
+
+    return () => {
+      mathReadyListeners.delete(reevaluate)
+    }
+  }, [])
 
   const {run: setConfig} = useDebounceFn(
     async config => {

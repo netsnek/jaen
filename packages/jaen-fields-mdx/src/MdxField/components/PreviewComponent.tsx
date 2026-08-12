@@ -1,6 +1,19 @@
 import React, {useEffect, useState} from 'react'
 import {ErrorBoundary} from 'react-error-boundary'
-import SyntaxHighlighter from 'react-syntax-highlighter'
+/**
+ * The async light build, not the default one.
+ *
+ * The default entry point bundles highlight.js with all ~190 language
+ * definitions, which is 1.3 MB of source and the second largest package in a
+ * consuming site's bundle. It reaches the browser through any page that mounts
+ * an MdxField, including a page that only shows a two-line code fence.
+ *
+ * `light-async` emits the identical hljs class names and fetches a language
+ * definition the first time a fence asks for it, so the rendered result is the
+ * same once the chunk lands. This is the editor preview, which never exists in
+ * server output, so nothing about the served HTML changes either.
+ */
+import SyntaxHighlighter from 'react-syntax-highlighter/dist/esm/light-async'
 import {VFileMessage} from 'vfile-message'
 import {Statistics} from 'vfile-statistics'
 
