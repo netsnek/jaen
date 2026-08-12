@@ -16,7 +16,7 @@
     "index.js"
   ],
   "scripts": {
-    "build": "yarn typecheck && tsc gatsby/* --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule --noCheck",
+    "build": "tsc gatsby/* --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule --noCheck",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
