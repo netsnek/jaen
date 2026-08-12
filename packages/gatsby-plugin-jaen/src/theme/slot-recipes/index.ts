@@ -128,7 +128,18 @@ export const drawerSlotRecipe = defineSlotRecipe({
       pt: 6,
       pb: 0,
       fontSize: 'md',
-      fontWeight: 'normal'
+      fontWeight: 'normal',
+      /**
+       * `block`, because v2's was.
+       *
+       * v2's `chakra-modal__header` was a plain block, so the HStack inside it
+       * filled the header's content box and `justifyContent: space-between`
+       * pushed the close button to the right edge. v3's drawer header is a
+       * flex container, which turns that same HStack into a flex item sized to
+       * its own content: it shrank from 272px to 232px and took the close
+       * button 40px away from the edge it used to sit against.
+       */
+      display: 'block'
     },
     body: {px: {base: 4, md: 6}, py: 6},
     footer: {px: {base: 4, md: 6}, py: 4, display: 'block'},
@@ -326,5 +337,23 @@ export const accordionSlotRecipe = defineSlotRecipe({
   ],
   base: {
     itemTrigger: {gap: 0}
+  }
+})
+
+/**
+ * v2's List drew no markers and v3's does.
+ *
+ * v3's list recipe defaults to `variant: 'marker'`, whose root sets
+ * `listStyle: revert`, and a class beats the `ol, ul {list-style: none}` that
+ * the Tailwind reset still puts on the document. Every CMS menu grew bullet
+ * points, which is most visible in the navigation drawer.
+ *
+ * A call site that wants markers still gets them: `listStyleType="disc"` as a
+ * prop wins over the recipe, which is what the dashboard already does.
+ */
+export const listSlotRecipe = defineSlotRecipe({
+  slots: ['root', 'item', 'indicator'],
+  defaultVariants: {
+    variant: 'plain'
   }
 })

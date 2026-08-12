@@ -71,14 +71,21 @@ export const DrawerLeft: React.FC<DrawerLeftProps> = ({
                   </Box>
                   {/* v3's CloseTrigger renders whatever it is handed and
                       nothing otherwise, where v2's DrawerCloseButton brought
-                      its own X. size="xs" matches the 32px v2 drew, and the
-                      gray palette keeps the hover neutral against the brand
-                      one jaen's button recipe pins in `base`. */}
+                      its own X.
+                      
+                      size="md", measured rather than assumed: v2's
+                      DrawerCloseButton drew 40x40 here, not the 32 an earlier
+                      comment claimed, and md is the 40px entry in jaen's
+                      button sizes. The gray palette keeps the hover neutral
+                      against the brand one the recipe pins in `base`. */}
                   <Drawer.CloseTrigger asChild pos="static" onClick={onClose}>
                     <CloseButton
                       ref={initialFocusRef}
-                      size="xs"
+                      size="md"
                       colorPalette="gray"
+                      // v3 scales the glyph with the box and draws 20px inside
+                      // a 40px button. v2 drew 16px in the same box, measured.
+                      css={{'& svg': {width: '16px', height: '16px'}}}
                     />
                   </Drawer.CloseTrigger>
                 </HStack>

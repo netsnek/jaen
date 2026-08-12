@@ -120,8 +120,11 @@ export const DrawerRight: React.FC<DrawerRightProps> = ({
                   <Drawer.CloseTrigger asChild pos="static" onClick={onClose}>
                     <CloseButton
                       ref={initialFocusRef}
-                      size="xs"
+                      size="md"
                       colorPalette="gray"
+                      // v3 scales the glyph with the box and draws 20px inside
+                      // a 40px button. v2 drew 16px in the same box, measured.
+                      css={{'& svg': {width: '16px', height: '16px'}}}
                     />
                   </Drawer.CloseTrigger>
                 </HStack>
