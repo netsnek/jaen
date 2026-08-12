@@ -423,7 +423,15 @@ export const TextField = connectField<string, TextFieldProps>(
           // brand.300 is a light tint that reads as a different orange next
           // to a brand.500 button, so the light mode takes 500 and only the
           // dark mode keeps the lighter tint for legibility.
-          a: {
+          //
+          // The ampersand is required, it is not a style choice. v2's `sx`
+          // took a bare element name as a nested selector; v3's `css` reads an
+          // unprefixed key as a CONDITION and swaps it with the property,
+          // turning this block into `{color: {a: 'brand.500'}}`. There is no
+          // condition named `a`, so the whole thing is dropped without a
+          // warning and every link a writer puts in a text field renders in
+          // the surrounding text colour.
+          '& a': {
             color: 'brand.500',
             textDecoration: 'underline',
             _dark: {
