@@ -42,6 +42,7 @@ import {
   textareaRecipe
 } from './recipes'
 import {
+  accordionSlotRecipe,
   cardSlotRecipe,
   checkboxSlotRecipe,
   drawerSlotRecipe,
@@ -99,6 +100,7 @@ export const jaenConfig = defineConfig({
       textarea: textareaRecipe
     },
     slotRecipes: {
+      accordion: accordionSlotRecipe,
       card: cardSlotRecipe,
       checkbox: checkboxSlotRecipe,
       drawer: drawerSlotRecipe,

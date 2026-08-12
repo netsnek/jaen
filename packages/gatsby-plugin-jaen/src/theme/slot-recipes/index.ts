@@ -302,3 +302,29 @@ export const tabsSlotRecipe = defineSlotRecipe({
     root: {colorPalette: 'brand'}
   }
 })
+
+/**
+ * The one declaration jaen's accordions need, and the reason they need it.
+ *
+ * v2's accordion button was `{fontSize: 'md', px: 4, py: 2}` and declared no
+ * gap, so the label and the chevron sat at the two ends of a flex row with
+ * nothing between them. v3's `itemTrigger` adds `gap: 3`, which pushes twelve
+ * pixels between them and, on the debug page's three panels, moved the label
+ * away from the edge it used to align to.
+ *
+ * Measured on /cms/debug/: v2 renders the label with a 0px gutter, v3 with
+ * 12px, on all three panels.
+ */
+export const accordionSlotRecipe = defineSlotRecipe({
+  slots: [
+    'root',
+    'item',
+    'itemTrigger',
+    'itemContent',
+    'itemIndicator',
+    'itemBody'
+  ],
+  base: {
+    itemTrigger: {gap: 0}
+  }
+})

@@ -34,7 +34,21 @@ export const buttonRecipe = defineRecipe({
    * `base` writes the palette variables onto the element itself; an explicit
    * colorPalette prop still wins, because props merge after the recipe.
    */
-  base: {colorPalette: 'brand'},
+  /**
+   * `gap: 2` is v2's icon gutter, restored.
+   *
+   * v2's Button declared no gap. It spaced icons with the wrapping
+   * `chakra-button__icon` span, which carried `margin-inline-end: 0.5rem`. The
+   * codemod turned every `leftIcon`/`rightIcon` into a plain child, so that
+   * span and its margin are gone and only the button's own gap is left. v3's
+   * default gap is size-dependent (4px at xs, 12px at md), which matched
+   * neither.
+   *
+   * 8px is right for 33 of the 34 v2 call sites that put an icon beside a
+   * label, counted rather than estimated. The one exception carried no icon
+   * span in v2 either, and is a single button in the media gallery.
+   */
+  base: {colorPalette: 'brand', gap: 2},
 
   variants: {
     variant: {
@@ -157,22 +171,52 @@ export const buttonRecipe = defineRecipe({
     size: {
       // sizes.15 does not exist in v3 and is added in foundations/tokens.ts;
       // without it `2xl` would emit `height: 15` and fall back to auto.
-      '2xs': {h: '6', minW: '6', fontSize: '2xs', px: '2'},
-      xs: {h: '8', minW: '8', fontSize: 'xs', lineHeight: '1.125rem', px: '2'},
-      sm: {h: '9', minW: '9', fontSize: 'sm', lineHeight: '1.25rem', px: '3.5'},
-      md: {h: '10', minW: '10', fontSize: 'sm', lineHeight: '1.25rem', px: '4'},
+      '2xs': {h: '6', minW: '6', fontSize: '2xs', px: '2', gap: 2},
+      xs: {
+        h: '8',
+        minW: '8',
+        fontSize: 'xs',
+        lineHeight: '1.125rem',
+        px: '2',
+        gap: 2
+      },
+      sm: {
+        h: '9',
+        minW: '9',
+        fontSize: 'sm',
+        lineHeight: '1.25rem',
+        px: '3.5',
+        gap: 2
+      },
+      md: {
+        h: '10',
+        minW: '10',
+        fontSize: 'sm',
+        lineHeight: '1.25rem',
+        px: '4',
+        gap: 2
+      },
       lg: {
         h: '11',
         minW: '11',
         fontSize: 'md',
         lineHeight: '1.5rem',
-        px: '4.5'
+        px: '4.5',
+        gap: 2
       },
-      xl: {h: '12', minW: '12', fontSize: 'md', lineHeight: '1.5rem', px: '5'},
+      xl: {
+        h: '12',
+        minW: '12',
+        fontSize: 'md',
+        lineHeight: '1.5rem',
+        px: '5',
+        gap: 2
+      },
       '2xl': {
         h: '15',
         minW: '15',
         fontSize: 'lg',
+        gap: 2,
         lineHeight: '1.75rem',
         px: '7'
       }
