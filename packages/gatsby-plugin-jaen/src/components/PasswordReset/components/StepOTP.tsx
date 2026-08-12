@@ -2,7 +2,6 @@ import React from 'react'
 import {useForm, Controller} from 'react-hook-form'
 import {
   Button,
-  ButtonProps,
   Center,
   HStack,
   PinInput,
@@ -95,7 +94,7 @@ const StepOTP: React.FC<StepEmailProps> = props => {
             typegen` is run against src/theme, so the cast goes then. */}
         <Button
           type="submit"
-          variant={'primary' as ButtonProps['variant']}
+          variant="primary"
           size="lg"
           loading={isSubmitting}
           disabled={otp.length !== 6}>

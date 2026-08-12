@@ -3,7 +3,6 @@ import {
   Alert,
   Box,
   Button,
-  ButtonProps,
   CloseButton,
   Container,
   Heading,
@@ -215,7 +214,7 @@ export const Signup: React.FC<SignupProps> = props => {
                       typegen, so the literal has to be cast until one does. */}
                   <Button
                     type="submit"
-                    variant={'primary' as ButtonProps['variant']}
+                    variant="primary"
                     size="lg"
                     loading={isSubmitting}>
                     Sign up

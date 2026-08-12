@@ -1,4 +1,4 @@
-import {Box, Button, ButtonProps, HStack, Stack, Text} from '@chakra-ui/react'
+import {Box, Button, HStack, Stack, Text} from '@chakra-ui/react'
 import * as React from 'react'
 import {FaArrowDown} from '@react-icons/all-files/fa/FaArrowDown'
 import {FaArrowUp} from '@react-icons/all-files/fa/FaArrowUp'
@@ -83,10 +83,7 @@ export const SectionField = withRedux(
             key="section-field-tooltip-button-add"
             variant={
               // This variant is declared in gatsby-plugin-jaen's button recipe.
-              // Widening the type of `variant` beyond the names v3's own recipe
-              // carries takes a `chakra typegen` run, which no package here has
-              // a script for, so the name is asserted instead.
-              'field-highlighter-tooltip-text' as ButtonProps['variant']
+              'field-highlighter-tooltip-text'
             }
             size="xs">
             <Text as="span" lineClamp={1}>
@@ -208,9 +205,7 @@ export const SectionField = withRedux(
               isEditing={isEditing}
               actions={[
                 <Button
-                  variant={
-                    'field-highlighter-tooltip-text' as ButtonProps['variant']
-                  }
+                  variant="field-highlighter-tooltip-text"
                   key={`section-field-tooltip-button-${item.id}`}>
                   <Text as="span" lineClamp={1}>
                     {s.Component.options.label}

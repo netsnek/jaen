@@ -43,12 +43,16 @@ export const IndexField: React.FC<IndexFieldProps> = withRedux(
         actions={[
           <Button
             variant={
-              // No theme has ever defined `jaen-highlight-tooltip-text`. The
-              // name the other fields use is `field-highlighter-tooltip-text`.
-              // A variant that misses contributes nothing in either version,
-              // so this chip has always drawn as a bare base-style button, and
-              // it still does. Correcting the name would restyle it, which is
-              // a change of its own and not part of the migration.
+              // The only assertion left in the package, and it is load-bearing
+              // evidence rather than a workaround. No theme has ever defined
+              // `jaen-highlight-tooltip-text`; the name the other fields use is
+              // `field-highlighter-tooltip-text`. Since gatsby-plugin-jaen gained
+              // a typegen script the compiler knows every real variant, so this
+              // line would now fail without the cast, which is exactly how the
+              // typo came to light. A variant that misses contributes nothing,
+              // so the chip has always drawn as a bare base-style button and
+              // still does. Correcting the name would restyle it, which is a
+              // change of its own and not part of this migration.
               'jaen-highlight-tooltip-text' as ButtonProps['variant']
             }
             key="jaen-highlight-tooltip-text-index">

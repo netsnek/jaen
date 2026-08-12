@@ -44,7 +44,10 @@ export const Head: React.FC<
   const image = jaenPageMetadata?.image || siteMetadata?.image
   const normalizedSiteUrl = siteMetadata?.siteUrl?.replace(/\/+$/, '')
   const canonicalUrl = normalizedSiteUrl
-    ? new URL(props.location.pathname || '/', `${normalizedSiteUrl}/`).toString()
+    ? new URL(
+        props.location.pathname || '/',
+        `${normalizedSiteUrl}/`
+      ).toString()
     : undefined
   const siteUrl = normalizedSiteUrl || '/'
   const url = canonicalUrl || props.location.pathname

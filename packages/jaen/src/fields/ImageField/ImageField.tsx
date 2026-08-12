@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  ButtonProps,
-  Center,
-  IconButton,
-  Image,
-  Text
-} from '@chakra-ui/react'
+import {Box, Button, Center, IconButton, Image, Text} from '@chakra-ui/react'
 import {GatsbyImage, getSrc} from 'gatsby-plugin-image'
 import {CSSProperties, forwardRef, ReactEventHandler} from 'react'
 import {FaImage} from '@react-icons/all-files/fa/FaImage'
@@ -129,10 +121,7 @@ export const ImageField = connectField<ImageFieldMediaId, ImageFieldProps>(
             <Button
               variant={
                 // This variant is declared in gatsby-plugin-jaen's button
-                // recipe. Widening the type of `variant` beyond the names v3's
-                // own recipe carries takes a `chakra typegen` run, which no
-                // package here has a script for, so the name is asserted.
-                'field-highlighter-tooltip' as ButtonProps['variant']
+                'field-highlighter-tooltip'
               }
               onClick={() => {
                 context.toggleModal({defaultSelected: mediaId})
@@ -142,7 +131,7 @@ export const ImageField = connectField<ImageFieldMediaId, ImageFieldProps>(
             </Button>,
 
             <IconButton
-              variant={'field-highlighter-tooltip' as ButtonProps['variant']}
+              variant="field-highlighter-tooltip"
               aria-label="Remove"
               onClick={handleRemove}>
               <FaTrashAlt />

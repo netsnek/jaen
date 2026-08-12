@@ -1,6 +1,6 @@
 import React from 'react'
 import {useForm} from 'react-hook-form'
-import {Input, Button, ButtonProps, Stack, Field} from '@chakra-ui/react'
+import {Input, Button, Stack, Field} from '@chakra-ui/react'
 
 interface FormData {
   emailAddress: string
@@ -46,7 +46,7 @@ const StepEmail: React.FC<StepEmailProps> = props => {
             typegen` is run against src/theme, so the cast goes then. */}
         <Button
           type="submit"
-          variant={'primary' as ButtonProps['variant']}
+          variant="primary"
           size="lg"
           loading={isSubmitting}>
           Continue

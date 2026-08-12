@@ -14,7 +14,8 @@
     "build": "tsc gatsby/* --outDir dist/gatsby --esModuleInterop --skipLibCheck --resolveJsonModule --noCheck && yarn build:css",
     "build:css": "tailwindcss -i ./src/styles/globals.css -o dist/jaen.css",
     "build:css:watch": "tailwindcss -i ./src/styles/globals.css -o dist/jaen.css --watch",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typegen": "chakra typegen src/theme/system.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.4.2",

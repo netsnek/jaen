@@ -10,7 +10,8 @@
     "prettier:fix": "yarn prettier packages/jaen/src/ --write",
     "format": "yarn prettier:fix && yarn lint:fix",
     "build": "yarn workspace jaen run build && yarn workspace gatsby-source-jaen run build && yarn workspace gatsby-plugin-jaen run build && yarn workspace gatsby-jaen-emailwerk run build && yarn workspace gatsby-jaen-lens run build &&  yarn workspace jaen-fields-mdx run build",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "yarn workspace gatsby-plugin-jaen typegen"
   },
   "workspaces": [
     "packages/jaen",
@@ -28,6 +29,7 @@
     "prettier-plugin-organize-imports": "^3.2.2"
   },
   "devDependencies": {
+    "@chakra-ui/cli": "^3.36.1",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.0",
     "@semantic-release/release-notes-generator": "^14.0.0",

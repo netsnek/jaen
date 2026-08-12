@@ -1,11 +1,4 @@
-import {
-  Button,
-  ButtonProps,
-  Portal,
-  Text,
-  TextProps,
-  Tooltip
-} from '@chakra-ui/react'
+import {Button, Portal, Text, TextProps, Tooltip} from '@chakra-ui/react'
 import DOMPurify from 'isomorphic-dompurify'
 import React, {useCallback, useEffect, useMemo, useState} from 'react'
 
@@ -342,10 +335,7 @@ export const TextField = connectField<string, TextFieldProps>(
           <Button
             variant={
               // This variant is declared in gatsby-plugin-jaen's button recipe.
-              // Widening the type of `variant` beyond the names v3's own recipe
-              // carries takes a `chakra typegen` run, which no package here has
-              // a script for, so the name is asserted instead.
-              'field-highlighter-tooltip-text' as ButtonProps['variant']
+              'field-highlighter-tooltip-text'
             }
             key={`jaen-highlight-tooltip-text-${jaenField.name}`}>
             {/* The delays are v2's, which opened and closed on the same frame

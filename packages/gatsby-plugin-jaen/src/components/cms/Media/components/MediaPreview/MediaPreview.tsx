@@ -2,7 +2,6 @@ import {
   AspectRatio,
   Button,
   ButtonGroup,
-  ButtonProps,
   HStack,
   IconButton,
   Image,
@@ -168,7 +167,7 @@ export const MediaPreview: React.FC<MediaPreviewProps> = ({
                     theme recipes once `chakra typegen` regenerates it, and no
                     package here runs typegen yet. */}
                 <Button
-                  variant={'text' as ButtonProps['variant']}
+                  variant="text"
                   onClick={() => {
                     onPreview(false)
                   }}>

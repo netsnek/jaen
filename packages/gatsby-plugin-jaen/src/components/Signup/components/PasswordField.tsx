@@ -1,7 +1,6 @@
 import {
   Field,
   IconButton,
-  IconButtonProps,
   Input,
   InputGroup,
   InputProps,
@@ -56,7 +55,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
             // learns about theme recipes when `chakra typegen` regenerates it.
             // Nothing here runs typegen, so the literal needs the cast.
             <IconButton
-              variant={'text' as IconButtonProps['variant']}
+              variant="text"
               color="brand.500"
               aria-label={open ? 'Mask password' : 'Reveal password'}
               onClick={onClickReveal}>
