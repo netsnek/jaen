@@ -69,8 +69,19 @@ export const jaenConfig = defineConfig({
    * A consuming site that wants v3's reset can set preflight on its own system
    * and decide that for itself. What it cannot do is opt out of one it never
    * asked for.
+   *
+   * :where(), not the bare id. Chakra takes the scope string verbatim and
+   * nests every preflight selector under it, so `#momo` produces `#momo *
+   * {font-size: inherit}` at specificity (1,0,1) and `#momo button
+   * {background-color: transparent}` at (1,0,1). Both outrank the (0,1,0)
+   * emotion class every recipe emits, which silently unstyled the entire CMS:
+   * headings at body size, buttons with no fill, checkboxes invisible. v2 had
+   * the same reset at `:where(h1, h2, ...)` and bare element selectors, all of
+   * which lose to a class. Wrapping the scope in :where() contributes zero
+   * specificity, so the reset still reaches only jaen's own root and recipes
+   * win inside it again.
    */
-  preflight: {scope: '#momo'},
+  preflight: {scope: ':where(#momo)'},
   globalCss,
   theme: {
     breakpoints,
