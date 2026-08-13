@@ -298,10 +298,12 @@ const Slice: React.FC<SliceProps> = props => {
 
       const groupType = config.menu.type === 'app' ? 'app' : 'user'
 
+      // The icon table lives in its own chunk; see resolve-jaen-icon.ts. It
+      // is 70 KiB and only an admin ever reaches this line.
       const icon = config.icon
-        ? (await import(`@react-icons/all-files/fa/${config.icon}`))[
-            config.icon
-          ]
+        ? await (
+            await import('./resolve-jaen-icon')
+          ).resolveJaenIcon(config.icon)
         : undefined
 
       extendMenu(groupType, {

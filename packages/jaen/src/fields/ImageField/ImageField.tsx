@@ -61,6 +61,15 @@ export interface ImageFieldProps extends ImageProps {
   overload?: boolean
   sizes?: string
   autoScale?: boolean
+  /**
+   * Intrinsic size of `defaultValue`, written as real width and height
+   * attributes on the fallback img. Chakra's own width/height are style props
+   * and never reach the DOM, which is what Lighthouse's "explicit width and
+   * height" audit reads. Ignored once the field has a media node, because
+   * GatsbyImage writes them itself.
+   */
+  intrinsicWidth?: number
+  intrinsicHeight?: number
 }
 
 export type ImageFieldMediaId = string
@@ -74,6 +83,8 @@ export const ImageField = connectField<ImageFieldMediaId, ImageFieldProps>(
     overload,
     sizes,
     autoScale = true,
+    intrinsicWidth,
+    intrinsicHeight,
     ...imageProps
   }) => {
     const isLightbox = lightbox && !jaenField.isEditing
@@ -146,7 +157,9 @@ export const ImageField = connectField<ImageFieldMediaId, ImageFieldProps>(
             lightboxGroup,
             defaultValue,
             sizes,
-            autoScale
+            autoScale,
+            intrinsicWidth,
+            intrinsicHeight
           }}
         />
       </PageProvider>
@@ -170,6 +183,9 @@ const ImageComponent = forwardRef<
     defaultValue?: string
     sizes?: string
     autoScale?: boolean
+    /** Intrinsic size of `defaultValue`, written as real img attributes. */
+    intrinsicWidth?: number
+    intrinsicHeight?: number
   }
 >(
   (
@@ -182,6 +198,8 @@ const ImageComponent = forwardRef<
       defaultValue,
       sizes,
       autoScale,
+      intrinsicWidth,
+      intrinsicHeight,
       ...props
     },
     ref
@@ -225,6 +243,20 @@ const ImageComponent = forwardRef<
             }}
           />
         ) : (
+          /**
+           * A plain img, not Chakra's, when the caller knows the intrinsic
+           * size.
+           *
+           * Chakra treats `width` and `height` as style props, so they become
+           * CSS and never reach the DOM as attributes. Lighthouse's "Image
+           * elements do not have explicit width and height" reads the
+           * attributes, and without them the browser cannot reserve the box
+           * before the file arrives. An aspect-ratio on a wrapper fixes the
+           * shift but not the audit, because the audit looks at the element.
+           *
+           * Only this branch needs it: the media path renders GatsbyImage,
+           * which writes the attributes itself.
+           */
           // @ts-ignore
           <Image
             {...imageProps}
@@ -232,7 +264,18 @@ const ImageComponent = forwardRef<
             src={defaultValue}
             boxSize={autoScale ? 'full' : undefined}
             style={imageProps?.style}
-          />
+            asChild={intrinsicWidth && intrinsicHeight ? true : undefined}>
+            {intrinsicWidth && intrinsicHeight ? (
+              <img
+                src={defaultValue}
+                width={intrinsicWidth}
+                height={intrinsicHeight}
+                alt={imageProps?.alt}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : undefined}
+          </Image>
         )}
       </Box>
     )
