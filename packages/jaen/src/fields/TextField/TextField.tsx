@@ -47,6 +47,69 @@ const cleanRichText = (
 }
 
 /**
+ * Cheap pre test for "is there an anchor in here at all".
+ *
+ * The bracket class is what keeps `<abbr>` out of the match, so a value whose
+ * only markup is an abbreviation never pays for a second parse.
+ */
+const CONTAINS_ANCHOR = /<a[\s/>]/i
+
+/**
+ * Attributes that can name a link on their own, without any visible text.
+ */
+const ANCHOR_NAME_ATTRIBUTES = ['aria-label', 'aria-labelledby', 'title']
+
+/**
+ * Removes anchors that are invisible and nameless from rendered rich text.
+ *
+ * Editing leaves them behind. netsnek.com's footer field "FooterTextNew"
+ * starts with `<a href="tel:+436508248811" target="_blank"></a><b>E-Mail</b>`,
+ * an anchor holding a phone number in its href and nothing between its tags.
+ * It paints nothing, it has no accessible name, and axe reports it as a
+ * link-name violation ("Links must have discernible text"). The same phone
+ * number appears again further down the very same field, that time with a
+ * visible label, so dropping the empty one loses nothing.
+ *
+ * An anchor is only dropped when it is worthless in every respect: it has an
+ * href (an anchor without one may be a jump target), its text is empty after
+ * trimming, it has no element child (an img names its link through alt) and it
+ * carries none of aria-label, aria-labelledby or title.
+ *
+ * DOMPurify is the only parser available on both the server and the browser
+ * here, so RETURN_DOM is used to get a walkable tree. The value has already
+ * been sanitized with the same options, which makes this pass idempotent apart
+ * from the anchors it is here to remove.
+ */
+const stripEmptyAnchors = (html: string) => {
+  if (!CONTAINS_ANCHOR.test(html)) {
+    return html
+  }
+
+  const root = DOMPurify.sanitize(html, {
+    ADD_TAGS: ['a'],
+    ADD_ATTR: ['href', 'target'],
+    RETURN_DOM: true
+  })
+
+  root.querySelectorAll('a').forEach(anchor => {
+    const hasName = ANCHOR_NAME_ATTRIBUTES.some(
+      attribute => (anchor.getAttribute(attribute) || '').trim() !== ''
+    )
+
+    if (
+      anchor.hasAttribute('href') &&
+      (anchor.textContent || '').trim() === '' &&
+      anchor.children.length === 0 &&
+      !hasName
+    ) {
+      anchor.remove()
+    }
+  })
+
+  return root.innerHTML
+}
+
+/**
  * Elements that may legally sit inside a heading or a paragraph.
  *
  * The list is HTML's phrasing content, trimmed to what a rich text value
@@ -115,6 +178,24 @@ export const TextField = connectField<string, TextFieldProps>(
 
       setValue(newValue)
     }, [jaenField.value, isRTF])
+
+    /**
+     * What is actually painted, which is not always what is stored.
+     *
+     * The empty anchor cleanup may only ever touch the rendered output. `value`
+     * is what a blur writes back into the field, and while a writer is placing
+     * a link the anchor is legitimately empty for a moment, so neither the
+     * saved text nor the text under the caret is allowed to change under them.
+     * Plain text fields have had every tag removed already and are handed
+     * through untouched.
+     */
+    const displayValue = useMemo(() => {
+      if (jaenField.isEditing || !isRTF) {
+        return value
+      }
+
+      return stripEmptyAnchors(value)
+    }, [value, jaenField.isEditing, isRTF])
 
     const {toast} = useNotificationsContext()
 
@@ -393,7 +474,7 @@ export const TextField = connectField<string, TextFieldProps>(
         {...tunes.activeProps}
         asProps={{
           outline: 'none',
-          dangerouslySetInnerHTML: {__html: value},
+          dangerouslySetInnerHTML: {__html: displayValue},
           contentEditable: jaenField.isEditing,
           onBlur: handleContentBlur,
           onPaste: (evt: React.ClipboardEvent<HTMLDivElement>) => {
