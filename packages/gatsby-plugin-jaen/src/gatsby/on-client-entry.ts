@@ -86,6 +86,34 @@ let bufferAttached = false
 let sentryModule: SentryModule | null = null
 let sentryLoading: Promise<SentryModule> | null = null
 let sentryRunning = false
+let pendingSentryUser: Parameters<SentryModule['setUser']>[0] = null
+
+/**
+ * Attach the signed-in user to Sentry, but only if Sentry is already running.
+ *
+ * `wrap-page-element.tsx` used to do this with a plain
+ * `import * as Sentry from '@sentry/gatsby'`, and that one static edge put
+ * @sentry/core and @sentry/utils into the eagerly loaded app chunk: 159.6 KB
+ * of source on netsnek.com, measured out of the build's own source maps. Every
+ * anonymous visitor downloaded, parsed and evaluated it, for a call that sits
+ * behind `auth.isAuthenticated` and that only an admin can ever reach.
+ *
+ * The call has to stay non-loading, not merely lazy. Sentry is not allowed to
+ * start before the visitor has agreed to it, so a version of this that awaited
+ * `loadSentry()` would fetch the SDK for anyone who happens to be signed in
+ * and has said no. If the module is absent, there is nothing to tell and
+ * nothing to do: `startSentry` sets the user itself once consent arrives.
+ */
+export const setSentryUser = (
+  user: Parameters<SentryModule['setUser']>[0]
+): void => {
+  // Kept regardless, because consent usually arrives after the page has
+  // rendered. Without this, an admin who agrees on a page they are already
+  // sitting on would stay anonymous in Sentry until the next navigation.
+  pendingSentryUser = user
+
+  sentryModule?.setUser(user)
+}
 
 const rememberPreConsentError = (value: unknown): void => {
   if (preConsentErrors.length >= PRE_CONSENT_BUFFER_LIMIT) return
@@ -231,6 +259,11 @@ const startSentry = async (options: JaenSentryOptions): Promise<void> => {
     ...(replaysSessionSampleRate > 0 ? {replaysSessionSampleRate} : {}),
     ...(replaysOnErrorSampleRate > 0 ? {replaysOnErrorSampleRate} : {})
   })
+
+  // Whoever was signed in before consent arrived. See setSentryUser.
+  if (pendingSentryUser) {
+    Sentry.setUser(pendingSentryUser)
+  }
 
   flushPreConsentErrors(Sentry)
 }

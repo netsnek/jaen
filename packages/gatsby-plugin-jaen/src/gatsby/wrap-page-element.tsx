@@ -7,7 +7,13 @@ import {
 import {Flex} from '@chakra-ui/react'
 import {GatsbyBrowser, Slice} from 'gatsby'
 import React from 'react'
-import * as Sentry from '@sentry/gatsby'
+
+// Deliberately not `import * as Sentry from '@sentry/gatsby'`. That single
+// line put 159.6 KB of @sentry/core and @sentry/utils into the eagerly loaded
+// app chunk of every consuming site, for one call that only ever runs for a
+// signed-in admin. setSentryUser reaches the SDK only when consent has already
+// started it. See its comment in on-client-entry.ts.
+import {setSentryUser} from './on-client-entry'
 
 import {DynamicPageRenderer} from './DynamicPageRenderer'
 import Layout from './Layout'
@@ -25,7 +31,7 @@ const CustomPageElement: React.FC<CustomPageElementProps> = ({
   const auth = useAuth()
 
   if (auth.isAuthenticated && auth.user) {
-    Sentry.setUser({
+    setSentryUser({
       email: auth.user.profile.email,
       id: auth.user.profile.sub,
       username: auth.user.profile.preferred_username,
