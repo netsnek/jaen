@@ -1,5 +1,6 @@
-import React, {createContext, useMemo} from 'react'
-import {useAuth} from 'react-oidc-context'
+import React, {createContext, useContext, useMemo} from 'react'
+
+import {ANONYMOUS_AUTH, OidcAuthContext} from './auth-context'
 
 import {
   fetchCurrentUser,
@@ -122,7 +123,10 @@ const AuthUserContext = createContext<{
 export const AuthUserProvider: React.FC<{
   children: React.ReactNode
 }> = ({children}) => {
-  const auth = useAuth()
+  // jaen's own context rather than react-oidc-context's hook, so that this
+  // module does not pin oidc-client-ts into the eager bundle. See
+  // auth-context.ts.
+  const auth = useContext(OidcAuthContext) ?? ANONYMOUS_AUTH
 
   const baseUrl = auth.settings.authority
 

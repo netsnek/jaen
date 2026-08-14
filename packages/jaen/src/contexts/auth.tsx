@@ -1,12 +1,22 @@
 import {Alert, Box, Center} from '@chakra-ui/react'
-import React, {useEffect, useMemo} from 'react'
-import {AuthProvider} from 'react-oidc-context'
+import React, {useContext, useEffect, useMemo} from 'react'
 import {PageProps} from '../types'
 
-import {useAuth as useOIDCAuth} from 'react-oidc-context'
 import {fetchCurrentUserRoles} from '../clients/zitadel-gql'
+import {ANONYMOUS_AUTH, needsOidcRuntime, OidcAuthContext} from './auth-context'
 import {AuthUserProvider} from './auth-user'
 import {useNotificationsContext} from './notifications'
+
+/**
+ * The OIDC runtime, fetched only where it is needed.
+ *
+ * `react-oidc-context` imports `UserManager` from `oidc-client-ts` at module
+ * scope, so importing it here statically, as this file used to, put 99.5 KB of
+ * source into the app chunk of every consuming site. That chunk is downloaded,
+ * parsed and evaluated by every anonymous visitor on every page, in exchange
+ * for a sign-in that only an admin ever performs.
+ */
+const OidcRuntime = React.lazy(async () => await import('./auth-oidc'))
 
 /**
  * Where the roles sit in the token. Zitadel's own claim by default, so every
@@ -35,7 +45,10 @@ const rolesFromTokenClaim = (claim: unknown): string[] => {
 }
 
 export const useAuth = () => {
-  const oidcAuth = useOIDCAuth()
+  // jaen's own context, filled either by the lazily loaded OIDC runtime or by
+  // the signed-out constant. Reading react-oidc-context's hook directly here
+  // is what used to pin oidc-client-ts into every page.
+  const oidcAuth = useContext(OidcAuthContext) ?? ANONYMOUS_AUTH
 
   const [isRolesLoading, setIsRolesLoading] = React.useState<boolean>(false)
   const [roles, setRoles] = React.useState<string[]>([])
@@ -111,7 +124,14 @@ export const checkUserRoles = (
 
 export const AuthenticationProvider: React.FC<{
   children: React.ReactNode
-}> = ({children}) => {
+  /**
+   * The current path, so that the decision below re-runs on navigation.
+   * gatsby-plugin-jaen's wrap-root-element already has it. Left undefined it
+   * falls back to the browser's own, which is correct for the first render and
+   * stale afterwards, so passing it is the supported way.
+   */
+  pathname?: string
+}> = ({children, pathname}) => {
   /**
    * The scope, which is the one genuinely provider-specific part of signing in.
    *
@@ -152,22 +172,72 @@ export const AuthenticationProvider: React.FC<{
     return Array.from(parts).join(' ')
   }, [])
 
+  /**
+   * Whether this visit has to load the OIDC runtime at all.
+   *
+   * Latched on rather than recomputed, so a visitor who reaches /login and
+   * then navigates away does not tear the provider down under a session that
+   * is being established. Once true it stays true for the life of the page.
+   *
+   * The server renders `false`, which is the signed-out HTML that is generated
+   * today anyway, and the browser re-evaluates on mount. That first evaluation
+   * is deliberately in an effect rather than in the initial state: reading
+   * sessionStorage during render would make the client's first render differ
+   * from the server's and produce a hydration mismatch.
+   */
+  const [needsOidc, setNeedsOidc] = React.useState(false)
+
+  useEffect(() => {
+    if (needsOidc) return
+    if (!needsOidcRuntime(pathname)) return
+
+    let cancelled = false
+
+    /**
+     * Fetched to completion before the switch is flipped, not after.
+     *
+     * Flipping first and letting Suspense wait would blank the whole app for
+     * the length of one chunk request, because this provider sits above the
+     * page. Resolving the same module promise React.lazy will read means that
+     * by the time `needsOidc` turns true the component is already in memory
+     * and the boundary never actually suspends.
+     */
+    void import('./auth-oidc')
+      .then(() => {
+        if (!cancelled) setNeedsOidc(true)
+      })
+      .catch(error => {
+        // A failed chunk leaves the signed-out state in place, which is the
+        // honest outcome: nothing can be signed in without it.
+        console.error('jaen: could not load the OIDC runtime', error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [pathname, needsOidc])
+
+  if (needsOidc) {
+    return (
+      // No fallback markup. The tree below renders the signed-out state while
+      // the chunk is in flight, which is what it showed a moment ago anyway,
+      // and a spinner here would flash on every CMS navigation.
+      <React.Suspense fallback={null}>
+        <OidcRuntime
+          clientId={__JAEN_ZITADEL_GQL__.clientId}
+          redirectUri={__JAEN_ZITADEL_GQL__.redirectUri}
+          authority={__JAEN_ZITADEL_GQL__.authority}
+          scope={scope}>
+          <AuthUserProvider>{children}</AuthUserProvider>
+        </OidcRuntime>
+      </React.Suspense>
+    )
+  }
+
   return (
-    <AuthProvider
-      client_id={__JAEN_ZITADEL_GQL__.clientId}
-      redirect_uri={__JAEN_ZITADEL_GQL__.redirectUri}
-      scope={scope}
-      loadUserInfo
-      authority={__JAEN_ZITADEL_GQL__.authority}
-      onSigninCallback={() => {
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        )
-      }}>
+    <OidcAuthContext.Provider value={ANONYMOUS_AUTH}>
       <AuthUserProvider>{children}</AuthUserProvider>
-    </AuthProvider>
+    </OidcAuthContext.Provider>
   )
 }
 

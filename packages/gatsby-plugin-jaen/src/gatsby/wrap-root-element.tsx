@@ -211,7 +211,9 @@ export const wrapRootElement: GatsbyBrowser['wrapRootElement'] = (
       disableTransitionOnChange>
       <ChakraProvider value={system}>
         <NotificationsProvider>
-          <AuthenticationProvider>
+          {/* The path decides whether the OIDC runtime is loaded at all, so it
+              has to be re-read on navigation rather than once at mount. */}
+          <AuthenticationProvider pathname={pathname}>
             <JaenIntlProvider>
               <Toaster />
 
