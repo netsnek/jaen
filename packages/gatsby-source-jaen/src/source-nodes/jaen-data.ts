@@ -14,6 +14,36 @@ export type JaenData = {
   patches?: any
 }
 
+/**
+ * The publish flow has shipped patches where a Boolean flag arrives as the
+ * raw checkbox value: `excludedFromIndex: "on"`. The GraphQL schema declares
+ * the field Boolean, so a single such patch kills the whole build with
+ * "Boolean cannot represent a non boolean value". Coerce the known checkbox
+ * spellings on every page entry (and its nested childPages) before merging;
+ * anything else passes through untouched so a genuinely wrong type still
+ * surfaces.
+ */
+const coerceCheckboxBoolean = (value: unknown): unknown => {
+  if (value === 'on' || value === 'true') return true
+  if (value === 'off' || value === 'false' || value === '') return false
+  return value
+}
+
+const normalizeCheckboxBooleans = (data: JaenData | undefined): void => {
+  const walkPages = (pages: unknown): void => {
+    if (!Array.isArray(pages)) return
+    for (const page of pages) {
+      if (typeof page !== 'object' || page === null) continue
+      const p = page as Record<string, unknown>
+      if ('excludedFromIndex' in p) {
+        p['excludedFromIndex'] = coerceCheckboxBoolean(p['excludedFromIndex'])
+      }
+      walkPages(p['childPages'])
+    }
+  }
+  walkPages(data?.pages)
+}
+
 export const sourceNodes = async (args: SourceNodesArgs) => {
   const {actions, createNodeId, createContentDigest, reporter, cache} = args
   const {createNode} = actions
@@ -34,9 +64,18 @@ export const sourceNodes = async (args: SourceNodesArgs) => {
 
     const jaenDataDir = path.join(process.cwd(), 'jaen-data')
 
-    for (const link of data) {
-      // skip empty lines
-      if (link === '') {
+    for (const rawLine of data) {
+      // Surrounding whitespace is not part of a path or a URL. A trailing
+      // carriage return is the common case: the publish workflow appends to
+      // this file from a runner, and a file that has ever been written on
+      // Windows carries CRLF, which used to turn every line into a path that
+      // does not exist.
+      const link = rawLine.trim()
+
+      // Skip empty lines and comments. The file is edited by hand as often as
+      // it is appended to, and a patch list nobody may annotate is one whose
+      // entries stop being explicable after the third one.
+      if (link === '' || link.startsWith('#')) {
         continue
       }
 
@@ -135,6 +174,7 @@ export const sourceNodes = async (args: SourceNodesArgs) => {
       })
 
       if (response) {
+        normalizeCheckboxBooleans(response.data)
         jaenData = deepmerge(jaenData, response.data, {
           arrayMerge: deepmergeArrayIdMerge,
           customMerge: key => {
